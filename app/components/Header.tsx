@@ -12,7 +12,7 @@ export default function Header() {
               <Image
                 src="/LogoSaberes.webp"
                 alt="Logo de Saberes"
-                width={64}
+                width={128}
                 height={64}
                 className="max-h-16 w-auto"
               />
