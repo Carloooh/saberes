@@ -5,35 +5,35 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-interface ArrowProps {
-  className?: string;
-  style?: React.CSSProperties;
-  onClick?: () => void;
-}
+// interface ArrowProps {
+//   className?: string;
+//   style?: React.CSSProperties;
+//   onClick?: () => void;
+// }
 
-function SampleNextArrow(props: ArrowProps) {
-  const { onClick } = props;
-  return (
-    <div
-      className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-3 rounded-full shadow-md cursor-pointer hover:bg-blue-700 transition"
-      onClick={onClick}
-    >
-      ▶
-    </div>
-  );
-}
+// function SampleNextArrow(props: ArrowProps) {
+//   const { onClick } = props;
+//   return (
+//     <div
+//       className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 text-blue-500 p-3 rounded-full shadow-md cursor-pointer hover:text-blue-700 transition"
+//       onClick={onClick}
+//     >
+//       ▶
+//     </div>
+//   );
+// }
 
-function SamplePrevArrow(props: ArrowProps) {
-  const { onClick } = props;
-  return (
-    <div
-      className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-3 rounded-full shadow-md cursor-pointer hover:bg-blue-700 transition"
-      onClick={onClick}
-    >
-      ◀
-    </div>
-  );
-}
+// function SamplePrevArrow(props: ArrowProps) {
+//   const { onClick } = props;
+//   return (
+//     <div
+//       className="absolute left-[-50px] top-1/2 transform -translate-y-1/2  text-blue-500 p-3 rounded-full border-blue-500 shadow-md cursor-pointer hover:text-blue-700 transition"
+//       onClick={onClick}
+//     >
+//       ◀
+//     </div>
+//   );
+// }
 
 // function SampleNextArrow(props: ArrowProps) {
 //   const { className, style, onClick } = props;
@@ -57,6 +57,7 @@ function SamplePrevArrow(props: ArrowProps) {
 //   );
 // }
 
+
 const SliderComponent = () => {
   const settings = {
     dots: true,
@@ -67,8 +68,8 @@ const SliderComponent = () => {
     autoplay: true,
     autoplaySpeed: 3000,
     pauseOnHover: true,
-    nextArrow: <SampleNextArrow />,
-    prevArrow: <SamplePrevArrow />,
+    // nextArrow: <SampleNextArrow />,
+    // prevArrow: <SamplePrevArrow />,
     responsive: [
       {
         breakpoint: 1024,
@@ -95,11 +96,11 @@ const SliderComponent = () => {
   };
 
   return (
-    <section className="section relative flex flex-row justify-center items-center">
+    <section className="section relative flex flex-row justify-center items-center pt-8 px-2">
       <div className="container">
         <Slider {...settings}>
           {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index}>
+            <div key={index} className="">
               <a
                 href="#"
                 className="card-link block bg-white rounded-[12px] p-[18px] border-2 border-transparent shadow-md transition-all duration-200 ease-in-out hover:border-[#5372F0]"
