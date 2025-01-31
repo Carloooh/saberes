@@ -3,9 +3,8 @@ const db = new Database('db/database.sqlite', { verbose: console.log });
 db.exec(`
   -- Tabla de usuarios (Estudiantes, Apoderados, Docentes)
 CREATE TABLE Usuario (
-    id_usuario TEXT PRIMARY KEY,
+    email TEXT NOT NULL PRIMARY KEY,
     nombre TEXT NOT NULL,
-    email TEXT NOT NULL,
     clave TEXT NOT NULL,
     tipo_usuario TEXT CHECK(tipo_usuario IN ('Estudiante', 'Apoderado', 'Docente', 'Profesor', 'Administrador')) NOT NULL,
     estado BOOLEAN NOT NULL,

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react';
+import ProtectedRoute from "@/app/components/ProtectedRoute";
 
 interface Asignatura {
   id: number;
@@ -74,6 +75,7 @@ const PortalDocente = () => {
   };
 
   return (
+    <ProtectedRoute allowedRoles={["Docente", "Profesor", "Administrador"]}>
     <div>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">Portal Docente</h1>
@@ -155,6 +157,7 @@ const PortalDocente = () => {
         </div>
       )}
     </div>
+    </ProtectedRoute>
   );
 };
 

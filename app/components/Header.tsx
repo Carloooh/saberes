@@ -1,70 +1,9 @@
-// "use client"
-
-// import Image from "next/image";
-// import Link from "next/link";
-
-// export default function Header() {
-//   return (
-//     <header className="border-b bg-white shadow-sm">
-//       <div className="h-1 w-full bg-gradient-to-r from-[#2196F3] to-[#E91E63]"></div>
-//       <div className="container mx-auto px-4 py-4">
-//         <div className="flex items-center justify-between">
-//           <div className="flex items-center gap-8">
-//             <Link className="flex items-center gap-2" href="/">
-//               <Image
-//                 src="/LogoSaberes.webp"
-//                 alt="Logo de Saberes"
-//                 width={128}
-//                 height={64}
-//                 className="max-h-16 w-auto"
-//               />
-//             </Link>
-//             <nav className="hidden md:flex items-center gap-6">
-//               <Link href="/" className="text-sm font-medium text-black hover:text-[#2196F3] transition-colors">Inicio</Link>
-//               <Link href="/portalAlumno" className="text-sm font-medium text-black hover:text-[#FF7043] transition-colors">Portal Alumnos</Link>
-//               <Link href="/portalDocente" className="text-sm font-medium text-black hover:text-[#4CAF50] transition-colors">Portal Docente</Link>
-//               <Link href="/portalAdministrador" className="text-sm font-medium text-black hover:text-[#FFD700] transition-colors">Portal Administrador</Link>
-//             </nav>
-//           </div>
-//           <div className="flex items-center gap-4">
-//             <div className="sm:flex sm:gap-4">
-//               <button id="loginBtn" className="rounded-md border border-[#2196F3] text-[#2196F3] hover:bg-[#FFD700]/20 px-5 py-2.5 text-sm font-normal transition">Acceder</button>
-//               <div className="hidden sm:flex">
-//                 <button id="registerBtn" className="rounded-md bg-[#E91E63]/85 text-white hover:bg-[#E91E63] px-5 py-2.5 text-sm font-normal transition">Registrarse</button>
-//               </div>
-//             </div>
-//             <div className="block md:hidden relative">
-//               <button id="menu-button" className="rounded bg-gray-100 p-2 text-gray-600 transition hover:text-gray-600/75">
-//                 <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-//                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-//                 </svg>
-//               </button>
-//               <div id="menu" className="absolute right-0 hidden mt-2 bg-white shadow-lg rounded-md w-48 z-10">
-//                 <Link href="/" className="block px-4 py-2 text-sm text-black hover:bg-[#2196F3] hover:text-white transition-colors">Inicio</Link>
-//                 <Link href="/portalAlumno" className="block px-4 py-2 text-sm text-black hover:bg-[#FF7043] hover:text-white transition-colors">Portal Alumnos y Apoderados</Link>
-//                 <Link href="/portalDocente" className="block px-4 py-2 text-sm text-black hover:bg-[#4CAF50] hover:text-white transition-colors">Portal Docente</Link>
-//                 <Link href="/portalAdministrador" className="block px-4 py-2 text-sm text-black hover:bg-[#FFD700] hover:text-white transition-colors">Portal Administrador</Link>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </header>
-//   );
-// }
-
-
-
-
-
-
-
-
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -75,6 +14,18 @@ export default function Header() {
     register: false,
     confirmRegister: false
   });
+  const [userType, setUserType] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const res = await fetch("/api/auth/check-session");
+      const data = await res.json();
+      setIsAuthenticated(data.authenticated);
+    };
+    checkAuth();
+  }, []);
 
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords(prev => ({
@@ -85,6 +36,85 @@ export default function Header() {
 
   const handleMenuItemClick = () => {
     setShowMenu(false);
+  };
+
+  const handleUserTypeChange = (type: string) => {
+    setUserType(type);
+  };
+
+  const handleLogin = async (email: string, clave: string) => {
+    console.log(clave)
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, clave }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        localStorage.setItem('userSession', JSON.stringify(data.user));
+        setIsAuthenticated(true);
+        setShowLoginModal(false);
+        router.push('/');
+      } else {
+        alert('Credenciales incorrectas');
+      }
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+    }
+  };
+
+  interface UserData {
+    id_usuario: string;
+    nombre: string;
+    email: string;
+    clave: string;
+    tipo_usuario: string;
+    estado: boolean;
+    rut: string;
+    hijos?: string;
+    cursos?: string;
+    asignaturas?: string;
+  }
+
+  const handleRegister = async (userData: UserData) => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Registro exitoso');
+        setShowRegisterModal(false);
+      } else {
+        alert('Error en el registro');
+      }
+    } catch (error) {
+      console.error('Error al registrar:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setIsAuthenticated(false);
+    router.push("/");
+  };
+
+  const [userSession, setUserSession] = useState<null | { tipo_usuario: string }>(null);
+
+  useEffect(() => {
+    const session = JSON.parse(localStorage.getItem("userSession") || "null");
+    setUserSession(session);
+  }, []);
+
+  const hasAccess = (rolesPermitidos: string[]) => {
+    return userSession && rolesPermitidos.includes(userSession.tipo_usuario);
   };
 
   return (
@@ -107,7 +137,7 @@ export default function Header() {
                 <Link href="/" className="text-sm font-medium text-black hover:text-[#2196F3] transition-colors">
                   Inicio
                 </Link>
-                <Link href="/portalAlumno" className="text-sm font-medium text-black hover:text-[#FF7043] transition-colors">
+                <Link href="/portalAlumno" className="text-sm font-medium text-black hover:text-[#FF7043] transition-colors " title={userSession ? (hasAccess(["Docente", "Profesor", "Administrador"]) ? "" : "No tienes permiso") : "Debes iniciar sesión"}>
                   Portal Alumnos
                 </Link>
                 <Link href="/portalDocente" className="text-sm font-medium text-black hover:text-[#4CAF50] transition-colors">
@@ -119,23 +149,41 @@ export default function Header() {
               </nav>
             </div>
             <div className="flex items-center gap-4">
-              <div className="sm:flex sm:gap-4">
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  className="rounded-md border border-[#2196F3] text-[#2196F3] hover:bg-[#FFD700]/20 px-5 py-2.5 text-sm font-normal transition"
-                >
-                  Acceder
-                </button>
-                <div className="hidden sm:flex">
-                  <button
-                    onClick={() => setShowRegisterModal(true)}
-                    className="rounded-md bg-[#E91E63]/85 text-white hover:bg-[#E91E63] px-5 py-2.5 text-sm font-normal transition"
-                  >
-                    Registrarse
-                  </button>
-                </div>
+              <div className="flex ">
+                {isAuthenticated ? (
+                  <>
+                    <div className="flex flex-row gap-1">
+                    <Link href="/perfil" className="rounded-md border border-[#2196F3] text-[#2196F3] hover:bg-[#FFD700]/20 px-2 md:px-2 place-content-center text-sm font-normal transition">
+                      Perfil
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="rounded-md bg-[#E91E63]/85 text-white hover:bg-[#E91E63] px-2 md:px-2 place-content-center text-clip text-sm font-normal transition whitespace-nowrap"
+                    >
+                      Cerrar Sesión
+                    </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                  <div className="flex flex-row gap-1">
+                    <button
+                      onClick={() => setShowLoginModal(true)}
+                      className="rounded-md border border-[#2196F3] text-[#2196F3] hover:bg-[#FFD700]/20 px-2 place-content-center text-sm font-normal transition"
+                    >
+                      Acceder
+                    </button>
+                      <button
+                        onClick={() => setShowRegisterModal(true)}
+                        className="rounded-md bg-[#E91E63]/85 text-white hover:bg-[#E91E63] px-2 place-content-center text-sm font-normal transition"
+                      >
+                        Registrarse
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="block md:hidden relative">
+              <div className="block md:hidden relative z-99999999999999999">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="rounded bg-gray-100 p-2 text-gray-600 transition hover:text-gray-600/75"
@@ -145,7 +193,7 @@ export default function Header() {
                   </svg>
                 </button>
                 {showMenu && (
-                  <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-md w-48 z-9999">
+                  <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-md w-48 z-10">
                     <Link href="/" onClick={handleMenuItemClick} className="block px-4 py-2 text-sm text-black hover:bg-[#2196F3] hover:text-white transition-colors">
                       Inicio
                     </Link>
@@ -184,7 +232,13 @@ export default function Header() {
                 </button>
               </div>
               <div className="p-6">
-                <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-4" onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const email = form.email.value;
+                  const clave = form.clave.value;
+                  handleLogin(email, clave);
+                }}>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                       Email
@@ -198,14 +252,14 @@ export default function Header() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="clave" className="block text-sm font-medium text-gray-700">
                       Contraseña
                     </label>
                     <div className="relative">
                       <input
-                        type={showPasswords.login ? "text" : "password"}
-                        id="password"
-                        name="password"
+                        type={showPasswords.login ? "text" : "clave"}
+                        id="clave"
+                        name="clave"
                         required
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2196F3] focus:border-[#2196F3]"
                       />
@@ -257,7 +311,23 @@ export default function Header() {
                 </button>
               </div>
               <div className="p-6 max-h-[80vh] overflow-y-auto">
-                <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <form className="space-y-6" onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target as HTMLFormElement);
+                  const userData = {
+                    id_usuario: formData.get('id_usuario') as string,
+                    nombre: formData.get('name') as string,
+                    email: formData.get('email') as string,
+                    clave: formData.get('password') as string,
+                    tipo_usuario: formData.get('userType') as string,
+                    estado: true,
+                    rut: formData.get('rut') as string,
+                    hijos: formData.get('children') as string,
+                    cursos: formData.get('course') as string,
+                    asignaturas: formData.get('subject') as string,
+                  };
+                  handleRegister(userData);
+                }}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div>
@@ -326,7 +396,7 @@ export default function Header() {
                           Confirmar Contraseña
                         </label>
                         <div className="relative">
-                        <input
+                          <input
                             type={showPasswords.confirmRegister ? "text" : "password"}
                             id="confirm-password"
                             name="confirmPassword"
@@ -356,6 +426,7 @@ export default function Header() {
                           name="userType"
                           required
                           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
+                          onChange={(e) => handleUserTypeChange(e.target.value)}
                         >
                           <option value="">Seleccionar...</option>
                           <option value="Administrador">Administrador</option>
@@ -365,7 +436,7 @@ export default function Header() {
                           <option value="Apoderado">Apoderado</option>
                         </select>
                       </div>
-                      <div className="course-field hidden">
+                      <div className={`course-field ${userType === 'Estudiante' ? '' : 'hidden'}`}>
                         <label htmlFor="course" className="block text-sm font-medium text-gray-700">
                           Curso
                         </label>
@@ -385,7 +456,7 @@ export default function Header() {
                           <option value="8">Octavo Básico</option>
                         </select>
                       </div>
-                      <div className="children-field hidden">
+                      <div className={`children-field ${userType === 'Apoderado' ? '' : 'hidden'}`}>
                         <label htmlFor="children" className="block text-sm font-medium text-gray-700">
                           Hijos (opcional)
                         </label>
@@ -397,7 +468,7 @@ export default function Header() {
                           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
                         />
                       </div>
-                      <div className="subject-field hidden">
+                      <div className={`subject-field ${userType === 'Profesor' || userType === 'Docente' ? '' : 'hidden'}`}>
                         <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
                           Asignatura (opcional)
                         </label>
@@ -425,12 +496,3 @@ export default function Header() {
     </>
   );
 }
-
-
-
-
-
-
-
-
-

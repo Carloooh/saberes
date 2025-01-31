@@ -1,6 +1,7 @@
 "use client"
 import React from 'react';
 import Image from 'next/image';
+import ProtectedRoute from "@/app/components/ProtectedRoute";
 
 const adminOptions = [
   { id: 'usuarios', label: 'Usuarios', icon: 'usuarios.svg' },
@@ -82,8 +83,9 @@ const AdminPanel: React.FC = () => {
   }, []);
 
   return (
+    <ProtectedRoute allowedRoles={["Administrador"]}>
       <div className="min-h-screen w-full bg-gray-50 mx-auto px-4 py-8">
-        <header className="sticky top-0  w-full border-b bg-white shadow-sm">
+        <header className="top-0  w-full border-b bg-white shadow-sm">
           <div className="flex h-14 items-center justify-between px-4">
             <h1 className="text-lg font-semibold text-gray-900">Panel de Administración</h1>
             <div className="relative">
@@ -98,12 +100,12 @@ const AdminPanel: React.FC = () => {
                 </svg>
               </button>
 
-              <div id="mobileMenu" className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-20">
+              <div id="mobileMenu" className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-9">
                 {adminOptions.map((option) => (
                   <a
                     key={option.id}
                     href={`#${option.id}`}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#2196F3] transition-colors"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#2196F3] transition-colors z-9"
                   >
                       <Image src={`/icons/${option.icon}`} className="size-4" alt="" width={24} height={24} />
                       {option.label}
@@ -214,6 +216,7 @@ const AdminPanel: React.FC = () => {
           </main>
         </div>
       </div>
+    </ProtectedRoute>
   );
 };
 
