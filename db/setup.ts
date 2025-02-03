@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+
 const db = new Database('db/database.sqlite', { verbose: console.log });
 db.exec(`
   -- Tabla de usuarios (Estudiantes, Apoderados, Docentes)
@@ -101,6 +102,44 @@ CREATE TABLE sede (
     url TEXT NOT NULL,
     imagen LONGBLOB
 )
+
+-- Tabla de Tipos de Cursos (Desde 1ro Básico hasta 8vo Básico)
+CREATE TABLE TipoCurso (
+    id_tipo_curso INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL UNIQUE
+);
+
+-- Poblar la tabla con los cursos
+INSERT INTO TipoCurso (nombre) VALUES
+('1ro Básico'),
+('2do Básico'),
+('3ro Básico'),
+('4to Básico'),
+('5to Básico'),
+('6to Básico'),
+('7mo Básico'),
+('8vo Básico');
+
+-- Tabla de Tipos de Asignaturas
+CREATE TABLE TipoAsignatura (
+    id_tipo_asignatura INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL UNIQUE
+);
+
+-- Poblar la tabla con las asignaturas
+INSERT INTO TipoAsignatura (nombre) VALUES
+('Lenguaje y Comunicación'),
+('Lengua Indígena'),
+('Idioma Extranjero'),
+('Matemática'),
+('Ciencias Naturales'),
+('Historia, Geografía y Ciencias Sociales'),
+('Artes Visuales'),
+('Música'),
+('Educación Física y Salud'),
+('Tecnología'),
+('Orientación'),
+('Religión');
 `);
 console.log("Database schema created successfully.");
 

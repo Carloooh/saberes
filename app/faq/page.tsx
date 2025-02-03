@@ -1,36 +1,80 @@
-"use client"
+"use client";
+import React, { useState, useEffect } from 'react';
 
-import { useState } from 'react';
-
-const faqs = [
-  { 
-    question: "¿Qué servicios ofrecen?", 
-    answer: "Ofrecemos una amplia gama de servicios que incluyen talleres creativos, excursiones guiadas, eventos culturales y programas educativos."
-  },
-  { 
-    question: "¿Cuáles son sus horarios de atención?", 
-    answer: "Nuestros horarios de atención son de lunes a viernes de 9:00 AM a 6:00 PM, y los sábados de 10:00 AM a 2:00 PM."
-  },
-  { 
-    question: "¿Cómo puedo contactarlos?", 
-    answer: "Puede contactarnos por teléfono al (123) 456-7890, por correo electrónico a info@ejemplo.com o en nuestra oficina."
-  },
-];
+interface FAQ {
+  id_informacion: string;
+  titulo: string;
+  contenido: string;
+}
 
 export default function FAQ() {
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Obtener FAQs al cargar el componente
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const response = await fetch('/api/faq');
+        const result = await response.json();
+
+        if (result.success) {
+          setFaqs(result.data);
+        } else {
+          setError('Error al cargar las FAQs');
+        }
+      } catch {
+        setError('Error en la conexión con el servidor');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFaqs();
+  }, []);
+
+  // Componente Skeleton Loader para una sola FAQ
+  const SkeletonFAQ = () => (
+    <div className="border rounded-lg p-4 bg-white">
+      <h2 className="text-xl font-semibold mb-2 h-6 bg-gray-200 rounded w-3/4 animate-pulse"></h2>
+      <div className="space-y-2">
+        {[...Array(1)].map((_, index) => (
+          <div key={index} className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+        ))}
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <h1 className="text-3xl font-bold mb-6 text-center">Preguntas Frecuentes</h1>
+        <div className="max-w-3xl mx-auto space-y-4">
+          {[...Array(3)].map((_, index) => (
+            <SkeletonFAQ key={index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center">Preguntas Frecuentes</h1>
       <div className="max-w-3xl mx-auto space-y-4">
         {faqs.map((faq, index) => (
-          <div key={index} className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setOpenIndex(openIndex === index ? null : index)}>
+          <div key={faq.id_informacion} className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setOpenIndex(openIndex === index ? null : index)}>
             <h2 className="text-xl font-semibold mb-2 flex justify-between items-center">
-              {faq.question}
+              {faq.titulo}
               <span className={openIndex === index ? 'rotate-180' : ''}>▼</span>
             </h2>
-            {openIndex === index && <p className="mt-2">{faq.answer}</p>}
+            {openIndex === index && <p className="mt-2 text-gray-700">{faq.contenido}</p>}
           </div>
         ))}
       </div>
