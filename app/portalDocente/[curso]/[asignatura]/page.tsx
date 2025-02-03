@@ -1,0 +1,122 @@
+// "use client";
+
+// import { useRouter } from 'next/navigation';
+// import { useEffect } from 'react';
+// import React from 'react';
+
+// interface Asignatura {
+//   id: number;
+//   nombre: string;
+// }
+
+// interface UserSession {
+//   tipo_usuario: string;
+//   asignaturas: Asignatura[];
+// }
+
+// const AsignaturaPage = ({ params }: { params: { curso: string; asignatura: string } }) => {
+//   const router = useRouter();
+
+//   const { curso, asignatura } = React.use(params);
+
+//   useEffect(() => {
+//     const storedSession = localStorage.getItem("userSession");
+//     if (!storedSession) {
+//       router.replace("/");
+//       return;
+//     }
+
+//     const userSession: UserSession = JSON.parse(storedSession);
+
+//     const asignaturaAsociada = userSession.asignaturas.find(
+//       (asig) => asig.nombre.toLowerCase().replace(/ /g, '-') === asignatura
+//     );
+
+//     if (!asignaturaAsociada) {
+//       router.replace("/");
+//     }
+//   }, [asignatura, router]);
+
+//   return (
+//     <div>
+//       <h1>Curso: {decodeURIComponent(curso)}</h1>
+//       <h2>Asignatura: {decodeURIComponent(asignatura)}</h2>
+//     </div>
+//   );
+// };
+
+// export default AsignaturaPage;
+
+
+
+
+
+
+
+"use client";
+
+import { useState } from "react";
+import React from "react";
+import Material from "@/app/components/docente/Material";
+import Calificaciones from "@/app/components/docente/Calificaciones";
+
+interface AsignaturaPageProps {
+  params: {
+    curso: string;
+    asignatura: string;
+  };
+}
+
+const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
+  const [activeTab, setActiveTab] = useState<"material" | "calificaciones">("material");
+
+  // Desenvolver la promesa `params` usando React.use()
+  console.log(params.curso)
+  const { curso, asignatura } = params;
+
+  const cursoNombre = decodeURIComponent(curso);
+  const asignaturaNombre = decodeURIComponent(asignatura);
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Curso: {cursoNombre}</h1>
+      <h2 className="text-xl font-semibold mb-6">Asignatura: {asignaturaNombre}</h2>
+
+      {/* Pestañas */}
+      <div className="flex space-x-4 border-b mb-6">
+        <button
+          className={`py-2 px-4 ${
+            activeTab === "material"
+              ? "border-b-2 border-blue-500 text-blue-500"
+              : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("material")}
+        >
+          Materiales
+        </button>
+        <button
+          className={`py-2 px-4 ${
+            activeTab === "calificaciones"
+              ? "border-b-2 border-blue-500 text-blue-500"
+              : "text-gray-500"
+          }`}
+          onClick={() => setActiveTab("calificaciones")}
+        >
+          Calificaciones
+        </button>
+      </div>
+
+      {/* Contenido de las pestañas */}
+      <div>
+        {activeTab === "material" && (
+          <Material cursoId={curso} asignaturaId={asignatura} />
+        )}
+        {activeTab === "calificaciones" && (
+          <Calificaciones cursoId={curso} asignaturaId={asignatura} />
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AsignaturaPage;
