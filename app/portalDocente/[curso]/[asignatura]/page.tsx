@@ -1,58 +1,3 @@
-// "use client";
-
-// import { useRouter } from 'next/navigation';
-// import { useEffect } from 'react';
-// import React from 'react';
-
-// interface Asignatura {
-//   id: number;
-//   nombre: string;
-// }
-
-// interface UserSession {
-//   tipo_usuario: string;
-//   asignaturas: Asignatura[];
-// }
-
-// const AsignaturaPage = ({ params }: { params: { curso: string; asignatura: string } }) => {
-//   const router = useRouter();
-
-//   const { curso, asignatura } = React.use(params);
-
-//   useEffect(() => {
-//     const storedSession = localStorage.getItem("userSession");
-//     if (!storedSession) {
-//       router.replace("/");
-//       return;
-//     }
-
-//     const userSession: UserSession = JSON.parse(storedSession);
-
-//     const asignaturaAsociada = userSession.asignaturas.find(
-//       (asig) => asig.nombre.toLowerCase().replace(/ /g, '-') === asignatura
-//     );
-
-//     if (!asignaturaAsociada) {
-//       router.replace("/");
-//     }
-//   }, [asignatura, router]);
-
-//   return (
-//     <div>
-//       <h1>Curso: {decodeURIComponent(curso)}</h1>
-//       <h2>Asignatura: {decodeURIComponent(asignatura)}</h2>
-//     </div>
-//   );
-// };
-
-// export default AsignaturaPage;
-
-
-
-
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -70,7 +15,6 @@ interface AsignaturaPageProps {
 const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
   const [activeTab, setActiveTab] = useState<"material" | "calificaciones">("material");
 
-  // Desenvolver la promesa `params` usando React.use()
   console.log(params.curso)
   const { curso, asignatura } = params;
 
