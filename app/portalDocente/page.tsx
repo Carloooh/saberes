@@ -277,7 +277,6 @@ const PortalDocente = () => {
                 <div className="flex space-x-4 justify-evenly">
                 <a
                   href={`/portalDocente/${curso.nombre.toLowerCase().replace(/ /g, '-')}`}
-                   className=""
                 >
                   <button
                     className="text-sm text-green-600 hover:text-green-800 font-medium transition duration-300 flex items-center"

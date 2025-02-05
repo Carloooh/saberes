@@ -54,7 +54,7 @@ export default function GaleriaPage() {
   }
 
   return (
-    <div className="py-8">
+    <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-center">Galería</h1>
 
       {/* Tabs de imágenes y videos */}

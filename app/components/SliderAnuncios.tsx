@@ -5,59 +5,6 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-// interface ArrowProps {
-//   className?: string;
-//   style?: React.CSSProperties;
-//   onClick?: () => void;
-// }
-
-// function SampleNextArrow(props: ArrowProps) {
-//   const { onClick } = props;
-//   return (
-//     <div
-//       className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 text-blue-500 p-3 rounded-full shadow-md cursor-pointer hover:text-blue-700 transition"
-//       onClick={onClick}
-//     >
-//       ▶
-//     </div>
-//   );
-// }
-
-// function SamplePrevArrow(props: ArrowProps) {
-//   const { onClick } = props;
-//   return (
-//     <div
-//       className="absolute left-[-50px] top-1/2 transform -translate-y-1/2  text-blue-500 p-3 rounded-full border-blue-500 shadow-md cursor-pointer hover:text-blue-700 transition"
-//       onClick={onClick}
-//     >
-//       ◀
-//     </div>
-//   );
-// }
-
-// function SampleNextArrow(props: ArrowProps) {
-//   const { className, style, onClick } = props;
-//   return (
-//     <div
-//       className={className}
-//       style={{ ...style, display: "block", background: "red" }}
-//       onClick={onClick}
-//     />
-//   );
-// }
-
-// function SamplePrevArrow(props: ArrowProps) {
-//   const { className, style, onClick } = props;
-//   return (
-//     <div
-//       className={className}
-//       style={{ ...style, display: "block", background: "green" }}
-//       onClick={onClick}
-//     />
-//   );
-// }
-
-
 const SliderComponent = () => {
   const settings = {
     dots: true,
@@ -68,8 +15,7 @@ const SliderComponent = () => {
     autoplay: true,
     autoplaySpeed: 3000,
     pauseOnHover: true,
-    // nextArrow: <SampleNextArrow />,
-    // prevArrow: <SamplePrevArrow />,
+    scrollSnap: true,
     responsive: [
       {
         breakpoint: 1024,

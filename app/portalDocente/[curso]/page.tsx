@@ -10,7 +10,7 @@ interface AsignaturaPageProps {
 const AsistenciaPage = ({ params }: AsignaturaPageProps) => {
 
   return (
-    <div className="p-6">
+    <div className="container mx-auto px-4 py-8">
       <h1>asistencia</h1>
     </div>
   );
