@@ -4,15 +4,15 @@ const db = new Database('db/database.sqlite', { verbose: console.log });
 db.exec(`
   -- Tabla de usuarios (Estudiantes, Apoderados, Docentes)
 CREATE TABLE Usuario (
-    email TEXT NOT NULL PRIMARY KEY,
+    rut TEXT NOT NULL PRIMARY KEY,
+    email TEXT NOT NULL,
+    emailapoderado text NOT NULL,
     nombre TEXT NOT NULL,
     clave TEXT NOT NULL,
-    tipo_usuario TEXT CHECK(tipo_usuario IN ('Estudiante', 'Apoderado', 'Docente', 'Profesor', 'Administrador')) NOT NULL,
+    tipo_usuario TEXT CHECK(tipo_usuario IN ('Estudiante', 'Docente', 'Administrador')) NOT NULL,
     estado BOOLEAN NOT NULL,
-    rut TEXT NOT NULL,
-    hijos TEXT NULL, -- Array con los hijos (para apoderados e incluso docentes)
-    cursos TEXT NULL, -- Array con los cursos (para docentes o estudiantes)
-    asignaturas TEXT NULL -- Array con las asignaturas (para docentes)
+    cursos TEXT NULL, -- Array con los cursos [curso1, curso2, ...]
+    asignaturas TEXT NULL -- Array con las asignaturas [asignatura1, asignatura2, ...]
 );
 
 -- Tabla de cursos
@@ -44,7 +44,7 @@ CREATE TABLE Asistencia (
     id_asistencia TEXT PRIMARY KEY,
     id_usuario TEXT NOT NULL,
     id_curso TEXT NOT NULL,
-    asistencia TEXT NOT NULL, -- Array con registros de asistencia ["xx/xx/xxxx", lugar, true/false]
+    asistencia TEXT NOT NULL, -- Array con registros de asistencia [["xx/xx/xxxx", lugar, true/false], ["xx/xx/xxxx", lugar, true/false], ...]
     FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario),
     FOREIGN KEY (id_curso) REFERENCES Curso(id_curso)
 );
@@ -54,7 +54,7 @@ CREATE TABLE Calificacion (
     id_calificaciones TEXT PRIMARY KEY,
     id_usuario TEXT NOT NULL,
     id_asignatura TEXT NOT NULL,
-    calificaciones TEXT NOT NULL, -- Array con registros de calificaciones ["prueba1", "xx/xx/xxxx", 7.0]
+    calificaciones TEXT NOT NULL, -- Array con registros de calificaciones [["prueba1", "xx/xx/xxxx", 7.0], ["prueba2", "xx/xx/xxxx", 7.0], ...]
     FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario),
     FOREIGN KEY (id_asignatura) REFERENCES Asignatura(id_asignatura)
 );
@@ -89,7 +89,7 @@ CREATE TABLE Galeria (
 -- Tabla de información general
 CREATE TABLE informacioninstitucional (
     id_informacion TEXT PRIMARY KEY,
-    tipo TEXT NOT NULL,
+    tipo TEXT NOT NULL CHECK(tipo IN ('Faq', 'Mision', 'Vision')),
     titulo TEXT,
     contenido TEXT NOT NULL
 );
@@ -118,7 +118,10 @@ INSERT INTO TipoCurso (nombre) VALUES
 ('5to Básico'),
 ('6to Básico'),
 ('7mo Básico'),
-('8vo Básico');
+('1ro Medio'),
+('2do Medio'),
+('3ro Medio'),
+('4to Medio'),
 
 -- Tabla de Tipos de Asignaturas
 CREATE TABLE TipoAsignatura (

@@ -257,7 +257,7 @@ export default function Header() {
                     </label>
                     <div className="relative">
                       <input
-                        type={showPasswords.login ? "text" : "clave"}
+                        type={showPasswords.login ? "text" : "password"}
                         id="clave"
                         name="clave"
                         required

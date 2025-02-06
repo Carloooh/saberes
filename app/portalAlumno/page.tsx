@@ -92,7 +92,7 @@ const PortalAlumno = () => {
               <h3 className="font-semibold">{asignatura.nombre}</h3>
               <p className="text-sm text-gray-600">{asignatura.profesor}</p>
               <a
-                href={`/portal-alumno/asignatura/${asignatura.nombre.toLowerCase()}`}
+                href={`/portalAlumno/${asignatura.nombre.toLowerCase()}`}
                 className="text-blue-600 hover:underline text-sm"
               >
                 Ver material ({asignatura.materiales})

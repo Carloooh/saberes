@@ -58,7 +58,7 @@ const SliderComponent = () => {
                   width={500}
                   height={281}
                 />
-                <p className="badge text-[#5372F0] py-[8px] px-[16px] text-[0.95rem] font-medium mt-[16px] mb-[18px] bg-[#DDE4FF] rounded-full w-fit">
+                <p className="badge text-[#5372F0] py-[8px] px-[16px] text-[0.95rem] font-medium mt-[16px] mb-[18px] rounded-full w-fit">
                   03/01/2024
                 </p>
                 <h2 className="card-title text-black text-[1.19rem] font-semibold">

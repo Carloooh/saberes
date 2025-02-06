@@ -32,7 +32,7 @@ const Hero = () => {
   }, []);
 
   if (loading) {
-    return <section className="bg-gray-50 px-2 pt-8">
+    return <section className="px-2 pt-8">
     <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
       <div className="md:w-1/2 mb-8 md:mb-0">
         <h2 className="text-3xl font-semibold text-gray-900 sm:text-4xl">Saberes</h2>
@@ -55,7 +55,7 @@ const Hero = () => {
   }
 
   return (
-    <section className="bg-gray-50 px-2 pt-8">
+    <section className="px-2 pt-8">
       <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
         <div className="md:w-1/2 mb-8 md:mb-0">
           <h2 className="text-3xl font-semibold text-gray-900 sm:text-4xl">Saberes</h2>
