@@ -1,6 +1,21 @@
 import Database from 'better-sqlite3';
 const db = new Database('db/database.sqlite', { verbose: console.log });
 
+function dropAllTables() {
+    const tables = db.prepare(`
+        SELECT name FROM sqlite_master 
+        WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+    `).all();
+
+    // Eliminar cada tabla
+    tables.forEach(table => {
+        db.prepare(`DROP TABLE IF EXISTS ${table.name}`).run();
+        console.log(`Tabla eliminada: ${table.name}`);
+    });
+}
+
+dropAllTables();
+
 db.exec(`
     CREATE TABLE IF NOT EXISTS Actividad (
         id_actividad TEXT NOT NULL PRIMARY KEY,
@@ -121,6 +136,7 @@ db.exec(`
         nombres_apoderado1 TEXT NOT NULL,
         apellidos_apoderado1 TEXT NOT NULL,
         rut_apoderado1 TEXT NOT NULL,
+        rut_tipo_apoderado1 TEXT NOT NULL,
         nacionalidad_apoderado1 TEXT NOT NULL,
         vinculo_apoderado1 TEXT NOT NULL,
         celular_apoderado1 NUMERIC NOT NULL,
@@ -186,6 +202,7 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS Matricula (
         id_matricula TEXT NOT NULL,
         rut_usuario TEXT NOT NULL,
+        fecha_matricula TEXT NOT NULL,
         estado INTEGER NOT NULL,
         ultimo_establecimiento TEXT NOT NULL,
         ultimo_nivel_cursado TEXT NOT NULL,
@@ -271,20 +288,21 @@ db.exec(`
 
     CREATE TABLE IF NOT EXISTS Usuario (
         rut_usuario TEXT NOT NULL PRIMARY KEY,
+        rut_tipo TEXT,
         email TEXT,
         clave TEXT NOT NULL,
         nombres TEXT NOT NULL,
         apellidos TEXT NOT NULL,
         tipo_usuario TEXT NOT NULL,
         estado INTEGER NOT NULL,
-        edad NUMERIC NOT NULL,
-        sexo TEXT NOT NULL,
-        nacionalidad TEXT NOT NULL,
-        talla TEXT NOT NULL,
-        fecha_nacimiento TEXT NOT NULL,
-        direccion TEXT NOT NULL,
-        comuna TEXT NOT NULL,
-        sector TEXT NOT NULL,
+        edad NUMERIC,
+        sexo TEXT,
+        nacionalidad TEXT ,
+        talla TEXT,
+        fecha_nacimiento TEXT,
+        direccion TEXT,
+        comuna TEXT,
+        sector TEXT,
         codigo_temporal TEXT
     );
 `);
