@@ -4,7 +4,7 @@ import db from '@/db';
 // GET: Obtener misión y visión
 export async function GET() {
   try {
-    const stmt = db.prepare('SELECT * FROM informacioninstitucional WHERE tipo IN (?, ?)');
+    const stmt = db.prepare('SELECT * FROM informacion_institucional WHERE tipo IN (?, ?)');
     const result = stmt.all('mision', 'vision') as { tipo: string; contenido: string }[];
 
     // Formatear los datos para devolverlos como un objeto

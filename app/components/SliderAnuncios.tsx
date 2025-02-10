@@ -15,7 +15,7 @@ const SliderComponent = () => {
     autoplay: true,
     autoplaySpeed: 3000,
     pauseOnHover: true,
-    scrollSnap: true,
+    swipeToSlide: true,
     responsive: [
       {
         breakpoint: 1024,

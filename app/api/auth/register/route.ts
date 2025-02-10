@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 
 export async function POST(req: Request) {
   try {
-    const { id_usuario, nombre, email, clave, tipo_usuario, estado, rut, hijos, cursos, asignaturas } =
+    const { rut_usuario, rut_tipo, email, clave, nombres, apellidos, tipo_usuario, estado, edad, sexo, nacionalidad, talla, fecha_nacimiento, direccion, comuna, sector, codigo_temporal } =
       await req.json();
 
     const checkStmt = db.prepare(`SELECT * FROM Usuario WHERE email = ?`);
@@ -17,22 +17,29 @@ export async function POST(req: Request) {
     const hashedClave = await bcrypt.hash(clave, 10);
 
     const stmt = db.prepare(`
-      INSERT INTO Usuario (id_usuario, nombre, email, clave, tipo_usuario, estado, rut, hijos, cursos, asignaturas)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO Usuario (rut_usuario, rut_tipo, email, clave, nombres, apellidos, tipo_usuario, estado, edad, sexo, nacionalidad, talla, fecha_nacimiento, direccion, comuna, sector, codigo_temporal)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    // stmt.run(id_usuario, nombre, email, hashedClave, tipo_usuario, estado, rut, hijos, cursos, asignaturas);
     stmt.run(
-      id_usuario,
-      nombre,
+      rut_usuario,
+      rut_tipo,
       email,
       hashedClave,
+      nombres,
+      apellidos,
       tipo_usuario,
-      estado ? 1 : 0, // Convertir booleano a 0 o 1
-      rut,
-      hijos ? JSON.stringify(hijos) : null, // Asegurar que sea string o null
-      cursos ? JSON.stringify(cursos) : null,
-      asignaturas ? JSON.stringify(asignaturas) : null
+      estado ? 1 : 0,
+      edad,
+      sexo,
+      nacionalidad,
+      talla,
+      fecha_nacimiento,
+      direccion,
+      comuna,
+      sector,
+      codigo_temporal
     );
+    
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
