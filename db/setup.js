@@ -861,11 +861,6 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_usuario_apellidos ON Usuario(apellidos);
     CREATE INDEX IF NOT EXISTS idx_usuario_tipo_usuario ON Usuario(tipo_usuario);
     CREATE INDEX IF NOT EXISTS idx_usuario_estado ON Usuario(estado);
-    CREATE INDEX IF NOT EXISTS idx_usuario_edad ON Usuario(edad);
-    CREATE INDEX IF NOT EXISTS idx_usuario_sexo ON Usuario(sexo);
-    CREATE INDEX IF NOT EXISTS idx_usuario_nacionalidad ON Usuario(nacionalidad);
-    CREATE INDEX IF NOT EXISTS idx_usuario_fecha_nacimiento ON Usuario(fecha_nacimiento);
-    CREATE INDEX IF NOT EXISTS idx_usuario_comuna ON Usuario(comuna);
 `);
 
 
