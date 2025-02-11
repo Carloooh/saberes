@@ -427,36 +427,12 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import Database from 'better-sqlite3';
 const db = new Database('db/database.sqlite', { verbose: console.log });
 
 function dropAllTables() {
-    // Deshabilitar claves foráneas temporalmente
     db.exec('PRAGMA foreign_keys = OFF;');
 
-    // Obtener lista de tablas en orden inverso (hijas primero)
     const tables = db.prepare(`
         SELECT name FROM sqlite_master 
         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
@@ -777,15 +753,10 @@ db.exec(`
 
     CREATE INDEX IF NOT EXISTS idx_asignaturas_id_curso ON Asignaturas(id_curso);
 
-
     CREATE INDEX IF NOT EXISTS idx_asignaturas_link_id_asignatura ON AsignaturasLink(id_asignatura);
 
-    CREATE INDEX IF NOT EXISTS idx_asistencia_id_curso ON Asistencia(id_curso);
-    CREATE INDEX IF NOT EXISTS idx_asistencia_rut_usuario ON Asistencia(rut_usuario);
     CREATE INDEX IF NOT EXISTS idx_asistencia_fecha ON Asistencia(fecha);
 
-    CREATE INDEX IF NOT EXISTS idx_calificaciones_id_evaluacion ON Calificaciones(id_evaluacion);
-    CREATE INDEX IF NOT EXISTS idx_calificaciones_id_asignatura ON Calificaciones(id_asignatura);
     CREATE INDEX IF NOT EXISTS idx_calificaciones_nota ON Calificaciones(nota);
 
     CREATE INDEX IF NOT EXISTS idx_consentimiento_rut_usuario ON Consentimiento(rut_usuario);
@@ -799,7 +770,6 @@ db.exec(`
 
     CREATE INDEX IF NOT EXISTS idx_cursos_link_id_curso ON CursosLink(id_curso);
 
-    CREATE INDEX IF NOT EXISTS idx_evaluaciones_id_asignatura ON Evaluaciones(id_asignatura);
     CREATE INDEX IF NOT EXISTS idx_evaluaciones_fecha ON Evaluaciones(fecha);
     CREATE INDEX IF NOT EXISTS idx_evaluaciones_titulo ON Evaluaciones(titulo);
 
@@ -809,58 +779,35 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_info_apoderado_rut_usuario ON Info_apoderado(rut_usuario);
     CREATE INDEX IF NOT EXISTS idx_info_apoderado_nombres ON Info_apoderado(nombres_apoderado1);
     CREATE INDEX IF NOT EXISTS idx_info_apoderado_apellidos ON Info_apoderado(apellidos_apoderado1);
-    CREATE INDEX IF NOT EXISTS idx_info_apoderado_rut_apoderado ON Info_apoderado(rut_apoderado1);
-    CREATE INDEX IF NOT EXISTS idx_info_apoderado_celular ON Info_apoderado(celular_apoderado1);
 
     CREATE INDEX IF NOT EXISTS idx_info_medica_rut_usuario ON Info_medica(rut_usuario);
 
     CREATE INDEX IF NOT EXISTS idx_informacion_institucional_titulo ON Informacion_institucional(titulo);
-    CREATE INDEX IF NOT EXISTS idx_informacion_institucional_tipo ON Informacion_institucional(tipo);
 
     CREATE INDEX IF NOT EXISTS idx_material_archivo_id_material ON Material_archivo(id_material);
-    CREATE INDEX IF NOT EXISTS idx_material_archivo_id_asignatura ON Material_archivo(id_asignatura);
     CREATE INDEX IF NOT EXISTS idx_material_archivo_titulo ON Material_archivo(titulo);
-    CREATE INDEX IF NOT EXISTS idx_material_archivo_extension ON Material_archivo(extension);
 
-    CREATE INDEX IF NOT EXISTS idx_material_educativo_id_asignatura ON Material_educativo(id_asignatura);
     CREATE INDEX IF NOT EXISTS idx_material_educativo_titulo ON Material_educativo(titulo);
 
-    CREATE INDEX IF NOT EXISTS idx_matricula_rut_usuario ON Matricula(rut_usuario);
     CREATE INDEX IF NOT EXISTS idx_matricula_estado ON Matricula(estado);
 
-    CREATE INDEX IF NOT EXISTS idx_matricula_archivo_id_matricula ON Matricula_archivo(id_matricula);
-    CREATE INDEX IF NOT EXISTS idx_matricula_archivo_rut_usuario ON Matricula_archivo(rut_usuario);
     CREATE INDEX IF NOT EXISTS idx_matricula_archivo_titulo ON Matricula_archivo(titulo);
-    CREATE INDEX IF NOT EXISTS idx_matricula_archivo_extension ON Matricula_archivo(extension);
 
-    CREATE INDEX IF NOT EXISTS idx_noticia_titulo ON Noticia(titulo);
     CREATE INDEX IF NOT EXISTS idx_noticia_fecha ON Noticia(fecha);
     CREATE INDEX IF NOT EXISTS idx_noticia_destacado ON Noticia(destacado);
 
     CREATE INDEX IF NOT EXISTS idx_noticia_archivo_id_noticia ON Noticia_Archivo(id_noticia);
-    CREATE INDEX IF NOT EXISTS idx_noticia_archivo_titulo ON Noticia_Archivo(titulo);
-    CREATE INDEX IF NOT EXISTS idx_noticia_archivo_extension ON Noticia_Archivo(extension);
 
     CREATE INDEX IF NOT EXISTS idx_sede_nombre ON Sede(nombre);
-    CREATE INDEX IF NOT EXISTS idx_sede_direccion ON Sede(direccion);
 
     CREATE INDEX IF NOT EXISTS idx_sede_archivo_id_sede ON Sede_archivo(id_sede);
-    CREATE INDEX IF NOT EXISTS idx_sede_archivo_titulo ON Sede_archivo(titulo);
-    CREATE INDEX IF NOT EXISTS idx_sede_archivo_extension ON Sede_archivo(extension);
 
-    CREATE INDEX IF NOT EXISTS idx_tarea_archivo_id_tarea ON Tarea_archivo(id_tarea);
-    CREATE INDEX IF NOT EXISTS idx_tarea_archivo_id_asignatura ON Tarea_archivo(id_asignatura);
     CREATE INDEX IF NOT EXISTS idx_tarea_archivo_titulo ON Tarea_archivo(titulo);
-    CREATE INDEX IF NOT EXISTS idx_tarea_archivo_extension ON Tarea_archivo(extension);
 
-    CREATE INDEX IF NOT EXISTS idx_tareas_id_asignatura ON Tareas(id_asignatura);
     CREATE INDEX IF NOT EXISTS idx_tareas_titulo ON Tareas(titulo);
 
     CREATE INDEX IF NOT EXISTS idx_usuario_email ON Usuario(email);
-    CREATE INDEX IF NOT EXISTS idx_usuario_nombres ON Usuario(nombres);
-    CREATE INDEX IF NOT EXISTS idx_usuario_apellidos ON Usuario(apellidos);
     CREATE INDEX IF NOT EXISTS idx_usuario_tipo_usuario ON Usuario(tipo_usuario);
-    CREATE INDEX IF NOT EXISTS idx_usuario_estado ON Usuario(estado);
 `);
 
 

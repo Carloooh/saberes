@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   if (path.startsWith("/portalDocente")) {
-    if (!["Docente", "Profesor", "Administrador"].includes(userSession.tipo_usuario)) {
+    if (!["Docente", "Administrador"].includes(userSession.tipo_usuario)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   } else if (path.startsWith("/portalAdministrador")) {
@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   } else if (path.startsWith("/portalAlumno")) {
-    if (!["Estudiante", "Apoderado"].includes(userSession.tipo_usuario)) {
+    if (!["Estudiante"].includes(userSession.tipo_usuario)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }

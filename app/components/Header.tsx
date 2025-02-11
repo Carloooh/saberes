@@ -38,7 +38,7 @@ export default function Header() {
     setShowMenu(false);
   };
 
-  const handleLogin = async (email: string, clave: string) => {
+  const handleLogin = async (rut_usuario: string, clave: string) => {
     console.log(clave);
     try {
       const response = await fetch("/api/auth/login", {
@@ -46,7 +46,7 @@ export default function Header() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, clave }),
+        body: JSON.stringify({ rut_usuario, clave }),
       });
       const data = await response.json();
       if (data.success) {
@@ -264,22 +264,22 @@ export default function Header() {
                   onSubmit={(e) => {
                     e.preventDefault();
                     const form = e.target as HTMLFormElement;
-                    const email = form.email.value;
+                    const rut_usuario = form.rut_usuario.value;
                     const clave = form.clave.value;
-                    handleLogin(email, clave);
+                    handleLogin(rut_usuario, clave);
                   }}
                 >
                   <div>
                     <label
-                      htmlFor="email"
+                      htmlFor="rut_usuario"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Email
+                      Rut
                     </label>
                     <input
-                      type="email"
-                      id="email"
-                      name="email"
+                      type="text"
+                      id="rut_usuario"
+                      name="rut_usuario"
                       required
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2196F3] focus:border-[#2196F3]"
                     />

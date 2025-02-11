@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     delete user.comuna;
     delete user.sector;
     delete user.codigo_temporal;
-    delete user.rut_tipo
+    delete user.rut_tipo;
 
     // Crear respuesta con cookie de sesión
     const response = NextResponse.json({ success: true, user }, { status: 200 });
