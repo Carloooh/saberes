@@ -67,7 +67,7 @@ for (let i = 1; i < 205 && i < data.length; i++) {
     const clave = uuidv4().replace(/-/g, '').slice(0, 10);
     const hashedClave = await bcrypt.hash(clave, 10);
     const tipo_usuario = "Estudiante";
-    const estado = 1;
+    const estado = "Activa";
     const sexo = row[10];
     const nacionalidad = row[15];
     const talla = row[13];
@@ -99,14 +99,15 @@ for (let i = 1; i < 205 && i < data.length; i++) {
     const cert_carnet = row[2] ? quitarTildes(row[2].toLowerCase().trim()) === "si" ? 1 : 0 : 0;
     const cert_estudios = row[3] ? quitarTildes(row[3].toLowerCase().trim()) === "si" ? 1 : 0 : 0;
     const cert_rsh = row[4] ? quitarTildes(row[4].toLowerCase().trim()) === "si" ? 1 : 0 : 0;
+    const cert_diagnostico = 0;
     const rezago_escolar = row[14] ? row[14].toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : "";
 
     // Insertar en Matricula
     const insertMatricula = db.prepare(`
-        INSERT INTO Matricula (id_matricula, rut_usuario, fecha_matricula, estado, ultimo_establecimiento, ultimo_nivel_cursado, incidencia_academica, flag_apoyo_especial, apoyo_especial, consentimiento_apoyo_especial, razon_consentimiento_apoyo_especial, cert_nacimiento, cert_carnet, cert_estudios, cert_rsh, rezago_escolar)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO Matricula (id_matricula, rut_usuario, fecha_matricula, estado, ultimo_establecimiento, ultimo_nivel_cursado, incidencia_academica, flag_apoyo_especial, apoyo_especial, consentimiento_apoyo_especial, razon_consentimiento_apoyo_especial, cert_nacimiento, cert_carnet, cert_estudios, cert_rsh, cert_diagnostico, rezago_escolar)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    insertMatricula.run(uuidv4(), rut_usuario, fecha_matricula, estado_matricula, ultimo_establecimiento, ultimo_nivel_cursado, incidencia_academica, flag_apoyo_especial, apoyo_especial, consentimiento_apoyo_especial, razon_consentimiento_apoyo_especial, cert_nacimiento, cert_carnet, cert_estudios, cert_rsh, rezago_escolar);
+    insertMatricula.run(uuidv4(), rut_usuario, fecha_matricula, estado_matricula, ultimo_establecimiento, ultimo_nivel_cursado, incidencia_academica, flag_apoyo_especial, apoyo_especial, consentimiento_apoyo_especial, razon_consentimiento_apoyo_especial, cert_nacimiento, cert_carnet, cert_estudios, cert_rsh, cert_diagnostico, rezago_escolar);
 
     // Info_apoderado
     const nombres_apoderado1 = row[43].toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');

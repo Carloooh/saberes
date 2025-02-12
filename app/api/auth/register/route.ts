@@ -12,8 +12,8 @@ export async function POST(req: Request) {
       ...userData 
     } = await req.json();
 
-    const checkStmt = db.prepare(`SELECT * FROM Usuario WHERE email = ?`);
-    const existingUser = checkStmt.get(userData.email);
+    const checkStmt = db.prepare(`SELECT * FROM Usuario WHERE RUT_USUARIO = ?`);
+    const existingUser = checkStmt.get(userData.rut_usuario);
     if (existingUser) {
       return NextResponse.json({ success: false, error: 'El usuario ya existe' }, { status: 400 });
     }
