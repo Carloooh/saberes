@@ -241,7 +241,7 @@ db.exec(`
         cert_estudios INTEGER NOT NULL,
         cert_rsh INTEGER NOT NULL,
         cert_diagnostico INTEGER NOT NULL,
-        rezago_escolar TEXT NOT NULL,
+        rezago_escolar TEXT,
         PRIMARY KEY (id_matricula, rut_usuario),
         FOREIGN KEY (rut_usuario) REFERENCES Usuario(rut_usuario)
     );

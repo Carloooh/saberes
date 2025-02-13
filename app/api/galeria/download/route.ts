@@ -10,7 +10,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'ID de archivo no proporcionado' }, { status: 400 });
     }
 
-    // Obtener el archivo desde la base de datos
     const stmt = db.prepare('SELECT archivo, extension FROM Galeria WHERE id_archivo = ?');
     const file = stmt.get(id) as { archivo: Buffer, extension: string };
 
@@ -18,7 +17,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, error: 'Archivo no encontrado' }, { status: 404 });
     }
 
-    // Devolver el archivo como una respuesta
     return new Response(file.archivo, {
       headers: {
         'Content-Type': file.extension === 'mp4' ? 'video/mp4' : `image/${file.extension}`,

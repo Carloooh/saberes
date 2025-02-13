@@ -56,7 +56,6 @@ const MatriculaEstudiante = () => {
       apellidos: formData.get("apellidos"),
       tipo_usuario: formData.get("tipo_usuario"),
       estado: formData.get("estado"),
-      edad: formData.get("edad"),
       sexo: formData.get("sexo"),
       nacionalidad: formData.get("nacionalidad"),
       talla: formData.get("talla"),
@@ -76,32 +75,45 @@ const MatriculaEstudiante = () => {
       razon_consentimiento_apoyo_especial: formData.get(
         "razon_consentimiento_apoyo_especial"
       ),
-      rezago_escolar: formData.get("rezago_escolar"),
+      rezago: formData.get("rezago"),
       id_curso: formData.get("id_curso"),
       nombres_apoderado1: formData.get("nombres_apoderado1"),
       apellidos_apoderado1: formData.get("apellidos_apoderado1"),
       rut_apoderado1: formData.get("rut_apoderado1"),
-      rut_tipo_apoderado1: formData.get("rut_tipo_apoderado1"),
+      rut_tipo_apoderado1: formData.get("tipo_rut_apoderado1"),
       nacionalidad_apoderado1: formData.get("nacionalidad_apoderado1"),
       vinculo_apoderado1: formData.get("vinculo_apoderado1"),
       celular_apoderado1: formData.get("celular_apoderado1"),
       email_apoderado1: formData.get("email_apoderado1"),
       comuna_apoderado1: formData.get("comuna_apoderado1"),
       direccion_apoderado1: formData.get("direccion_apoderado1"),
-      nucleo_familia: formData.get("nucleo_familia"),
+      nucleo_familiar: formData.get("nucleo_familiar"),
       nombres_apoderado2: formData.get("nombres_apoderado2"),
       apellidos_apoderado2: formData.get("apellidos_apoderado2"),
       celular_apoderado2: formData.get("celular_apoderado2"),
-      nombres_ce: formData.get("nombres_ce"),
-      apellidos_ce: formData.get("apellidos_ce"),
-      celular_ce: formData.get("celular_ce"),
-      vinculo_ce: formData.get("vinculo_ce"),
-      cert_nacimiento: formData.get("cert_nacimiento"),
-      cert_carnet: formData.get("cert_carnet"),
-      cert_estudios: formData.get("cert_estudios"),
-      cert_rsh: formData.get("cert_rsh"),
-      cert_diagnostico: formData.get("cert_diagnostico"),
-      hijos: formData.get("hijos"),
+      nombres_ce: formData.get("nombres_contacto"),
+      apellidos_ce: formData.get("apellidos_contacto"),
+      celular_ce: formData.get("celular_contacto"),
+      vinculo_ce: formData.get("vinculo_contacto"),
+      flag_control_medico: formData.get("flag_control_medico"),
+      flag_discapacidad: formData.get("flag_discapacidad"),
+      discapacidad: formData.get("discapacidad"),
+      flag_necesidad_especial: formData.get("flag_necesidad_especial"),
+      necesidad_especial: formData.get("necesidad_especial"),
+      flag_enfermedad: formData.get("flag_enfermedad"),
+      enfermedad: formData.get("enfermedad"),
+      flag_medicamentos: formData.get("flag_medicamentos"),
+      medicamentos: formData.get("medicamentos"),
+      flag_alergia: formData.get("flag_alergia"),
+      alergia: formData.get("alergia"),
+      prevision_medica: formData.get("prevision_medica"),
+      servicio_emergencia: formData.get("servicio_emergencia"),
+      cert_nacimiento: formData.get("cert_nacimiento") as File,
+      cert_carnet: formData.get("cert_carnet") as File,
+      cert_estudios: formData.get("cert_estudios") as File,
+      cert_rsh: formData.get("cert_rsh") as File,
+      cert_diagnostico: formData.get("cert_diagnostico") as File,
+      hitos: formData.get("hitos"),
       asistencia: formData.get("asistencia"),
       seguro_beneficio: formData.get("seguro_beneficio"),
       reuniones: formData.get("reuniones"),
@@ -111,7 +123,7 @@ const MatriculaEstudiante = () => {
       cumplimiento_compromisos: formData.get("cumplimiento_compromisos"),
       terminos_condiciones: formData.get("terminos_condiciones"),
     };
-
+    console.log("rezago", payload.rezago);
     const response = await fetch("/api/auth/register/matricula", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -147,7 +159,11 @@ const MatriculaEstudiante = () => {
             {" "}
             Los campos marcados con * son obligatorios
           </span>
-          <form onSubmit={handleSubmit} className="flex flex-col space-y-5">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col space-y-5"
+            encType="multipart/form-data"
+          >
             <fieldset className="border border-solid border-gray-300 p-3">
               <legend className="text-sm text-gray-700">
                 Información personal
@@ -163,6 +179,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="rut_usuario"
+                    name="rut_usuario"
                     placeholder="Ejemplo: 12345678-9"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -178,6 +195,7 @@ const MatriculaEstudiante = () => {
                   </label>
                   <select
                     id="rut_tipo"
+                    name="rut_tipo"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
                   >
@@ -199,6 +217,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="nombres"
+                    name="nombres"
                     placeholder="Ejemplo: Agustina Pascal"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -215,6 +234,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="apellidos"
+                    name="apellidos"
                     placeholder="Ejemplo: González Acevedo"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -231,6 +251,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="date"
                     id="fecha_nacimiento"
+                    name="fecha_nacimiento"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     max={new Date().toISOString().split("T")[0]}
                     required
@@ -246,6 +267,7 @@ const MatriculaEstudiante = () => {
                   </label>
                   <select
                     id="sexo"
+                    name="sexo"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
                   >
@@ -266,6 +288,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="nacionalidad"
+                    name="nacionalidad"
                     placeholder="Ejemplo: Chileno/a, Colombiano/a"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -282,6 +305,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="talla"
+                    name="talla"
                     placeholder="Ejemplo: S, M, L, 12, etc..."
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
@@ -297,6 +321,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="direccion"
+                    name="direccion"
                     placeholder="Ejemplo: Avenida España Sin Número"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -313,6 +338,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="comuna"
+                    name="comuna"
                     placeholder="Ejemplo: El Quisco"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -329,6 +355,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="sector"
+                    name="sector"
                     placeholder="Ejemplo: Quisco Centro"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
@@ -345,6 +372,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="email"
                     id="email"
+                    name="email"
                     placeholder="Ejemplo: nombre@ejemplo.com"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -419,6 +447,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="ultimo_establecimiento"
+                    name="ultimo_establecimiento"
                     placeholder="Ejemplo: Escuela Mirasol"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -435,6 +464,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="ultimo_nivel_cursado"
+                    name="ultimo_nivel_cursado"
                     placeholder="Ejemplo: 2° Básico"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -451,6 +481,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="text"
                     id="incidencia_academica"
+                    name="incidencia_academica"
                     placeholder="Ejemplo: No Aplica"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
@@ -487,6 +518,7 @@ const MatriculaEstudiante = () => {
                     <input
                       type="text"
                       id="apoyo_especial"
+                      name="apoyo_especial"
                       placeholder="Especifique el tipo de apoyo especial (opcional)"
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
@@ -524,6 +556,7 @@ const MatriculaEstudiante = () => {
                     <input
                       type="text"
                       id="razon_consentimiento_apoyo_especial"
+                      name="razon_consentimiento_apoyo_especial"
                       placeholder="Especifique la razón del consentimiento (opcional)"
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
@@ -532,14 +565,15 @@ const MatriculaEstudiante = () => {
 
                 <div>
                   <label
-                    htmlFor="rezago_escolar"
+                    htmlFor="rezago"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Rezago escolar
                   </label>
                   <input
                     type="text"
-                    id="rezago_escolar"
+                    id="rezago"
+                    name="rezago"
                     placeholder="Ejemplo: No registra, En proceso, etc."
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
@@ -555,6 +589,7 @@ const MatriculaEstudiante = () => {
                   </label>
                   <select
                     id="id_curso"
+                    name="id_curso"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
                   >
@@ -580,14 +615,15 @@ const MatriculaEstudiante = () => {
                 </h3>
                 <div>
                   <label
-                    htmlFor="nombres-apoderado1"
+                    htmlFor="nombres_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Nombres <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="nombres-apoderado1"
+                    id="nombres_apoderado1"
+                    name="nombres_apoderado1"
                     placeholder="Ejemplo: Agustina Pascal"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -595,14 +631,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="apellidos-apoderado1"
+                    htmlFor="apellidos_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Apellidos <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="apellidos-apoderado1"
+                    id="apellidos_apoderado1"
+                    name="apellidos_apoderado1"
                     placeholder="Ejemplo: González Acevedo"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -610,14 +647,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="rut-apoderado1"
+                    htmlFor="rut_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     RUT <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="rut-apoderado1"
+                    id="rut_apoderado1"
+                    name="rut_apoderado1"
                     placeholder="Ejemplo: 12345678-9"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -625,13 +663,14 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="tipo-rut-apoderado1"
+                    htmlFor="tipo_rut_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Tipo de RUT <span className="text-red-500">*</span>
                   </label>
                   <select
-                    id="tipo-rut-apoderado1"
+                    id="tipo_rut_apoderado1"
+                    name="tipo_rut_apoderado1"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
                   >
@@ -644,14 +683,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="nacionalidad-apoderado1"
+                    htmlFor="nacionalidad_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Nacionalidad <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="nacionalidad-apoderado1"
+                    id="nacionalidad_apoderado1"
+                    name="nacionalidad_apoderado1"
                     placeholder="Ejemplo: Chileno/a, Colombiano/a"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -659,7 +699,7 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="vinculo-apoderado1"
+                    htmlFor="vinculo_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Vínculo con el/la alumno/a{" "}
@@ -667,7 +707,8 @@ const MatriculaEstudiante = () => {
                   </label>
                   <input
                     type="text"
-                    id="vinculo-apoderado1"
+                    id="vinculo_apoderado1"
+                    name="vinculo_apoderado1"
                     placeholder="Ejemplo: Madre, Padre, Tutor/a"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -675,14 +716,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="celular-apoderado1"
+                    htmlFor="celular_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Celular <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
-                    id="celular-apoderado1"
+                    id="celular_apoderado1"
+                    name="celular_apoderado1"
                     placeholder="Ejemplo: 987654321"
                     min={9}
                     max={9}
@@ -693,14 +735,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="email-apoderado1"
+                    htmlFor="email_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Email <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
-                    id="email-apoderado1"
+                    id="email_apoderado1"
+                    name="email_apoderado1"
                     placeholder="Ejemplo: nombre@ejemplo.com"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -708,14 +751,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="direccion-apoderado1"
+                    htmlFor="direccion_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Dirección <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="direccion-apoderado1"
+                    id="direccion_apoderado1"
+                    name="direccion_apoderado1"
                     placeholder="Ejemplo: Avenida España Sin Número"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -723,14 +767,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="comuna-apoderado1"
+                    htmlFor="comuna_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Comuna <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="comuna-apoderado1"
+                    id="comuna_apoderado1"
+                    name="comuna_apoderado1"
                     placeholder="Ejemplo: El Quisco"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -747,6 +792,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="number"
                     id="nucleo_familiar"
+                    name="nucleo_familiar"
                     placeholder="Ejemplo: 1, 2, 3, etc..."
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     min={0}
@@ -761,42 +807,45 @@ const MatriculaEstudiante = () => {
                 </h3>
                 <div>
                   <label
-                    htmlFor="nombres-apoderado2"
+                    htmlFor="nombres_apoderado2"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Nombres
                   </label>
                   <input
                     type="text"
-                    id="nombres-apoderado2"
+                    id="nombres_apoderado2"
+                    name="nombres_apoderado2"
                     placeholder="Ejemplo: Valeria Meneses"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
                 <div>
                   <label
-                    htmlFor="apellidos-apoderado2"
+                    htmlFor="apellidos_apoderado2"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Apellidos
                   </label>
                   <input
                     type="text"
-                    id="apellidos-apoderado2"
+                    id="apellidos_apoderado2"
+                    name="apellidos_apoderado2"
                     placeholder="Ejemplo: Oscar Villarroel"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
                 </div>
                 <div>
                   <label
-                    htmlFor="celular-apoderado2"
+                    htmlFor="celular_apoderado2"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Celular
                   </label>
                   <input
                     type="tel"
-                    id="celular-apoderado2"
+                    id="celular_apoderado2"
+                    name="celular_apoderado2"
                     placeholder="Ejemplo: 981569877"
                     min={9}
                     max={9}
@@ -812,14 +861,15 @@ const MatriculaEstudiante = () => {
                 </h3>
                 <div>
                   <label
-                    htmlFor="nombres-contacto"
+                    htmlFor="nombres_contacto"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Nombres <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="nombres-contacto"
+                    id="nombres_contacto"
+                    name="nombres_contacto"
                     placeholder="Ejemplo: Aldo Jorge"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -827,14 +877,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="apellidos-contacto"
+                    htmlFor="apellidos_contacto"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Apellidos <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="apellidos-contacto"
+                    id="apellidos_contacto"
+                    name="apellidos_contacto"
                     placeholder="Ejemplo: Zarate Carreño"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -842,14 +893,15 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="celular-contacto"
+                    htmlFor="celular_contacto"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Celular <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
-                    id="celular-contacto"
+                    id="celular_contacto"
+                    name="celular_contacto"
                     placeholder="Ejemplo: 999027852"
                     min={9}
                     max={9}
@@ -860,7 +912,7 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="vinculo-contacto"
+                    htmlFor="vinculo_contacto"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Vínculo con el/la alumno/a{" "}
@@ -868,7 +920,8 @@ const MatriculaEstudiante = () => {
                   </label>
                   <input
                     type="text"
-                    id="vinculo-contacto"
+                    id="vinculo_contacto"
+                    name="vinculo_contacto"
                     placeholder="Ejemplo: Padre, Madre, Tutor/a"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -940,6 +993,7 @@ const MatriculaEstudiante = () => {
                   <div className="mt-2">
                     <input
                       type="text"
+                      name="discapacidad"
                       placeholder="Especifique la discapacidad (opcional)"
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
@@ -976,6 +1030,7 @@ const MatriculaEstudiante = () => {
                   <div className="mt-2">
                     <input
                       type="text"
+                      name="necesidad_especial"
                       placeholder="Especifique la necesidad especial (opcional)"
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
@@ -1012,6 +1067,7 @@ const MatriculaEstudiante = () => {
                   <div className="mt-2">
                     <input
                       type="text"
+                      name="enfermedad"
                       placeholder="Especifique la enfermedad (opcional)"
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
@@ -1048,6 +1104,7 @@ const MatriculaEstudiante = () => {
                   <div className="mt-2">
                     <input
                       type="text"
+                      name="medicamentos"
                       placeholder="Especifique los medicamentos (opcional)"
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
@@ -1084,6 +1141,7 @@ const MatriculaEstudiante = () => {
                   <div className="mt-2">
                     <input
                       type="text"
+                      name="alergia"
                       placeholder="Especifique la alergia (opcional)"
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     />
@@ -1092,14 +1150,15 @@ const MatriculaEstudiante = () => {
 
                 <div>
                   <label
-                    htmlFor="prevision-medica"
+                    htmlFor="prevision_medica"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Previsión médica <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
-                    id="prevision-medica"
+                    id="prevision_medica"
+                    name="prevision_medica"
                     placeholder="Ejemplo: Fonasa, Isapre"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -1108,7 +1167,7 @@ const MatriculaEstudiante = () => {
 
                 <div>
                   <label
-                    htmlFor="servicio-emergencia"
+                    htmlFor="servicio_emergencia"
                     className="block text-sm font-medium text-gray-700"
                   >
                     Servicio de emergencia{" "}
@@ -1116,7 +1175,8 @@ const MatriculaEstudiante = () => {
                   </label>
                   <input
                     type="text"
-                    id="servicio-emergencia"
+                    id="servicio_mergencia"
+                    name="servicio_emergencia"
                     placeholder="Ejemplo: Cesfam, Particular"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
@@ -1140,6 +1200,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="file"
                     id="cert_nacimiento"
+                    name="cert_nacimiento"
                     accept=".pdf,.doc,.docx,image/png,image/jpeg"
                     className="mt-1 block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     required
@@ -1156,6 +1217,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="file"
                     id="cert_estudios"
+                    name="cert_estudios"
                     accept=".pdf,.doc,.docx,image/png,image/jpeg"
                     className="mt-1 block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     required
@@ -1172,6 +1234,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="file"
                     id="cert_rsh"
+                    name="cert_rsh"
                     accept=".pdf,.doc,.docx,image/png,image/jpeg"
                     className="mt-1 block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     required
@@ -1188,6 +1251,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="file"
                     id="cert_carnet"
+                    name="cert_carnet"
                     accept=".pdf,.doc,.docx,image/png,image/jpeg"
                     className="mt-1 block  text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     required
@@ -1204,6 +1268,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="file"
                     id="cert_diagnostico"
+                    name="cert_diagnostico"
                     accept=".pdf,.doc,.docx,image/png,image/jpeg"
                     className="mt-1 block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                   />
@@ -1218,11 +1283,12 @@ const MatriculaEstudiante = () => {
                 <div className="flex items-start">
                   <input
                     type="checkbox"
-                    id="hijos"
+                    id="hitos"
+                    name="hitos"
                     required
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="hijos" className="ml-2 text-sm text-gray-700">
+                  <label htmlFor="hitos" className="ml-2 text-sm text-gray-700">
                     Me comprometo a facilitar el acceso, al niño, niña y
                     adolescente (NNA) a los hitos importantes del programa
                     Saberes durante todo el año, siendo el último “Saberes
@@ -1235,6 +1301,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="checkbox"
                     id="asistencia"
+                    name="asistencia"
                     required
                     className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -1255,6 +1322,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="checkbox"
                     id="seguro_beneficio"
+                    name="seguro_beneficio"
                     required
                     className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -1273,6 +1341,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="checkbox"
                     id="reuniones"
+                    name="reuniones"
                     required
                     className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -1293,6 +1362,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="checkbox"
                     id="apoyo_especial"
+                    name="reuniones"
                     required
                     className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -1312,6 +1382,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="checkbox"
                     id="sedes"
+                    name="sedes"
                     required
                     className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -1327,6 +1398,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="checkbox"
                     id="multimedia"
+                    name="multimedia"
                     required
                     className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -1346,6 +1418,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="checkbox"
                     id="cumplimiento_compromisos"
+                    name="cumplimiento_compromisos"
                     required
                     className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -1365,6 +1438,7 @@ const MatriculaEstudiante = () => {
                   <input
                     type="checkbox"
                     id="terminos_condiciones"
+                    name="terminos_condiciones"
                     required
                     className="h-4 w-4  text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
