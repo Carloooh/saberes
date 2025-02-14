@@ -62,43 +62,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Error en el servidor' }, { status: 500 });
     }
   }
-  
-
-// // POST: Subir un nuevo archivo
-// export async function POST(req: Request) {
-//   try {
-//     const formData = await req.formData();
-//     const file = formData.get('file') as File;
-
-//     if (!file) {
-//       return NextResponse.json({ success: false, error: 'No se proporcionó ningún archivo' }, { status: 400 });
-//     }
-
-//     // Validar el tipo de archivo
-//     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'video/mp4'];
-//     if (!allowedTypes.includes(file.type)) {
-//       return NextResponse.json({ success: false, error: 'Formato de archivo no permitido. Solo se permiten PNG, JPG, JPEG y MP4.' }, { status: 400 });
-//     }
-
-//     const fileBuffer = await file.arrayBuffer();
-//     let nombreArchivo = file.name.split('.').slice(0, -1).join('.');
-//     const extension = file.name.split('.').pop() || '';
-
-//     // Obtener un nombre único si el archivo ya existe
-//     nombreArchivo = obtenerNombreUnico(nombreArchivo, extension);
-
-//     const stmt = db.prepare(`
-//       INSERT INTO Galeria (id_archivo, archivo, extension)
-//       VALUES (?, ?, ?)
-//     `);
-//     stmt.run(nombreArchivo, Buffer.from(fileBuffer), extension);
-
-//     return NextResponse.json({ success: true, id: nombreArchivo }, { status: 201 });
-//   } catch (error) {
-//     console.error('Error al subir el archivo:', error);
-//     return NextResponse.json({ success: false, error: 'Error en el servidor' }, { status: 500 });
-//   }
-// }
 
 // PUT: Renombrar un archivo
 export async function PUT(req: Request) {
