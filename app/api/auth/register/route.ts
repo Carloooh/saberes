@@ -7,8 +7,9 @@ export async function POST(req: Request) {
     const { 
       rut_usuario, 
       tipo_usuario,
-      cursos = [],
-      asignaturas = [],
+      cursosAsignaturas = [],
+      // cursos = [],
+      // asignaturas = [],
       ...userData 
     } = await req.json();
 
@@ -54,24 +55,22 @@ export async function POST(req: Request) {
 
       // Insertar relaciones para Docente
       if (tipo_usuario === 'Docente') {
-        // Insertar en CursosLink
         const cursoStmt = db.prepare(`
           INSERT INTO CursosLink (rut_usuario, id_curso) VALUES (?, ?)
         `);
         
-        // Insertar en AsignaturasLink
         const asignaturaStmt = db.prepare(`
           INSERT INTO AsignaturasLink (rut_usuario, id_asignatura) VALUES (?, ?)
         `);
 
-        cursos.forEach((curso: string) => {
-          cursoStmt.run(rut_usuario, curso);
-        });
+        cursosAsignaturas.forEach(({ cursoId, asignaturas }: { cursoId: string, asignaturas: string[] }) => {
+          cursoStmt.run(rut_usuario, cursoId);
 
-        asignaturas.forEach((asignatura: string) => {
-          asignaturaStmt.run(rut_usuario, asignatura);
+          asignaturas.forEach((asignaturaId: string) => {
+            asignaturaStmt.run(rut_usuario, asignaturaId);
+          });
         });
-      }
+        
 
       if (tipo_usuario === 'Administrador') {
         const allCursos = db.prepare(`SELECT id_curso FROM Curso`).all() as { id_curso: string }[];

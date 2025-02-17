@@ -101,6 +101,8 @@ for (let i = 1; i < 205 && i < data.length; i++) {
     const cert_rsh = row[4] ? quitarTildes(row[4].toLowerCase().trim()) === "si" ? 1 : 0 : 0;
     const cert_diagnostico = 0;
     const rezago_escolar = row[14] ? row[14].toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : "";
+    const curso_ingreso = row[11];
+    
 
     // Insertar en Matricula
     const insertMatricula = db.prepare(`
@@ -108,6 +110,21 @@ for (let i = 1; i < 205 && i < data.length; i++) {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     insertMatricula.run(uuidv4(), rut_usuario, fecha_matricula, estado_matricula, ultimo_establecimiento, ultimo_nivel_cursado, incidencia_academica, flag_apoyo_especial, apoyo_especial, consentimiento_apoyo_especial, razon_consentimiento_apoyo_especial, cert_nacimiento, cert_carnet, cert_estudios, cert_rsh, cert_diagnostico, rezago_escolar);
+
+    // insertar en Curso
+    const insertCurso = db.prepare(`
+        INSERT INTO CursoAsignaturasLink (rut_usuario, id_curso, id_asignatura)
+        VALUES (?, ?, ?)
+    `);
+    
+    const curso = db.prepare(`
+        SELECT 
+          id_curso
+        FROM Curso
+        WHERE nombre_curso = ${curso_ingreso}
+      `).all();
+
+    insertCurso.run(rut_usuario, curso, null);
 
     // Info_apoderado
     const nombres_apoderado1 = row[43].toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');

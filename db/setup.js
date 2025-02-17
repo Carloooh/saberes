@@ -48,25 +48,18 @@ db.exec(`
         nombre_curso TEXT NOT NULL
     );
 
-    CREATE TABLE IF NOT EXISTS CursosLink (
+    CREATE TABLE IF NOT EXISTS CursosAsignaturasLink (
         rut_usuario TEXT NOT NULL,
-        id_curso TEXT NOT NULL,
-        PRIMARY KEY (rut_usuario, id_curso),
+        id_curso TEXT NOT NULL
+        id_asignatura TEXT,
+        PRIMARY KEY (rut_usuario, id_asignatura),
         FOREIGN KEY (rut_usuario) REFERENCES Usuario(rut_usuario),
-        FOREIGN KEY (id_curso) REFERENCES Curso(id_curso)
+        FOREIGN KEY (id_asignatura) REFERENCES Asignatura(id_asignatura)
     );
 
     CREATE TABLE IF NOT EXISTS Asignatura (
         id_asignatura TEXT NOT NULL PRIMARY KEY,
         nombre_asignatura TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS AsignaturasLink (
-        rut_usuario TEXT NOT NULL,
-        id_asignatura TEXT NOT NULL,
-        PRIMARY KEY (rut_usuario, id_asignatura),
-        FOREIGN KEY (rut_usuario) REFERENCES Usuario(rut_usuario),
-        FOREIGN KEY (id_asignatura) REFERENCES Asignatura(id_asignatura)
     );
 
     CREATE TABLE IF NOT EXISTS Asignaturas (
@@ -325,7 +318,9 @@ db.exec(`
 
     CREATE INDEX IF NOT EXISTS idx_asignaturas_id_curso ON Asignaturas(id_curso);
 
-    CREATE INDEX IF NOT EXISTS idx_asignaturas_link_id_asignatura ON AsignaturasLink(id_asignatura);
+    CREATE INDEX IF NOT EXISTS idx_cursosasignaturas_link_id_asignatura ON CursosAsignaturasLink(rut_usuario);
+    CREATE INDEX IF NOT EXISTS idx_cursosasignaturas_link_id_asignatura ON CursosAsignaturasLink(id_curso);
+    CREATE INDEX IF NOT EXISTS idx_cursosasignaturas_link_id_asignatura ON CursosAsignaturasLink(id_asignatura);
 
     CREATE INDEX IF NOT EXISTS idx_asistencia_fecha ON Asistencia(fecha);
 
@@ -339,8 +334,6 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_contacto_emergencia_vinculo ON Contacto_emergencia(vinculo);
 
     CREATE INDEX IF NOT EXISTS idx_curso_nombre ON Curso(nombre_curso);
-
-    CREATE INDEX IF NOT EXISTS idx_cursos_link_id_curso ON CursosLink(id_curso);
 
     CREATE INDEX IF NOT EXISTS idx_evaluaciones_fecha ON Evaluaciones(fecha);
     CREATE INDEX IF NOT EXISTS idx_evaluaciones_titulo ON Evaluaciones(titulo);

@@ -5,8 +5,6 @@ export async function middleware(request: NextRequest) {
   // Obtener la cookie de sesión del usuario
   const userSessionCookie = request.cookies.get("userSession")?.value;
 
-  console.log("Middleware - userSessionCookie:", userSessionCookie);
-
   // Si no hay una sesión activa, redirigir al inicio
   if (!userSessionCookie) {
     return NextResponse.redirect(new URL("/", request.url));
@@ -20,8 +18,6 @@ export async function middleware(request: NextRequest) {
     console.error("Error al parsear la sesión del usuario:", error);
     return NextResponse.redirect(new URL("/", request.url));
   }
-
-  console.log("Middleware - userSession:", userSession);
 
   // Verificar el rol del usuario según la ruta
   const path = request.nextUrl.pathname;
@@ -38,6 +34,10 @@ export async function middleware(request: NextRequest) {
     if (!["Estudiante"].includes(userSession.tipo_usuario)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
+  } else if (path.startsWith("/perfil")) {
+    if (!["Estudiante", "Docente", "Administrador"].includes(userSession.tipo_usuario)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   }
 
   return NextResponse.next();
@@ -45,5 +45,5 @@ export async function middleware(request: NextRequest) {
 
 // Configuración para aplicar el middleware solo a ciertas rutas
 export const config = {
-  matcher: ["/portalDocente/:path*", "/portalAdministrador/:path*", "/portalAlumno/:path*"],
+  matcher: ["/portalDocente/:path*", "/portalAdministrador/:path*", "/portalAlumno/:path*", "/perfil/:path*"],
 };
