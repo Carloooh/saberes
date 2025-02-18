@@ -4,7 +4,7 @@ import db from '@/db';
 // GET: Obtener todas las FAQs
 export async function GET() {
   try {
-    const stmt = db.prepare('SELECT * FROM informacioninstitucional WHERE tipo = ?');
+    const stmt = db.prepare('SELECT * FROM informacion_institucional WHERE tipo = ?');
     const faqs = stmt.all('faq');
     return NextResponse.json({ success: true, data: faqs }, { status: 200 });
   } catch (error) {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const { titulo, contenido } = await req.json();
 
     const stmt = db.prepare(`
-      INSERT INTO informacioninstitucional (id_informacion, tipo, titulo, contenido)
+      INSERT INTO informacion_institucional (id_informacion, tipo, titulo, contenido)
       VALUES (?, ?, ?, ?)
     `);
     const id = crypto.randomUUID(); // Generar un ID único
@@ -38,7 +38,7 @@ export async function PUT(req: Request) {
     const { id_informacion, titulo, contenido } = await req.json();
 
     const stmt = db.prepare(`
-      UPDATE informacioninstitucional
+      UPDATE informacion_institucional
       SET titulo = ?, contenido = ?
       WHERE id_informacion = ?
     `);
@@ -56,7 +56,7 @@ export async function DELETE(req: Request) {
   try {
     const { id_informacion } = await req.json();
 
-    const stmt = db.prepare('DELETE FROM informacioninstitucional WHERE id_informacion = ?');
+    const stmt = db.prepare('DELETE FROM informacion_institucional WHERE id_informacion = ?');
     stmt.run(id_informacion);
 
     return NextResponse.json({ success: true }, { status: 200 });

@@ -164,8 +164,8 @@ export async function POST(req: Request) {
       );
 
       // Insertar en CursosLink
-      const cursoStmt = db.prepare(`INSERT INTO CursosLink (rut_usuario, id_curso) VALUES (?, ?)`);
-      cursoStmt.run(rut_usuario, id_curso);
+      const cursoStmt = db.prepare(`INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso, id_asignatura) VALUES (?, ?, ?, ?)`);
+      cursoStmt.run(uuidv4(), rut_usuario, id_curso, null);
 
       // Insertar en Matricula
       const id_matricula = uuidv4();

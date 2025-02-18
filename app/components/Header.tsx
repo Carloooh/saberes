@@ -85,7 +85,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="border-b bg-white shadow-sm">
+      <header className="border-b shadow-sm">
         <div className="h-1 w-full bg-gradient-to-r from-[#2196F3] to-[#E91E63]"></div>
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">

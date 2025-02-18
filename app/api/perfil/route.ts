@@ -1,6 +1,21 @@
 import { NextResponse, NextRequest } from "next/server";
 import db from "@/db";
 
+interface Asignatura {
+  id_asignatura: string;
+  nombre_asignatura: string;
+}
+
+interface Curso {
+  id_curso: string;
+  nombre_curso: string;
+  asignaturas: string;
+}
+
+interface CursoWithAsignaturas extends Omit<Curso, 'asignaturas'> {
+  asignaturas: Asignatura[];
+}
+
 export async function GET(request: NextRequest) {
   try {
     const userSessionCookie = request.cookies.get("userSession")?.value;
@@ -44,10 +59,27 @@ export async function GET(request: NextRequest) {
       `);
       const matricula = queryMatricula.get(rutUsuario);
 
+      const queryCursoAlumnoId = db.prepare(`
+        SELECT id_curso FROM CursosAsignaturasLink WHERE rut_usuario = ?
+      `);
+      
+      const cursoAlumnoId = queryCursoAlumnoId.get(rutUsuario);
+
+      const queryCursoAlumno = db.prepare(`
+        SELECT nombre_curso FROM Curso WHERE id_curso = ?
+      `);
+
+      const cursoAlumno = queryCursoAlumno.get(cursoAlumnoId.id_curso);
+
       const queryApoderado = db.prepare(`
         SELECT * FROM Info_apoderado WHERE rut_usuario = ?
       `);
       const apoderado = queryApoderado.get(rutUsuario);
+
+      const queryContactoEmergencia = db.prepare(`
+        SELECT * FROM Contacto_emergencia WHERE rut_usuario = ?
+      `);
+      const contactoEmergencia = queryContactoEmergencia.get(rutUsuario);
 
       const queryInfoMedica = db.prepare(`
         SELECT * FROM Info_medica WHERE rut_usuario = ?
@@ -57,37 +89,55 @@ export async function GET(request: NextRequest) {
       const queryArchivos = db.prepare(`
         SELECT * FROM Matricula_archivo WHERE rut_usuario = ?
       `);
-      const archivos = queryArchivos.all(rutUsuario);
+
+      const archivos = queryArchivos.all(rutUsuario).map(archivo => ({
+        id_documento: archivo.id_documento,
+        titulo: archivo.titulo,
+        extension: archivo.extension,
+        downloadUrl: `/api/perfil/documentos/${archivo.id_documento}`
+      }));
 
       perfilData = {
         ...perfilData,
         matricula,
         apoderado,
+        contactoEmergencia,
         infoMedica,
         archivos,
+        cursoAlumno
       };
     } else {
-      // Obtener información para docentes y administradores
       const queryCursos = db.prepare(`
-        SELECT c.* FROM Curso c
-        INNER JOIN CursosLink cl ON c.id_curso = cl.id_curso
+        SELECT DISTINCT c.*, 
+          (
+            SELECT json_group_array(
+              json_object(
+                'id_asignatura', a.id_asignatura,
+                'nombre_asignatura', a.nombre_asignatura
+              )
+            )
+            FROM Asignatura a
+            INNER JOIN CursosAsignaturasLink cal 
+            WHERE cal.id_curso = c.id_curso 
+            AND cal.rut_usuario = ?
+            AND cal.id_asignatura = a.id_asignatura
+            ORDER BY a.id_asignatura ASC
+          ) as asignaturas
+        FROM Curso c
+        INNER JOIN CursosAsignaturasLink cl ON c.id_curso = cl.id_curso
         WHERE cl.rut_usuario = ?
+        ORDER BY c.id_curso ASC
       `);
-      const cursos = queryCursos.all(rutUsuario);
-
-        
-
-      const queryAsignaturas = db.prepare(`
-        SELECT a.* FROM Asignatura a
-        INNER JOIN AsignaturasLink al ON a.id_asignatura = al.id_asignatura
-        WHERE al.rut_usuario = ?
-      `);
-      const asignaturas = queryAsignaturas.all(rutUsuario);
+      
+      const cursos = queryCursos.all(rutUsuario, rutUsuario).map((curso: unknown): CursoWithAsignaturas => ({
+        id_curso: (curso as Curso).id_curso,
+        nombre_curso: (curso as Curso).nombre_curso,
+        asignaturas: JSON.parse((curso as Curso).asignaturas || '[]')
+      }));
 
       perfilData = {
         ...perfilData,
-        cursos,
-        asignaturas,
+        cursos
       };
     }
     console.log(perfilData);

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import db from '@/db';
 import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {
   try {
@@ -8,13 +9,11 @@ export async function POST(req: Request) {
       rut_usuario, 
       tipo_usuario,
       cursosAsignaturas = [],
-      // cursos = [],
-      // asignaturas = [],
       ...userData 
     } = await req.json();
 
     const checkStmt = db.prepare(`SELECT * FROM Usuario WHERE RUT_USUARIO = ?`);
-    const existingUser = checkStmt.get(userData.rut_usuario);
+    const existingUser = checkStmt.get(rut_usuario);
     if (existingUser) {
       return NextResponse.json({ success: false, error: 'El usuario ya existe' }, { status: 400 });
     }
@@ -24,7 +23,6 @@ export async function POST(req: Request) {
     db.exec('BEGIN TRANSACTION');
 
     try {
-      // Insertar usuario
       const userStmt = db.prepare(`
         INSERT INTO Usuario (
           rut_usuario, rut_tipo, email, clave, nombres, apellidos, 
@@ -53,44 +51,34 @@ export async function POST(req: Request) {
         userData.codigo_temporal || ''
       );
 
-      // Insertar relaciones para Docente
       if (tipo_usuario === 'Docente') {
-        const cursoStmt = db.prepare(`
-          INSERT INTO CursosLink (rut_usuario, id_curso) VALUES (?, ?)
-        `);
-        
-        const asignaturaStmt = db.prepare(`
-          INSERT INTO AsignaturasLink (rut_usuario, id_asignatura) VALUES (?, ?)
+        const stmt = db.prepare(`
+          INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso, id_asignatura)
+          VALUES (?, ?, ?, ?)
         `);
 
         cursosAsignaturas.forEach(({ cursoId, asignaturas }: { cursoId: string, asignaturas: string[] }) => {
-          cursoStmt.run(rut_usuario, cursoId);
-
           asignaturas.forEach((asignaturaId: string) => {
-            asignaturaStmt.run(rut_usuario, asignaturaId);
+            stmt.run(uuidv4(), rut_usuario, cursoId, asignaturaId);
           });
         });
-        
+      } else if (tipo_usuario === 'Administrador') {
+        const stmt = db.prepare(`
+          INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso, id_asignatura)
+          VALUES (?, ?, ?, ?)
+        `);
 
-      if (tipo_usuario === 'Administrador') {
         const allCursos = db.prepare(`SELECT id_curso FROM Curso`).all() as { id_curso: string }[];
         const allAsignaturas = db.prepare(`SELECT id_asignatura FROM Asignatura`).all() as { id_asignatura: string }[];
 
-        const cursoStmt = db.prepare(`
-          INSERT INTO CursosLink (rut_usuario, id_curso) VALUES (?, ?)
-        `);
-
-        const asignaturaStmt = db.prepare(`
-          INSERT INTO AsignaturasLink (rut_usuario, id_asignatura) VALUES (?, ?)
-        `);
-
-        allCursos.forEach((curso: { id_curso: string }) => {
-          cursoStmt.run(rut_usuario, curso.id_curso);
+        allCursos.forEach((curso) => {
+          allAsignaturas.forEach((asignatura) => {
+            stmt.run(uuidv4(), rut_usuario, curso.id_curso, asignatura.id_asignatura);
+          });
         });
-
-        allAsignaturas.forEach((asignatura: { id_asignatura: string }) => {
-          asignaturaStmt.run(rut_usuario, asignatura.id_asignatura);
-        });
+      } else {
+        db.exec('ROLLBACK');
+        return NextResponse.json({ success: false, error: 'Error en los datos ingresados' }, { status: 500 })
       }
 
       db.exec('COMMIT');

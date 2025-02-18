@@ -10,7 +10,7 @@ const worksheet = workbook.Sheets[sheetName];
 
 const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
-for (let i = 1; i < 205 && i < data.length; i++) {
+for (let i = 2; i < 205 && i < data.length; i++) {
     const row = data[i];
 
     function quitarTildes(str) {
@@ -113,18 +113,19 @@ for (let i = 1; i < 205 && i < data.length; i++) {
 
     // insertar en Curso
     const insertCurso = db.prepare(`
-        INSERT INTO CursoAsignaturasLink (rut_usuario, id_curso, id_asignatura)
-        VALUES (?, ?, ?)
+        INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso, id_asignatura)
+        VALUES (?, ?, ?, ?)
     `);
     
     const curso = db.prepare(`
         SELECT 
           id_curso
         FROM Curso
-        WHERE nombre_curso = ${curso_ingreso}
-      `).all();
+        WHERE nombre_curso = ?
+      `).get(curso_ingreso);
 
-    insertCurso.run(rut_usuario, curso, null);
+    console.log(curso.id_curso)
+    insertCurso.run(uuidv4(), rut_usuario, curso.id_curso, null);
 
     // Info_apoderado
     const nombres_apoderado1 = row[43].toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
