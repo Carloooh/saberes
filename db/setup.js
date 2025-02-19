@@ -8,6 +8,7 @@ try {
       DELETE FROM Actividad_archivo;
       DELETE FROM Actividad;
       DELETE FROM Asistencia;
+      DELETE FROM DiasAsistencia;
       DELETE FROM Calificaciones;
       DELETE FROM Evaluaciones;
       DELETE FROM Material_archivo;
@@ -94,14 +95,20 @@ db.exec(`
         FOREIGN KEY (id_asignatura) REFERENCES Asignatura(id_asignatura) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS DiasAsistencia (
+        id_dia TEXT NOT NULL PRIMARY KEY, 
+        id_curso TEXT NOT NULL,           
+        fecha TEXT NOT NULL,              
+        FOREIGN KEY (id_curso) REFERENCES Curso(id_curso) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS Asistencia (
-        id_asistencia TEXT NOT NULL,
-        id_curso TEXT NOT NULL,
-        rut_usuario TEXT NOT NULL,
-        fecha TEXT NOT NULL,
+        id_asistencia TEXT NOT NULL PRIMARY KEY,
+        id_dia TEXT NOT NULL,       
+        rut_usuario TEXT NOT NULL, 
         asistencia INTEGER NOT NULL,
-        PRIMARY KEY (id_asistencia),
-        FOREIGN KEY (rut_usuario, id_curso) REFERENCES CursosAsignaturasLink(rut_usuario, id_curso) ON DELETE CASCADE
+        FOREIGN KEY (id_dia) REFERENCES DiasAsistencia(id_dia) ON DELETE CASCADE,
+        FOREIGN KEY (rut_usuario) REFERENCES Usuario(rut_usuario) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS Evaluaciones (
@@ -225,6 +232,7 @@ db.exec(`
         id_asignatura TEXT NOT NULL,
         titulo TEXT NOT NULL,
         descripcion TEXT NOT NULL,
+        fecha TEXT NOT NULL,
         enlace TEXT,
         PRIMARY KEY (id_material, id_asignatura),
         FOREIGN KEY (id_asignatura) REFERENCES Asignatura(id_asignatura) ON DELETE CASCADE
@@ -384,8 +392,6 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_cursosasignaturas_link_id_rut_usuario ON CursosAsignaturasLink(rut_usuario);
     CREATE INDEX IF NOT EXISTS idx_cursosasignaturas_link_id_curso ON CursosAsignaturasLink(id_curso);
     CREATE INDEX IF NOT EXISTS idx_cursosasignaturas_link_id_asignatura ON CursosAsignaturasLink(id_asignatura);
-
-    CREATE INDEX IF NOT EXISTS idx_asistencia_fecha ON Asistencia(fecha);
 
     CREATE INDEX IF NOT EXISTS idx_calificaciones_nota ON Calificaciones(nota);
 

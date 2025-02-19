@@ -19,70 +19,29 @@ interface Curso {
 
 interface UserProfile {
   rut_usuario: string;
-  rut_tipo: string;
-  edad: string;
   nombres: string;
   apellidos: string;
   email: string;
   tipo_usuario: string;
-  fecha_nacimiento: string;
-  nacionalidad: string;
-  talla: string;
-  direccion: string;
-  comuna: string;
-  sector: string;
-
-  cursoAlumno?: {
-    nombre_curso: string;
-  };
-
+  // Campos específicos para estudiantes
   matricula?: {
     fecha_matricula: string;
     ultimo_establecimiento: string;
     ultimo_nivel_cursado: string;
-    incidencia_academica: string;
-    flag_apoyo_especial: string;
-    apoyo_especial: string;
-    consentimiento_apoyo_especial: string;
-    razon_consentimiento_apoyo_especial: string;
-    rezago_escolar: string;
+    // ... otros campos de matrícula
   };
   apoderado?: {
     nombres_apoderado1: string;
     apellidos_apoderado1: string;
     rut_apoderado1: string;
-    rut_tipo_apoderado1: string;
-    nacionalidad_apoderado1: string;
-    vinculo_apoderado1: string;
     celular_apoderado1: string;
     email_apoderado1: string;
-    comuna_apoderado1: string;
-    direccion_apoderado1: string;
-    nucleo_familiar: string;
-    nombres_apoderado2: string;
-    apellidos_apoderado2: string;
-    celular_apoderado2: string;
-  };
-  contactoEmergencia?: {
-    nombres: string;
-    apellidos: string;
-    celular: string;
-    vinculo: string;
+    // ... otros campos de apoderado
   };
   infoMedica?: {
-    flag_control_medico: string;
-    flag_discapacidad: string;
-    discapacidad: string;
-    flag_necesidad_especial: string;
-    necesidad_especial: string;
-    flag_enfermedad: string;
-    enfermedad: string;
-    flag_medicamentos: string;
-    medicamentos: string;
-    flag_alergia: string;
-    alergia: string;
     prevision_medica: string;
     servicio_emergencia: string;
+    // ... otros campos médicos
   };
   archivos?: Array<{
     id_documento: string;
@@ -146,8 +105,8 @@ const Perfil: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 w-full">
-      <div className="mx-auto bg-white rounded-lg shadow-md p-6">
+    <div className="min-h-screen bg-gray-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold mb-6">Perfil de Usuario</h1>
 
         {userData ? (
@@ -167,53 +126,40 @@ const Perfil: React.FC = () => {
               <p>
                 <span className="font-medium">RUT:</span> {userData.rut_usuario}
               </p>
-              <p>
-                <span className="font-medium">Tipo:</span> {userData.rut_tipo}
-              </p>
-              <p>
-                <span className="font-medium">Sexo:</span> {userData.sexo}
-              </p>
-              <p>
-                <span className="font-medium">Fecha de nacimiento:</span>{" "}
-                {userData.fecha_nacimiento}
-              </p>
-              <p>
-                <span className="font-medium">Edad:</span> {userData.edad}
-              </p>
-              <p>
-                <span className="font-medium">Nacionalidad:</span>{" "}
-                {userData.nacionalidad}
-              </p>
-              <p>
-                <span className="font-medium">Talla:</span> {userData.talla}
-              </p>
-
-              <p>
-                <span className="font-medium">Dirección:</span>{" "}
-                {userData.direccion}
-              </p>
-              <p>
-                <span className="font-medium">Comuna:</span> {userData.comuna}
-              </p>
-              <p>
-                <span className="font-medium">Sector:</span> {userData.sector}
-              </p>
             </div>
 
             {/* Información específica para estudiantes */}
             {userSession?.tipo_usuario === "Estudiante" && (
               <>
-                {/* Sección de Familiar */}
+                {/* Sección de Matrícula */}
+                {userData.matricula && (
+                  <div className="border-b pb-4">
+                    <h2 className="text-xl font-semibold mb-3">
+                      Información de Matrícula
+                    </h2>
+                    <p>
+                      <span className="font-medium">Fecha:</span>{" "}
+                      {userData.matricula.fecha_matricula}
+                    </p>
+                    <p>
+                      <span className="font-medium">
+                        Último Establecimiento:
+                      </span>{" "}
+                      {userData.matricula.ultimo_establecimiento}
+                    </p>
+                    <p>
+                      <span className="font-medium">Último Nivel:</span>{" "}
+                      {userData.matricula.ultimo_nivel_cursado}
+                    </p>
+                  </div>
+                )}
+
+                {/* Sección de Apoderado */}
                 {userData.apoderado && (
                   <div className="border-b pb-4">
                     <h2 className="text-xl font-semibold mb-3">
-                      Información Familiar
+                      Información del Apoderado
                     </h2>
-                    <p>
-                      <span className="font-medium">Nucleo familiar:</span>{" "}
-                      {userData.apoderado.nucleo_familiar}
-                    </p>
-                    <h3 className="text-lg pt-2 mb-2">Apoderado principal</h3>
                     <p>
                       <span className="font-medium">Nombre:</span>{" "}
                       {userData.apoderado.nombres_apoderado1}{" "}
@@ -224,10 +170,6 @@ const Perfil: React.FC = () => {
                       {userData.apoderado.rut_apoderado1}
                     </p>
                     <p>
-                      <span className="font-medium">Tipo:</span>
-                      {userData.apoderado.rut_tipo_apoderado1}
-                    </p>
-                    <p>
                       <span className="font-medium">Contacto:</span>{" "}
                       {userData.apoderado.celular_apoderado1}
                     </p>
@@ -235,45 +177,6 @@ const Perfil: React.FC = () => {
                       <span className="font-medium">Email:</span>{" "}
                       {userData.apoderado.email_apoderado1}
                     </p>
-                    <p>
-                      <span className="font-medium">Vinculo:</span>
-                      {userData.apoderado.vinculo_apoderado1}
-                    </p>
-                    <p>
-                      <span className="font-medium">Comuna:</span>{" "}
-                      {userData.apoderado.comuna_apoderado1}
-                    </p>
-                    <p>
-                      <span className="font-medium">Dirección:</span>{" "}
-                      {userData.apoderado.direccion_apoderado1}
-                    </p>
-                    <p>
-                      <span className="font-medium">Nacionalidad:</span>{" "}
-                      {userData.apoderado.nacionalidad_apoderado1}
-                    </p>
-                    <h3 className="text-lg pt-2 mb-2">Apoderado secundario</h3>
-                    <p>
-                      <span className="font-medium">Nombre:</span>{" "}
-                      {userData.apoderado.nombres_apoderado2}{" "}
-                      {userData.apoderado.apellidos_apoderado2}
-                    </p>
-                    <p>
-                      <span className="font-medium">Celular:</span>{" "}
-                      {userData.apoderado.celular_apoderado2}
-                    </p>
-                  </div>
-                )}
-
-                {/* Sección de Contacto Emergencia */}
-                {userData.apoderado && (
-                  <div className="border-b pb-4">
-                    <h2 className="text-xl font-semibold mb-3">
-                      Contactos de emergencia
-                    </h2>
-                    <p>{userData.contactoEmergencia?.nombres}</p>
-                    <p>{userData.contactoEmergencia?.apellidos}</p>
-                    <p>{userData.contactoEmergencia?.celular}</p>
-                    <p>{userData.contactoEmergencia?.vinculo}</p>
                   </div>
                 )}
 
@@ -284,83 +187,6 @@ const Perfil: React.FC = () => {
                       Información Médica
                     </h2>
                     <p>
-                      <span className="font-medium">
-                        Estado control médico:
-                      </span>{" "}
-                      {userData.infoMedica.flag_control_medico === "1"
-                        ? "Atrasado"
-                        : "Al día"}
-                    </p>
-                    <p>
-                      <span className="font-medium">
-                        ¿Tiene alguna discapacidad discapacidad?:
-                      </span>{" "}
-                      {userData.infoMedica.flag_discapacidad === "1"
-                        ? "No"
-                        : "Si"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Discapacidad:</span>{" "}
-                      {userData.infoMedica.discapacidad
-                        ? userData.infoMedica.discapacidad
-                        : "No aplica"}
-                    </p>
-                    <p>
-                      <span className="font-medium">
-                        ¿Tiene alguna necesidad especial?:
-                      </span>{" "}
-                      {userData.infoMedica.flag_necesidad_especial === "1"
-                        ? "Si"
-                        : "No"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Necesidad especial:</span>{" "}
-                      {userData.infoMedica.necesidad_especial
-                        ? userData.infoMedica.necesidad_especial
-                        : "No aplica"}
-                    </p>
-
-                    <p>
-                      <span className="font-medium">
-                        ¿Posee alguna enfermedad?:
-                      </span>{" "}
-                      {userData.infoMedica.flag_enfermedad === "1"
-                        ? "Si"
-                        : "No"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Enfermedad:</span>{" "}
-                      {userData.infoMedica.enfermedad
-                        ? userData.infoMedica.enfermedad
-                        : "No aplica"}
-                    </p>
-                    <p>
-                      <span className="font-medium">
-                        ¿Utiliza medicamentos?:
-                      </span>{" "}
-                      {userData.infoMedica.flag_medicamentos === "1"
-                        ? "Si"
-                        : "No"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Medicamentos:</span>{" "}
-                      {userData.infoMedica.medicamentos
-                        ? userData.infoMedica.medicamentos
-                        : "No aplica"}
-                    </p>
-                    <p>
-                      <span className="font-medium">
-                        ¿Posee alguna alergia?:
-                      </span>{" "}
-                      {userData.infoMedica.flag_alergia === "1" ? "Si" : "No"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Alergia:</span>{" "}
-                      {userData.infoMedica.alergia
-                        ? userData.infoMedica.alergia
-                        : "No aplica"}
-                    </p>
-                    <p>
                       <span className="font-medium">Previsión:</span>{" "}
                       {userData.infoMedica.prevision_medica}
                     </p>
@@ -369,69 +195,6 @@ const Perfil: React.FC = () => {
                         Servicio de Emergencia:
                       </span>{" "}
                       {userData.infoMedica.servicio_emergencia}
-                    </p>
-                  </div>
-                )}
-
-                {/* Sección de Matrícula */}
-                {userData.matricula && (
-                  <div className="border-b pb-4">
-                    <h2 className="text-xl font-semibold mb-3">
-                      Información de Matrícula
-                    </h2>
-                    <p>
-                      <span className="font-medium">Curso alumno:</span>{" "}
-                      {userData.cursoAlumno?.nombre_curso}
-                    </p>
-                    <p>
-                      <span className="font-medium">Fecha de matricula:</span>{" "}
-                      {userData.matricula.fecha_matricula}
-                    </p>
-                    <p>
-                      <span className="font-medium">
-                        Último establecimiento educacional:
-                      </span>{" "}
-                      {userData.matricula.ultimo_establecimiento}
-                    </p>
-                    <p>
-                      <span className="font-medium">Último nivel cursado:</span>{" "}
-                      {userData.matricula.ultimo_nivel_cursado}
-                    </p>
-                    <p>
-                      <span className="font-medium">Incidencia académica:</span>{" "}
-                      {userData.matricula.incidencia_academica}
-                    </p>
-                    <p>
-                      <span className="font-medium">
-                        Requiere apoyo especial:
-                      </span>{" "}
-                      {userData.matricula.flag_apoyo_especial === "1"
-                        ? "Si"
-                        : "No"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Apoyo especial:</span>{" "}
-                      {userData.matricula.apoyo_especial
-                        ? userData.matricula.apoyo_especial
-                        : "No aplica"}
-                    </p>
-                    <p>
-                      <span className="font-medium">
-                        Consentimiento de apoyo especial:
-                      </span>{" "}
-                      {userData.matricula.consentimiento_apoyo_especial === "1"
-                        ? "Aceptado"
-                        : "No aceptado"}
-                    </p>
-                    <p>
-                      <span className="font-medium">
-                        Razón del consentimiento de apoyo especial:
-                      </span>{" "}
-                      {userData.matricula.razon_consentimiento_apoyo_especial}
-                    </p>
-                    <p>
-                      <span className="font-medium">Rezago escolar:</span>{" "}
-                      {userData.matricula.rezago_escolar}
                     </p>
                   </div>
                 )}
