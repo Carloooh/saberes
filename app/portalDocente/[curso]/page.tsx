@@ -158,13 +158,13 @@ const AsistenciaPage = ({ params }: { params: Promise<{ curso: string }> }) => {
         },
         body: JSON.stringify({
           curso,
-          fecha: newFecha, // Enviar la fecha directamente en formato YYYY-MM-DD
+          fecha: newFecha,
         }),
       });
 
       if (response.ok) {
-        fetchDias(); // Refrescar la lista de días
-        setNewFecha(""); // Limpiar el campo de fecha
+        fetchDias();
+        setNewFecha("");
       }
     } catch (error) {
       console.error("Error al agregar día:", error);

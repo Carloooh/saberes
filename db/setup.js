@@ -120,7 +120,7 @@ db.exec(`
     );
 
     CREATE TABLE IF NOT EXISTS Calificaciones (
-        id_calificaciones TEXT NOT NULL PRIMARY KEY,
+        id_calificacion TEXT NOT NULL PRIMARY KEY,
         id_evaluacion TEXT NOT NULL,
         rut_estudiante TEXT NOT NULL,
         nota REAL NOT NULL,

@@ -121,10 +121,9 @@ for (let i = 2; i < 205 && i < data.length; i++) {
         SELECT 
           id_curso
         FROM Curso
-        WHERE nombre_curso = ?
-      `).get(curso_ingreso);
+        WHERE LOWER(nombre_curso) = LOWER(?)
+    `).get(curso_ingreso);
 
-    console.log(curso.id_curso)
     insertCurso.run(uuidv4(), rut_usuario, curso.id_curso, null);
 
     // Info_apoderado
