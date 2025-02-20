@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { v4 as uuidv4 } from "uuid";
 
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -26,36 +27,41 @@ export async function GET(request: Request) {
             )
           ELSE NULL END
         ) as archivos,
-        json_group_array(
-          DISTINCT CASE WHEN u.rut_usuario IS NOT NULL THEN
+        (
+          SELECT json_group_array(
             json_object(
-              'rut_estudiante', u.rut_usuario,
-              'nombres', u.nombres,
-              'apellidos', u.apellidos,
-              'estado', COALESCE(et.estado, 'pendiente'),
-              'fecha_entrega', et.fecha_entrega,
-              'comentario', et.comentario,
-              'archivos_entrega', (
-                SELECT json_group_array(
-                  DISTINCT CASE WHEN eta.id_archivo IS NOT NULL THEN
+              'rut_estudiante', u2.rut_usuario,
+              'nombres', u2.nombres,
+              'apellidos', u2.apellidos,
+              'estado', COALESCE(et2.estado, 'pendiente'),
+              'fecha_entrega', et2.fecha_entrega,
+              'comentario', et2.comentario,
+              'id_entrega', et2.id_entrega,
+              'archivos_entrega', COALESCE(
+                (
+                  SELECT json_group_array(
                     json_object(
                       'id_archivo', eta.id_archivo,
                       'titulo', eta.titulo,
                       'extension', eta.extension
                     )
-                  ELSE NULL END
-                )
-                FROM EntregaTarea_Archivo eta
-                WHERE eta.id_entrega = et.id_entrega
+                  )
+                  FROM EntregaTarea_Archivo eta
+                  WHERE eta.id_entrega = et2.id_entrega
+                ),
+                '[]'
               )
             )
-          ELSE NULL END
+          )
+          FROM CursosAsignaturasLink cal2
+          JOIN Usuario u2 ON cal2.rut_usuario = u2.rut_usuario
+          LEFT JOIN EntregaTarea et2 ON t.id_tarea = et2.id_tarea 
+            AND u2.rut_usuario = et2.rut_estudiante
+          WHERE cal2.id_asignatura = t.id_asignatura 
+            AND u2.tipo_usuario = 'Estudiante'
         ) as entregas
       FROM Tareas t
       LEFT JOIN Tarea_archivo ta ON t.id_tarea = ta.id_tarea
-      LEFT JOIN CursosAsignaturasLink cal ON t.id_asignatura = cal.id_asignatura
-      LEFT JOIN Usuario u ON cal.rut_usuario = u.rut_usuario AND u.tipo_usuario = 'Estudiante'
-      LEFT JOIN EntregaTarea et ON t.id_tarea = et.id_tarea AND u.rut_usuario = et.rut_estudiante
       WHERE t.id_asignatura = ?
       GROUP BY t.id_tarea, t.id_asignatura
       ORDER BY t.fecha DESC
@@ -64,16 +70,25 @@ export async function GET(request: Request) {
     const tareas = query.all(asignaturaId);
 
     // Process the results
-    const processedTareas = tareas.map(tarea => ({
-      ...tarea,
-      archivos: JSON.parse(tarea.archivos).filter(Boolean),
-      entregas: JSON.parse(tarea.entregas)
-        .filter(Boolean)
-        .map(e => ({
-          ...e,
-          archivos_entrega: e.archivos_entrega ? JSON.parse(e.archivos_entrega).filter(Boolean) : []
-        }))
-    }));
+    const processedTareas = tareas.map(tarea => {
+      const parsedArchivos = JSON.parse(tarea.archivos || '[]').filter(Boolean);
+      const parsedEntregas = JSON.parse(tarea.entregas || '[]').map(e => ({
+        ...e,
+        archivos_entrega: Array.isArray(e.archivos_entrega) 
+          ? e.archivos_entrega.filter(Boolean)
+          : JSON.parse(e.archivos_entrega || '[]').filter(Boolean)
+      }));
+
+      return {
+        id_tarea: tarea.id_tarea,
+        id_asignatura: tarea.id_asignatura,
+        titulo: tarea.titulo,
+        descripcion: tarea.descripcion,
+        fecha: tarea.fecha,
+        archivos: parsedArchivos,
+        entregas: parsedEntregas
+      };
+    });
 
     return NextResponse.json({ success: true, tareas: processedTareas });
   } catch (error) {
@@ -84,6 +99,7 @@ export async function GET(request: Request) {
     );
   }
 }
+
 
 export async function POST(request: Request) {
   try {
@@ -196,6 +212,36 @@ export async function DELETE(request: Request) {
     console.error("Error deleting task:", error);
     return NextResponse.json(
       { success: false, error: "Error al eliminar la tarea" },
+      { status: 500 }
+    );
+  }
+}
+
+
+export async function PATCH(request: Request) {
+  try {
+    const { id_entrega, estado } = await request.json();
+
+    if (!id_entrega || !estado) {
+      return NextResponse.json(
+        { success: false, error: "Faltan campos requeridos" },
+        { status: 400 }
+      );
+    }
+
+    const updateEstado = db.prepare(`
+      UPDATE EntregaTarea
+      SET estado = ?
+      WHERE id_entrega = ?
+    `);
+
+    updateEstado.run(estado, id_entrega);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error updating task status:", error);
+    return NextResponse.json(
+      { success: false, error: "Error al actualizar el estado de la tarea" },
       { status: 500 }
     );
   }
