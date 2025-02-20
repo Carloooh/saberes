@@ -32,6 +32,8 @@ try {
       DELETE FROM Informacion_institucional;
       DELETE FROM Galeria;
       DELETE FROM Usuario;
+      DELETE FROM EntregaTarea;
+      DELETE FROM EntregaTarea_Archivo;
     `;
   
     db.exec(deleteStatements);
@@ -322,6 +324,7 @@ db.exec(`
         id_asignatura TEXT NOT NULL,
         titulo TEXT NOT NULL,
         descripcion TEXT NOT NULL,
+        fecha TEXT NOT NULL,
         PRIMARY KEY (id_tarea, id_asignatura),
         FOREIGN KEY (id_asignatura) REFERENCES Asignatura(id_asignatura) ON DELETE CASCADE
     );
@@ -336,6 +339,32 @@ db.exec(`
         PRIMARY KEY (id_archivo, id_tarea, id_asignatura),
         FOREIGN KEY (id_tarea, id_asignatura) REFERENCES Tareas(id_tarea, id_asignatura) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS EntregaTarea (
+        id_entrega TEXT NOT NULL PRIMARY KEY,
+        id_tarea TEXT NOT NULL,
+        id_asignatura TEXT NOT NULL,
+        rut_estudiante TEXT NOT NULL,
+        fecha_entrega TEXT NOT NULL,
+        comentario TEXT,
+        estado TEXT NOT NULL DEFAULT 'pendiente',
+        FOREIGN KEY (id_tarea, id_asignatura)
+            REFERENCES Tareas(id_tarea, id_asignatura) ON DELETE CASCADE,
+        FOREIGN KEY (rut_estudiante)
+            REFERENCES Usuario(rut_usuario) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS EntregaTarea_Archivo (
+        id_archivo TEXT NOT NULL,
+        id_entrega TEXT NOT NULL,
+        titulo TEXT NOT NULL,
+        archivo BLOB NOT NULL,
+        extension TEXT NOT NULL,
+        PRIMARY KEY (id_archivo, id_entrega),
+        FOREIGN KEY (id_entrega)
+        REFERENCES EntregaTarea(id_entrega) ON DELETE CASCADE
+    );
+
 
     INSERT INTO informacion_institucional (id_informacion, tipo, titulo, contenido) VALUES
     (1, 'vision', 'vision',  'Estudio, investigación e innovación en educación social, educativa y cultural, liderando un modelo alternativo en rendición de exámenes libres con un alto nivel de aprendizaje significativo y sostenido en el tiempo.'),
@@ -439,6 +468,11 @@ db.exec(`
     CREATE INDEX IF NOT EXISTS idx_tarea_archivo_titulo ON Tarea_archivo(titulo);
 
     CREATE INDEX IF NOT EXISTS idx_tareas_titulo ON Tareas(titulo);
+
+    CREATE INDEX IF NOT EXISTS idx_entregatarea_id_tarea ON EntregaTarea (id_tarea);
+    CREATE INDEX IF NOT EXISTS idx_entregatarea_rut_estudiante ON EntregaTarea (rut_estudiante);
+    CREATE INDEX IF NOT EXISTS idx_entregatarea_estado ON EntregaTarea (estado);
+    CREATE INDEX IF NOT EXISTS idx_entregatarea_tarea_estudiante ON EntregaTarea (id_tarea, rut_estudiante);
 
     CREATE INDEX IF NOT EXISTS idx_usuario_email ON Usuario(email);
     CREATE INDEX IF NOT EXISTS idx_usuario_tipo_usuario ON Usuario(tipo_usuario);
