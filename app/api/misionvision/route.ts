@@ -26,11 +26,11 @@ export async function PUT(req: Request) {
     const { mision, vision } = await req.json();
 
     // Actualizar misión
-    const stmtMision = db.prepare('UPDATE informacioninstitucional SET contenido = ? WHERE tipo = ?');
+    const stmtMision = db.prepare('UPDATE informacion_institucional SET contenido = ? WHERE tipo = ?');
     stmtMision.run(mision, 'mision');
 
     // Actualizar visión
-    const stmtVision = db.prepare('UPDATE informacioninstitucional SET contenido = ? WHERE tipo = ?');
+    const stmtVision = db.prepare('UPDATE informacion_institucional SET contenido = ? WHERE tipo = ?');
     stmtVision.run(vision, 'vision');
 
     return NextResponse.json({ success: true }, { status: 200 });

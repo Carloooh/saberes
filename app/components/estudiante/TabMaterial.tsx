@@ -43,13 +43,18 @@ const TabMaterial = ({ asignaturaId }: { asignaturaId: string }) => {
     window.open(`/api/estudiante/material/download?id=${archivoId}`, "_blank");
   };
 
-  if (loading) return <div>Cargando materiales...</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-gray-500">Cargando material educativo...</div>
+      </div>
+    );
 
   return (
     <div className="space-y-4">
       {materiales.length === 0 ? (
-        <div className="text-center text-gray-500 py-8">
-          No hay materiales disponibles
+        <div className="text-center justify-center text-gray-500 py-8">
+          No hay material educativo disponibles
         </div>
       ) : (
         materiales.map((material) => (

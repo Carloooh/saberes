@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import db from '@/db';
+import { v4 as uuidv4 } from 'uuid';
 
 // GET: Obtener todos los archivos de la galería
 export async function GET(req: Request) {
@@ -51,10 +52,10 @@ export async function POST(req: Request) {
       }
   
       const stmt = db.prepare(`
-        INSERT INTO Galeria (id_archivo, archivo, extension)
-        VALUES (?, ?, ?)
+        INSERT INTO Galeria (id_archivo, titulo, archivo, extension)
+        VALUES (?, ?, ?, ?)
       `);
-      stmt.run(id, Buffer.from(fileBuffer), extension);
+      stmt.run(uuidv4(), id, Buffer.from(fileBuffer), extension);
   
       return NextResponse.json({ success: true, id }, { status: 201 });
     } catch (error) {

@@ -1,29 +1,39 @@
 const AccionesRapidas = () => {
-    const items = [
-      { href: "/actividades", title: "ACTIVIDADES", bg: "/images/actividades.webp" },
-      { href: "/noticias", title: "NOTICIAS", bg: "/images/noticias.webp" },
-      { href: "/sedes", title: "SEDES", bg: "/images/sedes.webp" },
-      { href: "/galeria", title: "GALERÍA", bg: "/images/galeria.webp" },
-      { href: "/faq", title: "PREGUNTAS FRECUENTES", bg: "/images/preguntas.webp" },
-    ];
-  
-    return (
-      <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <header className="text-center">
-          <h2 className="text-xl font-bold text-gray-900 sm:text-3xl">Accesos rápidos</h2>
-        </header>
-        <div className="grid grid-cols-2 md:grid-cols-3 grid-rows-2 gap-2 m-4">
-          {items.map((item, index) => (
-            <a key={index} href={item.href} className="relative rounded-md shadow-lg hover:shadow-2xl transition-shadow duration-300">
-              <div className="flex items-center justify-center bg-cover bg-center text-white font-bold text-2xl md:text-3xl lg:text-4xl p-10" style={{ backgroundImage: `url(${item.bg})` }}>
-                <h1 className="drop-shadow-lg">{item.title}</h1>
-              </div>
-            </a>
-          ))}
-        </div>
+  const items = [
+    { href: "/actividades", title: "ACTIVIDADES" },
+    { href: "/noticias", title: "NOTICIAS" },
+    { href: "/sedes", title: "SEDES" },
+    { href: "/galeria", title: "GALERÍA" },
+    { href: "/faq", title: "PREGUNTAS FRECUENTES" },
+    { href: "/matriculaEstudiante", title: "MATRICULAR ESTUDIANTE" }, // Nueva acción
+  ];
+
+  return (
+    <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      {/* Encabezado */}
+      <header className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-800 sm:text-3xl">
+          Accesos rápidos
+        </h2>
+      </header>
+
+      {/* Contenedor de los accesos rápidos */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        {items.map((item, index) => (
+          <a
+            key={index}
+            href={item.href}
+            className="group flex flex-col items-center justify-center h-32 bg-gradient-to-br from-indigo-50 to-indigo-100 
+                       rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+          >
+            <span className="text-indigo-700 font-medium text-sm sm:text-base lg:text-lg group-hover:text-indigo-900 transition-colors duration-300 text-center">
+              {item.title}
+            </span>
+          </a>
+        ))}
       </div>
-    );
-  };
-  
-  export default AccionesRapidas;
-  
+    </div>
+  );
+};
+
+export default AccionesRapidas;

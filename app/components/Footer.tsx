@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-white">
+    <footer>
       <div className="mx-auto max-w-5xl py-4 mt-4 sm:px-6 lg:px-8 border-gray-400 border-t">
         <Image
           src="/LogoSaberes.webp"

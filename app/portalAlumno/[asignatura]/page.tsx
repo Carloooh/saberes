@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import TabMaterial from "@/app/components/estudiante/TabMaterial";
 import TabCalificaciones from "@/app/components/estudiante/TabCalificaciones";
 import TabTareas from "@/app/components/estudiante/TabTareas";
@@ -15,6 +16,9 @@ const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
   const [activeTab, setActiveTab] = useState("material");
   const [loading, setLoading] = useState(true);
   const [asignaturaData, setAsignaturaData] = useState<any>(null);
+
+  const router = useRouter();
+  const { id_asignatura, nombre } = router.query;
 
   useEffect(() => {
     const fetchAsignaturaData = async () => {
@@ -37,13 +41,19 @@ const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
   }, [params.asignatura]);
 
   if (loading) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-gray-500 text-center w-full">
+          Cargando información de la asignatura...
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">
-        {asignaturaData?.nombre_asignatura || "Asignatura"}
+        {nombre ? nombre : "Asignatura"}
       </h1>
 
       <div className="mb-6">

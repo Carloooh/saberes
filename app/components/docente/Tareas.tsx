@@ -11,7 +11,7 @@ interface Archivo {
 }
 
 interface ArchivoEntrega extends Archivo {
-  downloadUrl: string;
+  downloadUrl?: string;
 }
 
 interface Entrega {
@@ -19,7 +19,7 @@ interface Entrega {
   rut_estudiante: string;
   nombres: string;
   apellidos: string;
-  estado: "pendiente" | "entregada";
+  estado: "pendiente" | "entregada" | "revisada";
   fecha_entrega: string | null;
   comentario: string | null;
   archivos_entrega: ArchivoEntrega[];
@@ -32,7 +32,7 @@ interface Tarea {
   descripcion: string;
   fecha: string;
   archivos: Archivo[];
-  entregas: Entrega[];
+  // Las entregas se traerán mediante el endpoint específico, no aquí.
 }
 
 interface TareasProps {
@@ -49,9 +49,11 @@ interface Estudiante {
 export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedTarea, setExpandedTarea] = useState<string | null>(null);
+  // Almacenamos las entregas por cada tarea (clave: id_tarea)
+  const [entregas, setEntregas] = useState<{ [key: string]: Entrega[] }>({});
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [selectedEntrega, setSelectedEntrega] = useState<string | null>(null);
+  const [expandedTarea, setExpandedTarea] = useState<string | null>(null);
   const [showNewTareaForm, setShowNewTareaForm] = useState(false);
   const [newTarea, setNewTarea] = useState({
     titulo: "",
@@ -68,7 +70,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
   const fetchTareas = async () => {
     try {
       const response = await fetch(
-        `/api/docente/tareas?asignaturaId=${asignaturaId}`
+        `/api/docente/tareas?cursoId=${cursoId}&asignaturaId=${asignaturaId}`
       );
       const data = await response.json();
       if (data.success) {
@@ -81,17 +83,11 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
     }
   };
 
-  useEffect(() => {
-    fetchTareas();
-  }, [asignaturaId]);
-
-  useEffect(() => {
-    fetchEstudiantes();
-  }, [cursoId]);
-
   const fetchEstudiantes = async () => {
     try {
-      const response = await fetch(`/api/docente/estudiantes?curso=${cursoId}`);
+      const response = await fetch(
+        `/api/docente/estudiantes?curso=${cursoId}&asignatura=${asignaturaId}`
+      );
       const data = await response.json();
       if (data.success) {
         setEstudiantes(data.estudiantes);
@@ -101,16 +97,44 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
     }
   };
 
+  // Llama al endpoint específico para obtener las entregas de una tarea
+  const fetchEntregas = async (id_tarea: string, id_asignatura: string) => {
+    try {
+      const response = await fetch(
+        `/api/docente/tareas/${id_tarea}/entregas?id_asignatura=${id_asignatura}`
+      );
+      const data = await response.json();
+      if (data.success) {
+        setEntregas((prev) => ({ ...prev, [id_tarea]: data.entregas }));
+      }
+    } catch (error) {
+      console.error("Error fetching entregas:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTareas();
+  }, [asignaturaId, cursoId]);
+
+  useEffect(() => {
+    fetchEstudiantes();
+  }, [cursoId, asignaturaId]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setNewTarea((prev) => ({
         ...prev,
-        archivos: Array.from(e.target.files!),
+        archivos: Array.from(e.target.files),
       }));
     }
   };
 
-  const handleUpdateStatus = async (id_entrega: string, estado: string) => {
+  const handleUpdateStatus = async (
+    id_entrega: string,
+    estado: string,
+    id_tarea: string,
+    id_asignatura: string
+  ) => {
     try {
       const response = await fetch("/api/docente/tareas", {
         method: "PATCH",
@@ -119,9 +143,9 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
         },
         body: JSON.stringify({ id_entrega, estado }),
       });
-
       if (response.ok) {
-        fetchTareas(); // Refresh the tasks list
+        // Actualizamos las entregas para esta tarea
+        fetchEntregas(id_tarea, id_asignatura);
       }
     } catch (error) {
       console.error("Error updating task status:", error);
@@ -134,17 +158,14 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
     formData.append("titulo", newTarea.titulo);
     formData.append("descripcion", newTarea.descripcion);
     formData.append("id_asignatura", asignaturaId);
-
     for (let i = 0; i < newTarea.archivos.length; i++) {
       formData.append("archivos", newTarea.archivos[i]);
     }
-
     try {
       const response = await fetch("/api/docente/tareas", {
         method: "POST",
         body: formData,
       });
-
       if (response.ok) {
         setNewTarea({ titulo: "", descripcion: "", archivos: [] });
         setShowNewTareaForm(false);
@@ -159,12 +180,9 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
     try {
       const response = await fetch("/api/docente/tareas", {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_tarea, id_asignatura }),
       });
-
       if (response.ok) {
         fetchTareas();
       }
@@ -173,8 +191,20 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
     }
   };
 
-  const getEntregaForStudent = (tarea: Tarea, rutEstudiante: string) => {
-    return tarea.entregas.find((e) => e.rut_estudiante === rutEstudiante);
+  // Cuando se expande una tarea, se trae la información de sus entregas
+  const handleExpandTarea = (tarea: Tarea) => {
+    if (expandedTarea === tarea.id_tarea) {
+      setExpandedTarea(null);
+    } else {
+      setExpandedTarea(tarea.id_tarea);
+      fetchEntregas(tarea.id_tarea, tarea.id_asignatura);
+    }
+  };
+
+  // Busca la entrega de un estudiante en la tarea actual
+  const getEntregaForStudent = (id_tarea: string, rutEstudiante: string) => {
+    const lista = entregas[id_tarea] || [];
+    return lista.find((e) => e.rut_estudiante === rutEstudiante);
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -318,11 +348,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
               )}
 
               <button
-                onClick={() =>
-                  setExpandedTarea(
-                    expandedTarea === tarea.id_tarea ? null : tarea.id_tarea
-                  )
-                }
+                onClick={() => handleExpandTarea(tarea)}
                 className="mt-4 text-sm text-blue-600 hover:text-blue-800"
               >
                 {expandedTarea === tarea.id_tarea
@@ -358,7 +384,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
                       <tbody className="bg-white divide-y divide-gray-200">
                         {estudiantes.map((estudiante) => {
                           const entrega = getEntregaForStudent(
-                            tarea,
+                            tarea.id_tarea,
                             estudiante.rut_usuario
                           );
                           return (
@@ -374,6 +400,8 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
                                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                       entrega?.estado === "entregada"
                                         ? "bg-green-100 text-green-800"
+                                        : entrega?.estado === "revisada"
+                                        ? "bg-blue-100 text-blue-800"
                                         : "bg-yellow-100 text-yellow-800"
                                     }`}
                                   >
@@ -422,20 +450,6 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
                                               </p>
                                             </div>
                                           )}
-                                          {entrega &&
-                                            entrega.estado !== "entregada" && (
-                                              <button
-                                                onClick={() =>
-                                                  handleUpdateStatus(
-                                                    entrega.id_entrega,
-                                                    "revisada"
-                                                  )
-                                                }
-                                                className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                                              >
-                                                Marcar como revisada
-                                              </button>
-                                            )}
                                           {entrega.archivos_entrega?.length >
                                             0 && (
                                             <div>
@@ -473,6 +487,22 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
                                               </div>
                                             </div>
                                           )}
+                                          {entrega &&
+                                            entrega.estado == "entregada" && (
+                                              <button
+                                                onClick={() =>
+                                                  handleUpdateStatus(
+                                                    entrega.id_entrega,
+                                                    "revisada",
+                                                    tarea.id_tarea,
+                                                    tarea.id_asignatura
+                                                  )
+                                                }
+                                                className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                              >
+                                                Marcar como revisada
+                                              </button>
+                                            )}
                                         </>
                                       ) : (
                                         <p className="text-sm text-gray-500">

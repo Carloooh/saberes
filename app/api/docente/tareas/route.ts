@@ -1,7 +1,7 @@
+// api/docente/tareas/route.ts
 import { NextResponse } from "next/server";
 import db from "@/db";
 import { v4 as uuidv4 } from "uuid";
-
 
 export async function GET(request: Request) {
   try {
@@ -19,47 +19,12 @@ export async function GET(request: Request) {
       SELECT 
         t.*,
         json_group_array(
-          DISTINCT CASE WHEN ta.id_archivo IS NOT NULL THEN
-            json_object(
-              'id_archivo', ta.id_archivo,
-              'titulo', ta.titulo,
-              'extension', ta.extension
-            )
-          ELSE NULL END
-        ) as archivos,
-        (
-          SELECT json_group_array(
-            json_object(
-              'rut_estudiante', u2.rut_usuario,
-              'nombres', u2.nombres,
-              'apellidos', u2.apellidos,
-              'estado', COALESCE(et2.estado, 'pendiente'),
-              'fecha_entrega', et2.fecha_entrega,
-              'comentario', et2.comentario,
-              'id_entrega', et2.id_entrega,
-              'archivos_entrega', COALESCE(
-                (
-                  SELECT json_group_array(
-                    json_object(
-                      'id_archivo', eta.id_archivo,
-                      'titulo', eta.titulo,
-                      'extension', eta.extension
-                    )
-                  )
-                  FROM EntregaTarea_Archivo eta
-                  WHERE eta.id_entrega = et2.id_entrega
-                ),
-                '[]'
-              )
-            )
+          DISTINCT json_object(
+            'id_archivo', ta.id_archivo,
+            'titulo', ta.titulo,
+            'extension', ta.extension
           )
-          FROM CursosAsignaturasLink cal2
-          JOIN Usuario u2 ON cal2.rut_usuario = u2.rut_usuario
-          LEFT JOIN EntregaTarea et2 ON t.id_tarea = et2.id_tarea 
-            AND u2.rut_usuario = et2.rut_estudiante
-          WHERE cal2.id_asignatura = t.id_asignatura 
-            AND u2.tipo_usuario = 'Estudiante'
-        ) as entregas
+        ) as archivos
       FROM Tareas t
       LEFT JOIN Tarea_archivo ta ON t.id_tarea = ta.id_tarea
       WHERE t.id_asignatura = ?
@@ -68,25 +33,15 @@ export async function GET(request: Request) {
     `);
 
     const tareas = query.all(asignaturaId);
-
-    // Process the results
     const processedTareas = tareas.map(tarea => {
       const parsedArchivos = JSON.parse(tarea.archivos || '[]').filter(Boolean);
-      const parsedEntregas = JSON.parse(tarea.entregas || '[]').map(e => ({
-        ...e,
-        archivos_entrega: Array.isArray(e.archivos_entrega) 
-          ? e.archivos_entrega.filter(Boolean)
-          : JSON.parse(e.archivos_entrega || '[]').filter(Boolean)
-      }));
-
       return {
         id_tarea: tarea.id_tarea,
         id_asignatura: tarea.id_asignatura,
         titulo: tarea.titulo,
         descripcion: tarea.descripcion,
         fecha: tarea.fecha,
-        archivos: parsedArchivos,
-        entregas: parsedEntregas
+        archivos: parsedArchivos
       };
     });
 
@@ -100,7 +55,6 @@ export async function GET(request: Request) {
   }
 }
 
-
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -108,7 +62,7 @@ export async function POST(request: Request) {
     const descripcion = formData.get("descripcion") as string;
     const id_asignatura = formData.get("id_asignatura") as string;
     const fecha = new Date().toISOString().split('T')[0];
-    const archivos = formData.getAll("archivos"); // Changed from getting individual files
+    const archivos = formData.getAll("archivos");
 
     if (!titulo || !descripcion || !id_asignatura) {
       return NextResponse.json(
@@ -128,8 +82,7 @@ export async function POST(request: Request) {
       `);
       insertTarea.run(id_tarea, id_asignatura, titulo, descripcion, fecha);
       
-      console.log("archivos: ", archivos)
-      // Process files
+      // Procesa archivos
       for (const file of archivos) {
         if (file instanceof File) {
           const arrayBuffer = await file.arrayBuffer();
@@ -142,12 +95,6 @@ export async function POST(request: Request) {
             INSERT INTO Tarea_archivo (id_archivo, id_tarea, id_asignatura, titulo, archivo, extension)
             VALUES (?, ?, ?, ?, ?, ?)
           `);
-          console.log(id_archivo,
-            id_tarea,
-            id_asignatura,
-            fileName,
-            buffer,
-            extension)
           insertArchivo.run(
             id_archivo,
             id_tarea,
@@ -188,14 +135,12 @@ export async function DELETE(request: Request) {
     db.exec('BEGIN TRANSACTION');
 
     try {
-      // Eliminar archivos de la tarea
       const deleteArchivos = db.prepare(`
         DELETE FROM Tarea_archivo
         WHERE id_tarea = ? AND id_asignatura = ?
       `);
       deleteArchivos.run(id_tarea, id_asignatura);
 
-      // Eliminar la tarea
       const deleteTarea = db.prepare(`
         DELETE FROM Tareas
         WHERE id_tarea = ? AND id_asignatura = ?
@@ -217,7 +162,6 @@ export async function DELETE(request: Request) {
   }
 }
 
-
 export async function PATCH(request: Request) {
   try {
     const { id_entrega, estado } = await request.json();
@@ -234,7 +178,6 @@ export async function PATCH(request: Request) {
       SET estado = ?
       WHERE id_entrega = ?
     `);
-
     updateEstado.run(estado, id_entrega);
 
     return NextResponse.json({ success: true });

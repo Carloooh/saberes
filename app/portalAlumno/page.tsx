@@ -89,7 +89,11 @@ const PortalAlumno = () => {
       : "0.0";
 
   if (loading) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-gray-500">Cargando información del curso...</div>
+      </div>
+    );
   }
 
   return (
@@ -114,7 +118,8 @@ const PortalAlumno = () => {
                   {asignatura.nombre_asignatura}
                 </h3>
                 <a
-                  href={`/portalAlumno/${asignatura.id_asignatura}`}
+                  // href={`/portalAlumno/${asignatura.id_asignatura}`}
+                  href={`/portalAlumno/${asignatura.id_asignatura}?nombre=${asignatura.nombre_asignatura}`}
                   className="text-blue-600 hover:underline text-sm"
                 >
                   Ver asignatura
