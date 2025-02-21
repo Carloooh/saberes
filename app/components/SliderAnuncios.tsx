@@ -66,9 +66,14 @@ const SliderComponent = () => {
 
   if (loading) {
     return (
-      <div className="container text-center flex flex-row justify-center items-center pt-8 px-2">
-        <p>Cargando noticias destacadas...</p>
-      </div>
+      <section className="section relative flex flex-row justify-center items-center pt-8 px-2">
+        <div className="container text-center">
+          <h1 className="text-3xl font-medium text-center w-full pb-4">
+            Noticias Destacadas
+          </h1>
+          <p>Cargando noticias destacadas...</p>
+        </div>
+      </section>
     );
   }
 

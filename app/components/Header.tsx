@@ -51,8 +51,9 @@ export default function Header() {
       });
       const data = await response.json();
       if (data.success) {
-        localStorage.setItem("userSession", JSON.stringify(data.user));
         setIsAuthenticated(true);
+        setUserSession(data.user);
+        localStorage.setItem("userSession", JSON.stringify(data.user));
         setShowLoginModal(false);
         router.push("/");
         toast.success("Sesión iniciada correctamente");
@@ -64,10 +65,27 @@ export default function Header() {
     }
   };
 
+  // const handleLogout = async () => {
+  //   await fetch("/api/auth/logout", { method: "POST" });
+  //   setIsAuthenticated(false);
+  //   toast.success("Sesión cerrada correctamente");
+  //   router.push("/");
+  // };
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setIsAuthenticated(false);
-    router.push("/");
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      // Clear all states
+      setIsAuthenticated(false);
+      setUserSession(null);
+      localStorage.removeItem("userSession");
+      // Reset menu state
+      setShowMenu(false);
+      toast.success("Sesión cerrada correctamente");
+      router.push("/");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast.error("Error al cerrar sesión");
+    }
   };
 
   const [userSession, setUserSession] = useState<null | {
@@ -75,12 +93,24 @@ export default function Header() {
   }>(null);
 
   useEffect(() => {
+    if (!userSession) {
+      setIsAuthenticated(false);
+    }
+  }, [userSession]);
+
+  useEffect(() => {
     const session = JSON.parse(localStorage.getItem("userSession") || "null");
     setUserSession(session);
   }, []);
 
+  // const hasAccess = (rolesPermitidos: string[]) => {
+  //   return userSession && rolesPermitidos.includes(userSession.tipo_usuario);
+  // };
   const hasAccess = (rolesPermitidos: string[]) => {
-    return userSession && rolesPermitidos.includes(userSession.tipo_usuario);
+    if (!isAuthenticated || !userSession || !userSession.tipo_usuario) {
+      return false;
+    }
+    return rolesPermitidos.includes(userSession.tipo_usuario);
   };
 
   return (
@@ -108,26 +138,46 @@ export default function Header() {
                 </Link>
                 <Link
                   href="/portalAlumno"
-                  className="text-sm font-medium text-black hover:text-[#FF7043] transition-colors "
+                  className={`text-sm font-medium ${
+                    hasAccess(["Estudiante"])
+                      ? "text-black hover:text-[#FF7043]"
+                      : "text-gray-400 pointer-events-none"
+                  } transition-colors`}
                   title={
-                    userSession
-                      ? hasAccess(["Docente", "Profesor", "Administrador"])
-                        ? ""
-                        : "No tienes permiso"
-                      : "Debes iniciar sesión"
+                    !hasAccess(["Estudiante"])
+                      ? "No tienes permiso para acceder a este portal"
+                      : ""
                   }
                 >
                   Portal Alumnos
                 </Link>
                 <Link
                   href="/portalDocente"
-                  className="text-sm font-medium text-black hover:text-[#4CAF50] transition-colors"
+                  className={`text-sm font-medium ${
+                    hasAccess(["Docente", "Administrador"])
+                      ? "text-black hover:text-[#4CAF50]"
+                      : "text-gray-400 pointer-events-none"
+                  } transition-colors`}
+                  title={
+                    !hasAccess(["Docente", "Administrador"])
+                      ? "No tienes permiso para acceder a este portal"
+                      : ""
+                  }
                 >
                   Portal Docente
                 </Link>
                 <Link
                   href="/portalAdministrador"
-                  className="text-sm font-medium text-black hover:text-[#FFD700] transition-colors"
+                  className={`text-sm font-medium ${
+                    hasAccess(["Administrador"])
+                      ? "text-black hover:text-[#FFD700]"
+                      : "text-gray-400 pointer-events-none"
+                  } transition-colors`}
+                  title={
+                    !hasAccess(["Administrador"])
+                      ? "No tienes permiso para acceder a este portal"
+                      : ""
+                  }
                 >
                   Portal Administrador
                 </Link>
@@ -203,21 +253,48 @@ export default function Header() {
                     <Link
                       href="/portalAlumno"
                       onClick={handleMenuItemClick}
-                      className="block px-4 py-2 text-sm text-black hover:bg-[#FF7043] hover:text-white transition-colors"
+                      className={`block px-4 py-2 text-sm ${
+                        hasAccess(["Estudiante"])
+                          ? "text-black hover:bg-[#FF7043] hover:text-white"
+                          : "text-gray-400 pointer-events-none"
+                      } transition-colors`}
+                      title={
+                        !hasAccess(["Estudiante"])
+                          ? "No tienes permiso para acceder a este portal"
+                          : ""
+                      }
                     >
-                      Portal Alumnos y Apoderados
+                      Portal Alumnos
                     </Link>
                     <Link
                       href="/portalDocente"
                       onClick={handleMenuItemClick}
-                      className="block px-4 py-2 text-sm text-black hover:bg-[#4CAF50] hover:text-white transition-colors"
+                      className={`block px-4 py-2 text-sm ${
+                        hasAccess(["Docente", "Administrador"])
+                          ? "text-black hover:bg-[#4CAF50] hover:text-white"
+                          : "text-gray-400 pointer-events-none"
+                      } transition-colors`}
+                      title={
+                        !hasAccess(["Docente", "Administrador"])
+                          ? "No tienes permiso para acceder a este portal"
+                          : ""
+                      }
                     >
                       Portal Docente
                     </Link>
                     <Link
                       href="/portalAdministrador"
                       onClick={handleMenuItemClick}
-                      className="block px-4 py-2 text-sm text-black hover:bg-[#FFD700] hover:text-white transition-colors"
+                      className={`block px-4 py-2 text-sm ${
+                        hasAccess(["Administrador"])
+                          ? "text-black hover:bg-[#FFD700] hover:text-white"
+                          : "text-gray-400 pointer-events-none"
+                      } transition-colors`}
+                      title={
+                        !hasAccess(["Administrador"])
+                          ? "No tienes permiso para acceder a este portal"
+                          : ""
+                      }
                     >
                       Portal Administrador
                     </Link>

@@ -1,47 +1,74 @@
+"use client";
 import Image from "next/image";
-import Link from "next/link";
+import toast from "react-hot-toast";
 
 export default function Footer() {
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success(`Copiado al portapapeles: ${text}`);
+    });
+  };
+
   return (
     <footer>
-      <div className="mx-auto max-w-5xl py-4 mt-4 sm:px-6 lg:px-8 border-gray-400 border-t">
-        <Image
-          src="/LogoSaberes.webp"
-          alt="Logo"
-          width={384}
-          height={96}
-          className="w-auto h-auto sm:w-64 md:w-72 lg:w-80 xl:w-96 mx-auto"
-        />
-        <p className="mx-auto mt-6 max-w-md text-center leading-relaxed text-gray-500">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Incidunt
-          consequuntur amet culpa cum itaque neque
+      <div className="mx-auto max-w-5xl py-4 mt-4 sm:px-6 lg:px-8 border-gray-400 border-t text-center">
+        {/* Logo */}
+        <div className="mb-4">
+          <Image
+            src="/LogoSaberes.webp"
+            alt="Logo"
+            width={256}
+            height={64}
+            className="w-auto h-auto sm:w-48 md:w-56 lg:w-64 mx-auto"
+          />
+        </div>
+
+        {/* Resumen objetivo general */}
+        <p className="text-sm text-gray-600 mb-4">
+          Fomentamos un modelo educativo innovador que involucra a estudiantes y
+          familias, fortaleciendo aprendizajes curriculares y socioemocionales.
         </p>
-        <ul className="mt-12 flex justify-center gap-6 md:gap-8">
-          <li>
-            <Link
-              className="text-gray-700 transition hover:text-gray-700/75"
-              href="/"
+
+        {/* Información de contacto en dos columnas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs text-gray-600 mx-auto">
+          {/* Columna 1 */}
+          <div className="space-y-1">
+            <p className="font-semibold">Administrativo:</p>
+            <p
+              className="cursor-pointer underline"
+              onClick={() => copyToClipboard("kescobar@elquisco.cl")}
             >
-              Inicio
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="text-gray-700 transition hover:text-gray-700/75"
-              href="/galeria"
+              kescobar@elquisco.cl
+            </p>
+            <p className="font-semibold">
+              Gestión de accesos y colaboración en red:
+            </p>
+            <p
+              className="cursor-pointer underline"
+              onClick={() => copyToClipboard("tsepulveda@elquisco.cl")}
             >
-              Galería
-            </Link>
-          </li>
-          <li>
-            <Link
-              className="text-gray-700 transition hover:text-gray-700/75"
-              href="/contacto"
+              tsepulveda@elquisco.cl
+            </p>
+          </div>
+
+          {/* Columna 2 */}
+          <div className="space-y-1">
+            <p className="font-semibold">Celular Saberes:</p>
+            <p
+              className="cursor-pointer underline"
+              onClick={() => copyToClipboard("+56965798774")}
             >
-              Contacto
-            </Link>
-          </li>
-        </ul>
+              +56965798774
+            </p>
+            <p className="font-semibold">Correo Saberes:</p>
+            <p
+              className="cursor-pointer underline"
+              onClick={() => copyToClipboard("convivencia.saberes@gmail.com")}
+            >
+              convivencia.saberes@gmail.com
+            </p>
+          </div>
+        </div>
       </div>
     </footer>
   );

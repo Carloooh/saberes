@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 interface CursoConAsignaturas {
   id_curso: string;
@@ -60,9 +61,15 @@ const RegistroFuncionario = () => {
     });
   };
 
-  // Enviar datos
+  const resetForm = (formElement: HTMLFormElement) => {
+    formElement.reset();
+    setUserType("");
+    setSelectedCursos({});
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.target as HTMLFormElement;
     const formData = new FormData(e.target as HTMLFormElement);
 
     const payload = {
@@ -87,9 +94,10 @@ const RegistroFuncionario = () => {
     });
 
     if (response.ok) {
-      alert("Registro exitoso");
+      toast.success("Registro exitoso");
+      resetForm(formElement);
     } else {
-      alert("Error en el registro");
+      toast.error("Error en el registro");
     }
   };
 

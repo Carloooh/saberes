@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 interface Curso {
   id_curso: string;
@@ -42,8 +43,26 @@ const MatriculaEstudiante = () => {
     fetchCursos();
   }, []);
 
+  const resetForm = (formElement: HTMLFormElement) => {
+    formElement.reset();
+
+    const radioInputs = formElement.querySelectorAll<HTMLInputElement>(
+      'input[type="radio"]'
+    );
+    radioInputs.forEach((input) => {
+      input.checked = false;
+    });
+
+    const checkboxInputs = formElement.querySelectorAll<HTMLInputElement>(
+      'input[type="checkbox"]'
+    );
+    checkboxInputs.forEach((input) => {
+      input.checked = false;
+    });
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formElement = e.target as HTMLFormElement;
     const formData = new FormData(e.target as HTMLFormElement);
 
     const response = await fetch("/api/auth/register/matricula", {
@@ -52,9 +71,10 @@ const MatriculaEstudiante = () => {
     });
 
     if (response.ok) {
-      alert("Registro exitoso");
+      toast.success("Registro exitoso");
+      resetForm(formElement);
     } else {
-      alert("Error en el registro");
+      toast.error("Error en el registro");
     }
   };
   return (
