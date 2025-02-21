@@ -65,12 +65,6 @@ export default function Header() {
     }
   };
 
-  // const handleLogout = async () => {
-  //   await fetch("/api/auth/logout", { method: "POST" });
-  //   setIsAuthenticated(false);
-  //   toast.success("Sesión cerrada correctamente");
-  //   router.push("/");
-  // };
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -103,9 +97,6 @@ export default function Header() {
     setUserSession(session);
   }, []);
 
-  // const hasAccess = (rolesPermitidos: string[]) => {
-  //   return userSession && rolesPermitidos.includes(userSession.tipo_usuario);
-  // };
   const hasAccess = (rolesPermitidos: string[]) => {
     if (!isAuthenticated || !userSession || !userSession.tipo_usuario) {
       return false;
@@ -493,3 +484,10 @@ export default function Header() {
     </>
   );
 }
+
+// https://www.youtube.com/watch?v=ANQfJrKIPGU
+
+// https://www.nodemailer.com/
+
+// https://react.email/docs/introduction
+// https://demo.react.email/preview/magic-links/plaid-verify-identity

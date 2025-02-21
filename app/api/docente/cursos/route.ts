@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const cursos = query.all(rutDocente, rutDocente).map(curso => ({
       ...curso,
       asignaturas: JSON.parse(curso.asignaturas || '[]')
-    }));
+    })).sort((a, b) => a.id_curso - b.id_curso);
 
     return NextResponse.json({ success: true, cursos });
   } catch (error) {
