@@ -61,6 +61,13 @@ const ActividadesPage: React.FC = () => {
     }
   };
 
+  const getMediaType = (extension: string): "image" | "video" | null => {
+    const ext = extension.toLowerCase();
+    if (["jpg", "jpeg", "png", "gif"].includes(ext)) return "image";
+    if (["mp4", "webm", "ogg"].includes(ext)) return "video";
+    return null;
+  };
+
   return (
     <div>
       <header className="text-black py-4">
@@ -88,13 +95,28 @@ const ActividadesPage: React.FC = () => {
                       {mediaFiles.map((archivo) => (
                         <div key={archivo.id_archivo}>
                           <div className="relative aspect-[16/9]">
-                            <Image
-                              src={`/api/actividades/download/${archivo.id_archivo}`}
-                              alt={archivo.titulo}
-                              fill
-                              className="object-cover rounded-lg"
-                              unoptimized
-                            />
+                            {getMediaType(archivo.extension) === "video" ? (
+                              <video
+                                className="w-full h-full object-cover rounded-lg"
+                                controls
+                                muted
+                                loop
+                              >
+                                <source
+                                  src={`/api/actividades/download/${archivo.id_archivo}`}
+                                  type={`video/${archivo.extension}`}
+                                />
+                                Tu navegador no soporta el elemento de video.
+                              </video>
+                            ) : (
+                              <Image
+                                src={`/api/actividades/download/${archivo.id_archivo}`}
+                                alt={archivo.titulo}
+                                fill
+                                className="object-cover rounded-lg"
+                                unoptimized
+                              />
+                            )}
                           </div>
                         </div>
                       ))}
@@ -152,13 +174,28 @@ const ActividadesPage: React.FC = () => {
                         {mediaFiles.map((archivo) => (
                           <div key={archivo.id_archivo}>
                             <div className="relative aspect-[16/9]">
-                              <Image
-                                src={`/api/actividades/download/${archivo.id_archivo}`}
-                                alt={archivo.titulo}
-                                fill
-                                className="object-cover rounded-lg"
-                                unoptimized
-                              />
+                              {getMediaType(archivo.extension) === "video" ? (
+                                <video
+                                  className="w-full h-full object-cover rounded-lg"
+                                  controls
+                                  muted
+                                  loop
+                                >
+                                  <source
+                                    src={`/api/actividades/download/${archivo.id_archivo}`}
+                                    type={`video/${archivo.extension}`}
+                                  />
+                                  Tu navegador no soporta el elemento de video.
+                                </video>
+                              ) : (
+                                <Image
+                                  src={`/api/actividades/download/${archivo.id_archivo}`}
+                                  alt={archivo.titulo}
+                                  fill
+                                  className="object-cover rounded-lg"
+                                  unoptimized
+                                />
+                              )}
                             </div>
                           </div>
                         ))}

@@ -1,43 +1,601 @@
+// "use client";
+
+// import React, { useState, useEffect } from "react";
+// import Image from "next/image";
+
+// interface Sede {
+//   id_sede: string;
+//   nombre: string;
+//   direccion: string;
+//   url: string;
+//   url_iframe: string;
+//   imagen?: string;
+//   archivos?: {
+//     id_archivo: string;
+//     titulo: string;
+//     extension: string;
+//   }[];
+// }
+
+// interface Curso {
+//   id_curso: string;
+//   nombre_curso: string;
+// }
+
+// const Sedes: React.FC = () => {
+//   const [sedes, setSedes] = useState<Sede[]>([]);
+//   const [cursos, setCursos] = useState<Curso[]>([]);
+//   const [showCreateForm, setShowCreateForm] = useState(false);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+
+//   const [createFormData, setCreateFormData] = useState({
+//     nombre: "",
+//     direccion: "",
+//     url: "",
+//     url_iframe: "",
+//     archivos: [] as File[],
+//   });
+
+//   const [editId, setEditId] = useState<string | null>(null);
+//   const [editFormData, setEditFormData] = useState({
+//     nombre: "",
+//     direccion: "",
+//     url: "",
+//     url_iframe: "",
+//     archivosToAdd: [] as File[],
+//     archivosToDelete: [] as string[],
+//   });
+
+//   useEffect(() => {
+//     fetch("/api/cursos")
+//       .then((res) => res.json())
+//       .then((data) => setCursos(data));
+//   }, []);
+
+//   const fetchSedes = async () => {
+//     try {
+//       setLoading(true);
+//       const response = await fetch("/api/sedes");
+//       const result = await response.json();
+
+//       if (result.success) {
+//         setSedes(result.data);
+//       } else {
+//         setError("Error al cargar las sedes");
+//       }
+//     } catch (error) {
+//       setError("Error en la conexión con el servidor");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchSedes();
+//   }, []);
+
+//   const handleCreateSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     const formData = new FormData();
+//     formData.append("nombre", createFormData.nombre);
+//     formData.append("direccion", createFormData.direccion);
+//     formData.append("url", createFormData.url);
+//     formData.append("url_iframe", createFormData.url_iframe);
+//     createFormData.archivos.forEach((file, index) => {
+//       formData.append(`archivo-${index}`, file);
+//     });
+
+//     try {
+//       const response = await fetch("/api/sedes", {
+//         method: "POST",
+//         body: formData,
+//       });
+//       const result = await response.json();
+
+//       if (result.success) {
+//         setCreateFormData({
+//           nombre: "",
+//           direccion: "",
+//           url: "",
+//           url_iframe: "",
+//           archivos: [],
+//         });
+//         setShowCreateForm(false);
+//         fetchSedes();
+//       }
+//     } catch (error) {
+//       setError("Error al crear la sede");
+//     }
+//   };
+
+//   const handleEdit = async (id: string) => {
+//     const formData = new FormData();
+//     formData.append("id_sede", id);
+//     formData.append("nombre", editFormData.nombre);
+//     formData.append("direccion", editFormData.direccion);
+//     formData.append("url", editFormData.url);
+//     formData.append("url_iframe", editFormData.url_iframe);
+
+//     if (editFormData.archivosToDelete.length > 0) {
+//       formData.append(
+//         "archivosAEliminar",
+//         JSON.stringify(editFormData.archivosToDelete)
+//       );
+//     }
+
+//     editFormData.archivosToAdd.forEach((file, index) => {
+//       formData.append(`archivo-${index}`, file);
+//     });
+
+//     try {
+//       const response = await fetch("/api/sedes", {
+//         method: "PUT",
+//         body: formData,
+//       });
+//       const result = await response.json();
+
+//       if (result.success) {
+//         setEditId(null);
+//         setEditFormData({
+//           nombre: "",
+//           direccion: "",
+//           url: "",
+//           url_iframe: "",
+//           archivosToAdd: [],
+//           archivosToDelete: [],
+//         });
+//         fetchSedes();
+//       }
+//     } catch (error) {
+//       setError("Error al actualizar la sede");
+//     }
+//   };
+
+//   const handleDelete = async (id: string) => {
+//     if (!confirm("¿Estás seguro de eliminar esta sede?")) return;
+//     try {
+//       const response = await fetch("/api/sedes", {
+//         method: "DELETE",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({ id_sede: id }),
+//       });
+//       const result = await response.json();
+
+//       if (result.success) {
+//         fetchSedes();
+//       }
+//     } catch (error) {
+//       setError("Error al eliminar la sede");
+//     }
+//   };
+
+//   const startEdit = (sede: Sede) => {
+//     setEditId(sede.id_sede);
+//     setEditFormData({
+//       nombre: sede.nombre,
+//       direccion: sede.direccion,
+//       url: sede.url,
+//       url_iframe: sede.url_iframe,
+//       archivosToAdd: [],
+//       archivosToDelete: [],
+//     });
+//   };
+
+//   if (loading) {
+//     return <div className="text-center p-4">Cargando...</div>;
+//   }
+
+//   return (
+//     <div className="container mx-auto p-4">
+//       <div className="flex justify-between items-center mb-6">
+//         <h1 className="text-2xl font-bold">Sedes</h1>
+//         <button
+//           onClick={() => setShowCreateForm(!showCreateForm)}
+//           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+//         >
+//           Nueva Sede
+//         </button>
+//       </div>
+
+//       {error && (
+//         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+//           {error}
+//         </div>
+//       )}
+
+//       {showCreateForm && (
+//         <div className="mb-6 p-6 border rounded-lg shadow-lg bg-gray-50">
+//           <h2 className="text-xl font-semibold mb-4">Crear Sede</h2>
+//           <form onSubmit={handleCreateSubmit}>
+//             <div className="grid grid-cols-1 gap-4">
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   Nombre
+//                 </label>
+//                 <input
+//                   type="text"
+//                   value={createFormData.nombre}
+//                   onChange={(e) =>
+//                     setCreateFormData({
+//                       ...createFormData,
+//                       nombre: e.target.value,
+//                     })
+//                   }
+//                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+//                   required
+//                 />
+//               </div>
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   Dirección
+//                 </label>
+//                 <input
+//                   type="text"
+//                   value={createFormData.direccion}
+//                   onChange={(e) =>
+//                     setCreateFormData({
+//                       ...createFormData,
+//                       direccion: e.target.value,
+//                     })
+//                   }
+//                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+//                   required
+//                 />
+//               </div>
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   URL
+//                 </label>
+//                 <input
+//                   type="url"
+//                   value={createFormData.url}
+//                   onChange={(e) =>
+//                     setCreateFormData({
+//                       ...createFormData,
+//                       url: e.target.value,
+//                     })
+//                   }
+//                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+//                   required
+//                 />
+//               </div>
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   URL del iframe
+//                 </label>
+//                 <input
+//                   type="text"
+//                   value={createFormData.url_iframe}
+//                   onChange={(e) =>
+//                     setCreateFormData({
+//                       ...createFormData,
+//                       url_iframe: e.target.value,
+//                     })
+//                   }
+//                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+//                 />
+//               </div>
+//               <div>
+//               {cursos.map((curso) => (
+//                 <div key={curso.id_curso} className="border p-4 rounded-lg">
+//                   <label className="flex items-center gap-2 mb-4">
+//                     <input
+//                       type="checkbox"
+//                       checked={!!selectedCursos[curso.id_curso]}
+//                       onChange={() => handleCursoChange(curso.id_curso)}
+//                     />
+//                     <span className="font-medium">{curso.nombre_curso}</span>
+//                   </label>
+
+//                 </div>
+//               ))}
+//               </div>
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   Archivos
+//                 </label>
+//                 <input
+//                   type="file"
+//                   multiple
+//                   onChange={(e) =>
+//                     setCreateFormData({
+//                       ...createFormData,
+//                       archivos: Array.from(e.target.files || []),
+//                     })
+//                   }
+//                   className="mt-1 block w-full"
+//                   accept="image/*,video/*"
+//                 />
+//               </div>
+//             </div>
+//             <div className="flex justify-end space-x-3 mt-4">
+//               <button
+//                 type="button"
+//                 onClick={() => {
+//                   setShowCreateForm(false);
+//                   setCreateFormData({
+//                     nombre: "",
+//                     direccion: "",
+//                     url: "",
+//                     url_iframe: "",
+//                     archivos: [],
+//                   });
+//                 }}
+//                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+//               >
+//                 Cancelar
+//               </button>
+//               <button
+//                 type="submit"
+//                 className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+//               >
+//                 Crear
+//               </button>
+//             </div>
+//           </form>
+//         </div>
+//       )}
+
+//       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//         {sedes.map((sede) => (
+//           <div
+//             key={sede.id_sede}
+//             className="border rounded-lg p-4 bg-white shadow"
+//           >
+//             {editId === sede.id_sede ? (
+//               <div>
+//                 <input
+//                   type="text"
+//                   value={editFormData.nombre}
+//                   onChange={(e) =>
+//                     setEditFormData({
+//                       ...editFormData,
+//                       nombre: e.target.value,
+//                     })
+//                   }
+//                   className="mb-2 w-full p-2 border rounded"
+//                   placeholder="Nombre"
+//                 />
+//                 <input
+//                   type="text"
+//                   value={editFormData.direccion}
+//                   onChange={(e) =>
+//                     setEditFormData({
+//                       ...editFormData,
+//                       direccion: e.target.value,
+//                     })
+//                   }
+//                   className="mb-2 w-full p-2 border rounded"
+//                   placeholder="Dirección"
+//                 />
+//                 <input
+//                   type="url"
+//                   value={editFormData.url}
+//                   onChange={(e) =>
+//                     setEditFormData({
+//                       ...editFormData,
+//                       url: e.target.value,
+//                     })
+//                   }
+//                   className="mb-2 w-full p-2 border rounded"
+//                   placeholder="URL"
+//                 />
+//                 <input
+//                   type="text"
+//                   value={editFormData.url_iframe}
+//                   onChange={(e) =>
+//                     setEditFormData({
+//                       ...editFormData,
+//                       url_iframe: e.target.value,
+//                     })
+//                   }
+//                   className="mb-2 w-full p-2 border rounded"
+//                   placeholder="URL del iframe"
+//                 />
+//                 <input
+//                   type="file"
+//                   multiple
+//                   onChange={(e) =>
+//                     setEditFormData({
+//                       ...editFormData,
+//                       archivosToAdd: Array.from(e.target.files || []),
+//                     })
+//                   }
+//                   className="mb-2 w-full"
+//                   accept="image/*,video/*"
+//                 />
+//                 {sede.archivos && sede.archivos.length > 0 && (
+//                   <div className="grid grid-cols-2 gap-2 mb-2">
+//                     {sede.archivos.map((archivo) => (
+//                       <div key={archivo.id_archivo} className="relative">
+//                         <Image
+//                           src={`/api/sedes/download/${archivo.id_archivo}`}
+//                           alt={archivo.titulo}
+//                           width={100}
+//                           height={100}
+//                           className="w-full h-24 object-cover rounded"
+//                           unoptimized
+//                         />
+//                         <button
+//                           onClick={() =>
+//                             setEditFormData({
+//                               ...editFormData,
+//                               archivosToDelete: [
+//                                 ...editFormData.archivosToDelete,
+//                                 archivo.id_archivo,
+//                               ],
+//                             })
+//                           }
+//                           className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+//                         >
+//                           X
+//                         </button>
+//                       </div>
+//                     ))}
+//                   </div>
+//                 )}
+//                 <div className="flex justify-end space-x-2">
+//                   <button
+//                     onClick={() => {
+//                       setEditId(null);
+//                       setEditFormData({
+//                         nombre: "",
+//                         direccion: "",
+//                         url: "",
+//                         url_iframe: "",
+//                         archivosToAdd: [],
+//                         archivosToDelete: [],
+//                       });
+//                     }}
+//                     className="px-3 py-1 text-gray-600 hover:underline"
+//                   >
+//                     Cancelar
+//                   </button>
+//                   <button
+//                     onClick={() => handleEdit(sede.id_sede)}
+//                     className="px-3 py-1 text-blue-600 hover:underline"
+//                   >
+//                     Guardar
+//                   </button>
+//                 </div>
+//               </div>
+//             ) : (
+//               <div>
+//                 <h3 className="text-lg font-semibold mb-2">{sede.nombre}</h3>
+//                 <p className="text-gray-600 mb-2">{sede.direccion}</p>
+//                 <a
+//                   href={sede.url}
+//                   target="_blank"
+//                   rel="noopener noreferrer"
+//                   className="text-blue-600 hover:underline mb-2 block"
+//                 >
+//                   {sede.url}
+//                 </a>
+//                 {sede.url_iframe && (
+//                   <div className="mb-4">
+//                     <iframe
+//                       src={sede.url_iframe}
+//                       className="w-full h-48 rounded border"
+//                       frameBorder="0"
+//                       allowFullScreen
+//                     ></iframe>
+//                   </div>
+//                 )}
+//                 {sede.archivos && sede.archivos.length > 0 && (
+//                   <div className="grid grid-cols-2 gap-2 mb-2">
+//                     {sede.archivos.map((archivo) => (
+//                       <div key={archivo.id_archivo}>
+//                         <Image
+//                           src={`/api/sedes/download/${archivo.id_archivo}`}
+//                           alt={archivo.titulo}
+//                           width={100}
+//                           height={100}
+//                           className="w-full h-24 object-cover rounded"
+//                           unoptimized
+//                         />
+//                       </div>
+//                     ))}
+//                   </div>
+//                 )}
+//                 <div className="flex justify-end space-x-2">
+//                   <button
+//                     onClick={() => startEdit(sede)}
+//                     className="px-3 py-1 text-blue-600 hover:underline"
+//                   >
+//                     Editar
+//                   </button>
+//                   <button
+//                     onClick={() => handleDelete(sede.id_sede)}
+//                     className="px-3 py-1 text-red-600 hover:underline"
+//                   >
+//                     Eliminar
+//                   </button>
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Sedes;
+
 "use client";
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface Sede {
   id_sede: string;
   nombre: string;
   direccion: string;
   url: string;
-  imagen: string; // Base64 o URL de la imagen
+  url_iframe: string;
+  cursos: string[];
+  imagen?: string;
+  archivos?: {
+    id_archivo: string;
+    titulo: string;
+    extension: string;
+  }[];
+}
+
+interface Curso {
+  id_curso: string;
+  nombre_curso: string;
 }
 
 const Sedes: React.FC = () => {
   const [sedes, setSedes] = useState<Sede[]>([]);
+  const [cursos, setCursos] = useState<Curso[]>([]);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [newNombre, setNewNombre] = useState('');
-  const [newDireccion, setNewDireccion] = useState('');
-  const [newUrl, setNewUrl] = useState('');
-  const [newImagen, setNewImagen] = useState<File | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editNombre, setEditNombre] = useState('');
-  const [editDireccion, setEditDireccion] = useState('');
-  const [editUrl, setEditUrl] = useState('');
-  const [editImagen, setEditImagen] = useState<File | null>(null);
+  const [error, setError] = useState("");
 
-  // Obtener sedes al cargar el componente o al cambiar la búsqueda
+  const [createFormData, setCreateFormData] = useState({
+    nombre: "",
+    direccion: "",
+    url: "",
+    url_iframe: "",
+    cursos: [] as string[],
+    archivos: [] as File[],
+  });
+
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    nombre: "",
+    direccion: "",
+    url: "",
+    url_iframe: "",
+    cursos: [] as string[],
+    archivosToAdd: [] as File[],
+    archivosToDelete: [] as string[],
+  });
+
+  useEffect(() => {
+    fetch("/api/cursos")
+      .then((res) => res.json())
+      .then((data) => setCursos(data));
+  }, []);
+
   const fetchSedes = async () => {
     try {
-      const response = await fetch(`/api/sedes?search=${searchQuery}`);
+      setLoading(true);
+      const response = await fetch("/api/sedes");
       const result = await response.json();
 
       if (result.success) {
         setSedes(result.data);
       } else {
-        setError('Error al cargar las sedes');
+        setError("Error al cargar las sedes");
       }
-    } catch {
-      setError('Error en la conexión con el servidor');
+    } catch (error) {
+      setError("Error en la conexión con el servidor");
     } finally {
       setLoading(false);
     }
@@ -45,298 +603,535 @@ const Sedes: React.FC = () => {
 
   useEffect(() => {
     fetchSedes();
-  }, [searchQuery]);
+  }, []);
 
-  // Subir imagen
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (isEdit) {
-        setEditImagen(file);
-      } else {
-        setNewImagen(file);
-      }
+  const handleCursoChange = (cursoId: string, formType: "create" | "edit") => {
+    if (formType === "create") {
+      setCreateFormData((prev) => ({
+        ...prev,
+        cursos: prev.cursos.includes(cursoId)
+          ? prev.cursos.filter((id) => id !== cursoId)
+          : [...prev.cursos, cursoId],
+      }));
+    } else {
+      setEditFormData((prev) => ({
+        ...prev,
+        cursos: prev.cursos.includes(cursoId)
+          ? prev.cursos.filter((id) => id !== cursoId)
+          : [...prev.cursos, cursoId],
+      }));
     }
   };
 
-  // Agregar una nueva sede
-  const handleAdd = async () => {
-    try {
-      const formData = new FormData();
-      formData.append('nombre', newNombre);
-      formData.append('direccion', newDireccion);
-      formData.append('url', newUrl);
-      if (newImagen) {
-        formData.append('imagen', newImagen);
-      }
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("nombre", createFormData.nombre);
+    formData.append("direccion", createFormData.direccion);
+    formData.append("url", createFormData.url);
+    formData.append("url_iframe", createFormData.url_iframe);
+    formData.append("cursos", JSON.stringify(createFormData.cursos));
+    createFormData.archivos.forEach((file, index) => {
+      formData.append(`archivo-${index}`, file);
+    });
 
-      const response = await fetch('/api/sedes', {
-        method: 'POST',
+    try {
+      const response = await fetch("/api/sedes", {
+        method: "POST",
         body: formData,
       });
-
       const result = await response.json();
 
       if (result.success) {
-        setNewNombre('');
-        setNewDireccion('');
-        setNewUrl('');
-        setNewImagen(null);
-        fetchSedes(); // Actualizar el listado
-      } else {
-        setError('Error al agregar la sede');
+        setCreateFormData({
+          nombre: "",
+          direccion: "",
+          url: "",
+          url_iframe: "",
+          cursos: [],
+          archivos: [],
+        });
+        setShowCreateForm(false);
+        fetchSedes();
       }
-    } catch {
-      setError('Error en la conexión con el servidor');
+    } catch (error) {
+      setError("Error al crear la sede");
     }
   };
 
-  // Modificar una sede
   const handleEdit = async (id: string) => {
-    try {
-      const formData = new FormData();
-      formData.append('id_sede', id);
-      formData.append('nombre', editNombre);
-      formData.append('direccion', editDireccion);
-      formData.append('url', editUrl);
-      if (editImagen) {
-        formData.append('imagen', editImagen);
-      }
+    const formData = new FormData();
+    formData.append("id_sede", id);
+    formData.append("nombre", editFormData.nombre);
+    formData.append("direccion", editFormData.direccion);
+    formData.append("url", editFormData.url);
+    formData.append("url_iframe", editFormData.url_iframe);
+    formData.append("cursos", JSON.stringify(editFormData.cursos));
 
-      const response = await fetch('/api/sedes', {
-        method: 'PUT',
+    if (editFormData.archivosToDelete.length > 0) {
+      formData.append(
+        "archivosAEliminar",
+        JSON.stringify(editFormData.archivosToDelete)
+      );
+    }
+
+    editFormData.archivosToAdd.forEach((file, index) => {
+      formData.append(`archivo-${index}`, file);
+    });
+
+    try {
+      const response = await fetch("/api/sedes", {
+        method: "PUT",
         body: formData,
       });
-
       const result = await response.json();
 
       if (result.success) {
         setEditId(null);
-        setEditNombre('');
-        setEditDireccion('');
-        setEditUrl('');
-        setEditImagen(null);
-        fetchSedes(); // Actualizar el listado
-      } else {
-        setError('Error al modificar la sede');
+        setEditFormData({
+          nombre: "",
+          direccion: "",
+          url: "",
+          url_iframe: "",
+          cursos: [],
+          archivosToAdd: [],
+          archivosToDelete: [],
+        });
+        fetchSedes();
       }
-    } catch {
-      setError('Error en la conexión con el servidor');
+    } catch (error) {
+      setError("Error al actualizar la sede");
     }
   };
 
-  // Eliminar una sede
   const handleDelete = async (id: string) => {
+    if (!confirm("¿Estás seguro de eliminar esta sede?")) return;
     try {
-      const response = await fetch('/api/sedes', {
-        method: 'DELETE',
+      const response = await fetch("/api/sedes", {
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ id_sede: id }),
       });
-
       const result = await response.json();
 
       if (result.success) {
-        fetchSedes(); // Actualizar el listado
-      } else {
-        setError('Error al eliminar la sede');
+        fetchSedes();
       }
-    } catch {
-      setError('Error en la conexión con el servidor');
+    } catch (error) {
+      setError("Error al eliminar la sede");
     }
   };
 
-  if (loading) {
-    return <p>Cargando...</p>;
-  }
+  const startEdit = (sede: Sede) => {
+    setEditId(sede.id_sede);
+    setEditFormData({
+      nombre: sede.nombre,
+      direccion: sede.direccion,
+      url: sede.url,
+      url_iframe: sede.url_iframe,
+      cursos: sede.cursos || [],
+      archivosToAdd: [],
+      archivosToDelete: [],
+    });
+  };
 
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
+  if (loading) {
+    return <div className="text-center p-4">Cargando...</div>;
   }
 
   return (
-    <div className="bg-white shadow sm:rounded-lg">
-      <div className="px-4 py-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Sedes</h3>
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Sedes</h1>
+        <button
+          onClick={() => setShowCreateForm(!showCreateForm)}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+        >
+          Nueva Sede
+        </button>
+      </div>
 
-        {/* Filtro de búsqueda */}
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="Buscar por nombre o dirección"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-2 border rounded-md mb-2"
-          />
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
         </div>
+      )}
 
-        {/* Formulario para agregar una nueva sede */}
-        <div className="mb-6">
-          <label htmlFor="newNombre" className="block text-sm font-medium text-gray-700">Nombre</label>
-          <input
-            id="newNombre"
-            type="text"
-            placeholder="Nombre"
-            value={newNombre}
-            onChange={(e) => setNewNombre(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          />
-          <label htmlFor="newDireccion" className="block text-sm font-medium text-gray-700 mt-2">Dirección</label>
-          <input
-            id="newDireccion"
-            type="text"
-            placeholder="Dirección"
-            value={newDireccion}
-            onChange={(e) => setNewDireccion(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          />
-          <label htmlFor="newUrl" className="block text-sm font-medium text-gray-700 mt-2">URL de Google Maps</label>
-          <input
-            id="newUrl"
-            type="text"
-            placeholder="URL de Google Maps"
-            value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-          />
-          <label htmlFor="newImagen" className="block text-sm font-medium text-gray-700 mt-2">Imagen</label>
-          <input
-            id="newImagen"
-            type="file"
-            onChange={(e) => handleImageUpload(e)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            accept="image/*"
-          />
-          {newImagen && (
-            <Image
-              src={URL.createObjectURL(newImagen)}
-              alt="Vista previa"
-              width={64}
-              height={64}
-              className="w-16 h-16 object-cover rounded mt-2"
-            />
-          )}
-          <button
-            onClick={handleAdd}
-            className="mt-2 inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            Agregar sede
-          </button>
-        </div>
-
-        {/* Listado de sedes */}
-        <div className="space-y-4">
-          {sedes.map((sede) => (
-            <div key={sede.id_sede} className="border rounded-lg p-4">
-              {editId === sede.id_sede ? (
-                <div>
-                  <label htmlFor="editNombre" className="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input
-                    id="editNombre"
-                    type="text"
-                    value={editNombre}
-                    onChange={(e) => setEditNombre(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  />
-                  <label htmlFor="editDireccion" className="block text-sm font-medium text-gray-700 mt-2">Dirección</label>
-                  <input
-                    id="editDireccion"
-                    type="text"
-                    value={editDireccion}
-                    onChange={(e) => setEditDireccion(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  />
-                  <label htmlFor="editUrl" className="block text-sm font-medium text-gray-700 mt-2">URL de Google Maps</label>
-                  <input
-                    id="editUrl"
-                    type="text"
-                    value={editUrl}
-                    onChange={(e) => setEditUrl(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  />
-                  <label htmlFor="editImagen" className="block text-sm font-medium text-gray-700 mt-2">Imagen</label>
-                  <input
-                    id="editImagen"
-                    type="file"
-                    onChange={(e) => handleImageUpload(e, true)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    accept="image/*"
-                  />
-                  {editImagen ? (
-                    <Image
-                      src={URL.createObjectURL(editImagen)}
-                      alt="Vista previa"
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 object-cover rounded mt-2"
-                    />
-                  ) : (
-                    sede.imagen && (
-                      <Image
-                        src={`data:image/jpeg;base64,${sede.imagen}`}
-                        alt={sede.nombre}
-                        width={64}
-                        height={64}
-                        className="w-16 h-16 object-cover rounded mt-2"
+      {showCreateForm && (
+        <div className="mb-6 p-6 border rounded-lg shadow-lg bg-gray-50">
+          <h2 className="text-xl font-semibold mb-4">Crear Sede</h2>
+          <form onSubmit={handleCreateSubmit}>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Nombre
+                </label>
+                <input
+                  type="text"
+                  value={createFormData.nombre}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      nombre: e.target.value,
+                    })
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Dirección
+                </label>
+                <input
+                  type="text"
+                  value={createFormData.direccion}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      direccion: e.target.value,
+                    })
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  URL
+                </label>
+                <input
+                  type="url"
+                  value={createFormData.url}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      url: e.target.value,
+                    })
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  URL del iframe
+                </label>
+                <input
+                  type="text"
+                  value={createFormData.url_iframe}
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      url_iframe: e.target.value,
+                    })
+                  }
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cursos
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  {cursos.map((curso) => (
+                    <div key={curso.id_curso} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`create-curso-${curso.id_curso}`}
+                        checked={createFormData.cursos.includes(curso.id_curso)}
+                        onChange={() =>
+                          handleCursoChange(curso.id_curso, "create")
+                        }
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                       />
-                    )
-                  )}
-                  <div className="flex justify-end space-x-2 mt-2">
-                    <button
-                      onClick={() => handleEdit(sede.id_sede)}
-                      className="inline-flex items-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      onClick={() => setEditId(null)}
-                      className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
+                      <label
+                        htmlFor={`create-curso-${curso.id_curso}`}
+                        className="ml-2 block text-sm text-gray-900"
+                      >
+                        {curso.nombre_curso}
+                      </label>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">{sede.nombre}</h2>
-                  <p className="mt-2 text-gray-700">{sede.direccion}</p>
-                  <p className="mt-2 text-blue-500">{sede.url}</p>
-                  {sede.imagen && (
-                    <Image
-                      src={`data:image/jpeg;base64,${sede.imagen}`}
-                      alt={sede.nombre}
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 object-cover rounded mt-2"
-                    />
-                  )}
-                  <div className="flex justify-end space-x-2 mt-2">
-                    <button
-                      onClick={() => {
-                        setEditId(sede.id_sede);
-                        setEditNombre(sede.nombre);
-                        setEditDireccion(sede.direccion);
-                        setEditUrl(sede.url);
-                        setEditImagen(null);
-                      }}
-                      className="inline-flex items-center rounded-md border border-transparent bg-yellow-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(sede.id_sede)}
-                      className="inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-              )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Archivos
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) =>
+                    setCreateFormData({
+                      ...createFormData,
+                      archivos: Array.from(e.target.files || []),
+                    })
+                  }
+                  className="mt-1 block w-full"
+                  accept="image/*,video/*"
+                />
+              </div>
             </div>
-          ))}
+            <div className="flex justify-end space-x-3 mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCreateForm(false);
+                  setCreateFormData({
+                    nombre: "",
+                    direccion: "",
+                    url: "",
+                    url_iframe: "",
+                    cursos: [],
+                    archivos: [],
+                  });
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+              >
+                Crear
+              </button>
+            </div>
+          </form>
         </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sedes.map((sede) => (
+          <div
+            key={sede.id_sede}
+            className="border rounded-lg p-4 bg-white shadow"
+          >
+            {editId === sede.id_sede ? (
+              <div>
+                <input
+                  type="text"
+                  value={editFormData.nombre}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      nombre: e.target.value,
+                    })
+                  }
+                  className="mb-2 w-full p-2 border rounded"
+                  placeholder="Nombre"
+                />
+                <input
+                  type="text"
+                  value={editFormData.direccion}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      direccion: e.target.value,
+                    })
+                  }
+                  className="mb-2 w-full p-2 border rounded"
+                  placeholder="Dirección"
+                />
+                <input
+                  type="url"
+                  value={editFormData.url}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      url: e.target.value,
+                    })
+                  }
+                  className="mb-2 w-full p-2 border rounded"
+                  placeholder="URL"
+                />
+                <input
+                  type="text"
+                  value={editFormData.url_iframe}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      url_iframe: e.target.value,
+                    })
+                  }
+                  className="mb-2 w-full p-2 border rounded"
+                  placeholder="URL del iframe"
+                />
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Cursos
+                  </label>
+                  <div className="grid grid-cols-2 gap-4">
+                    {cursos.map((curso) => (
+                      <div key={curso.id_curso} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`edit-curso-${curso.id_curso}`}
+                          checked={editFormData.cursos.includes(curso.id_curso)}
+                          onChange={() =>
+                            handleCursoChange(curso.id_curso, "edit")
+                          }
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor={`edit-curso-${curso.id_curso}`}
+                          className="ml-2 block text-sm text-gray-900"
+                        >
+                          {curso.nombre_curso}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      archivosToAdd: Array.from(e.target.files || []),
+                    })
+                  }
+                  className="mb-2 w-full"
+                  accept="image/*,video/*"
+                />
+                {sede.archivos && sede.archivos.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    {sede.archivos.map((archivo) => (
+                      <div key={archivo.id_archivo} className="relative">
+                        <Image
+                          src={`/api/sedes/download/${archivo.id_archivo}`}
+                          alt={archivo.titulo}
+                          width={100}
+                          height={100}
+                          className="w-full h-24 object-cover rounded"
+                          unoptimized
+                        />
+                        <button
+                          onClick={() =>
+                            setEditFormData({
+                              ...editFormData,
+                              archivosToDelete: [
+                                ...editFormData.archivosToDelete,
+                                archivo.id_archivo,
+                              ],
+                            })
+                          }
+                          className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full"
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => {
+                      setEditId(null);
+                      setEditFormData({
+                        nombre: "",
+                        direccion: "",
+                        url: "",
+                        url_iframe: "",
+                        cursos: [],
+                        archivosToAdd: [],
+                        archivosToDelete: [],
+                      });
+                    }}
+                    className="px-3 py-1 text-gray-600 hover:underline"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => handleEdit(sede.id_sede)}
+                    className="px-3 py-1 text-blue-600 hover:underline"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">{sede.nombre}</h3>
+                <p className="text-gray-600 mb-2">{sede.direccion}</p>
+                <a
+                  href={sede.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline mb-2 block"
+                >
+                  {sede.url}
+                </a>
+                {sede.url_iframe && (
+                  <div className="mb-4">
+                    <iframe
+                      src={sede.url_iframe}
+                      className="w-full h-48 rounded border"
+                      frameBorder="0"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                )}
+                {sede.cursos && sede.cursos.length > 0 && (
+                  <div className="mb-2">
+                    <h4 className="text-sm font-medium text-gray-700">
+                      Cursos:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {sede.cursos.map((cursoId) => {
+                        const curso = cursos.find(
+                          (c) => c.id_curso === cursoId
+                        );
+                        return curso ? (
+                          <span
+                            key={cursoId}
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                          >
+                            {curso.nombre_curso}
+                          </span>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
+                {sede.archivos && sede.archivos.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    {sede.archivos.map((archivo) => (
+                      <div key={archivo.id_archivo}>
+                        <Image
+                          src={`/api/sedes/download/${archivo.id_archivo}`}
+                          alt={archivo.titulo}
+                          width={100}
+                          height={100}
+                          className="w-full h-24 object-cover rounded"
+                          unoptimized
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => startEdit(sede)}
+                    className="px-3 py-1 text-blue-600 hover:underline"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(sede.id_sede)}
+                    className="px-3 py-1 text-red-600 hover:underline"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

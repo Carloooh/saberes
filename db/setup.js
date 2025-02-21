@@ -306,7 +306,9 @@ db.exec(`
         id_sede TEXT NOT NULL PRIMARY KEY,
         nombre TEXT NOT NULL,
         direccion TEXT NOT NULL,
-        url TEXT NOT NULL
+        url TEXT NOT NULL,
+        url_iframe TEXT NOT NULL,
+        cursos TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS Sede_archivo (
