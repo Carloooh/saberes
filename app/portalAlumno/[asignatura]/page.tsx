@@ -1,35 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useParams, useSearchParams } from "next/navigation";
 import TabMaterial from "@/app/components/estudiante/TabMaterial";
 import TabCalificaciones from "@/app/components/estudiante/TabCalificaciones";
 import TabTareas from "@/app/components/estudiante/TabTareas";
 
-interface AsignaturaPageProps {
-  params: {
-    asignatura: string;
-  };
-}
-
-const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
+const AsignaturaPage = () => {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const asignaturaId = params?.asignatura as string;
+  const nombreAsignatura = searchParams.get("nombre");
   const [activeTab, setActiveTab] = useState("material");
   const [loading, setLoading] = useState(true);
-  const [asignaturaData, setAsignaturaData] = useState<any>(null);
-
-  const router = useRouter();
-  const { id_asignatura, nombre } = router.query;
 
   useEffect(() => {
     const fetchAsignaturaData = async () => {
+      if (!asignaturaId) return;
+
       try {
-        const response = await fetch(
-          `/api/estudiante/asignatura/${params.asignatura}`
-        );
-        const data = await response.json();
-        if (data.success) {
-          setAsignaturaData(data.data);
-        }
         setLoading(false);
       } catch (error) {
         console.error("Error fetching asignatura data:", error);
@@ -38,7 +27,7 @@ const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
     };
 
     fetchAsignaturaData();
-  }, [params.asignatura]);
+  }, [asignaturaId]);
 
   if (loading) {
     return (
@@ -53,7 +42,7 @@ const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-6">
-        {nombre ? nombre : "Asignatura"}
+        {nombreAsignatura || "Asignatura"}
       </h1>
 
       <div className="mb-6">
@@ -94,14 +83,12 @@ const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
 
         <div className="mt-6">
           {activeTab === "material" && (
-            <TabMaterial asignaturaId={params.asignatura} />
+            <TabMaterial asignaturaId={asignaturaId} />
           )}
           {activeTab === "calificaciones" && (
-            <TabCalificaciones asignaturaId={params.asignatura} />
+            <TabCalificaciones asignaturaId={asignaturaId} />
           )}
-          {activeTab === "tareas" && (
-            <TabTareas asignaturaId={params.asignatura} />
-          )}
+          {activeTab === "tareas" && <TabTareas asignaturaId={asignaturaId} />}
         </div>
       </div>
     </div>

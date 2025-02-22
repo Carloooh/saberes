@@ -40,7 +40,6 @@ export default function Header() {
   };
 
   const handleLogin = async (rut_usuario: string, clave: string) => {
-    console.log(clave);
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",

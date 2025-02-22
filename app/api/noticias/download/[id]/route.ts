@@ -15,18 +15,17 @@ function getMimeType(extension: string): string {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    if (!params.id) {
+    const { id } = await context.params;
+
+    if (!id) {
       return NextResponse.json(
         { success: false, error: "ID no proporcionado" },
         { status: 400 }
       );
     }
-
-    // Log for debugging
-    console.log("Fetching file with ID:", params.id);
 
     const query = db.prepare(`
       SELECT archivo, extension, titulo
@@ -34,10 +33,7 @@ export async function GET(
       WHERE id_archivo = ?
     `);
 
-    const archivo = query.get(params.id);
-
-    // Log for debugging
-    console.log("Query result:", archivo ? "File found" : "File not found");
+    const archivo = query.get(id);
 
     if (!archivo) {
       return NextResponse.json(
@@ -54,9 +50,6 @@ export async function GET(
     }
 
     const contentType = getMimeType(archivo.extension);
-
-    // Log for debugging
-    console.log("Serving file with content type:", contentType);
 
     return new NextResponse(archivo.archivo, {
       headers: {

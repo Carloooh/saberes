@@ -6,9 +6,9 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const asignaturaId = searchParams.get("asignaturaId");
-    
+
     // Get user session from cookies instead of localStorage
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("userSession");
     const userSession = sessionCookie ? JSON.parse(sessionCookie.value) : null;
     const rutEstudiante = userSession?.rut_usuario;
@@ -35,11 +35,10 @@ export async function GET(request: Request) {
 
     const calificaciones = query.all(rutEstudiante, asignaturaId);
 
-    return NextResponse.json({ 
-      success: true, 
-      calificaciones 
+    return NextResponse.json({
+      success: true,
+      calificaciones,
     });
-
   } catch (error) {
     console.error("Error fetching calificaciones:", error);
     return NextResponse.json(

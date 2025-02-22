@@ -119,7 +119,10 @@ const PortalAlumno = () => {
                 </h3>
                 <a
                   // href={`/portalAlumno/${asignatura.id_asignatura}`}
-                  href={`/portalAlumno/${asignatura.id_asignatura}?nombre=${asignatura.nombre_asignatura}`}
+                  href={`/portalAlumno/${
+                    asignatura.id_asignatura
+                  }?nombre=${encodeURIComponent(asignatura.nombre_asignatura)}`}
+                  // href={`/portalAlumno/${asignatura.id_asignatura}?nombre=${asignatura.nombre_asignatura}`}
                   className="text-blue-600 hover:underline text-sm"
                 >
                   Ver asignatura

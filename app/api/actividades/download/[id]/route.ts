@@ -15,10 +15,12 @@ function getMimeType(extension: string): string {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    if (!params.id) {
+    const { id } = await context.params;
+
+    if (!id) {
       return NextResponse.json(
         { success: false, error: "ID no proporcionado" },
         { status: 400 }
@@ -31,7 +33,7 @@ export async function GET(
       WHERE id_archivo = ?
     `);
 
-    const archivo = query.get(params.id);
+    const archivo = query.get(id);
 
     if (!archivo || !archivo.archivo) {
       return NextResponse.json(
