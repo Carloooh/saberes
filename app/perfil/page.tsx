@@ -20,7 +20,6 @@ interface Curso {
 interface UserProfile {
   rut_usuario: string;
   rut_tipo: string;
-  edad: string;
   nombres: string;
   apellidos: string;
   email: string;
@@ -112,6 +111,20 @@ const Perfil: React.FC = () => {
     }
   }, []);
 
+  const calculateAge = (dateString: string): number => {
+    const today = new Date();
+    const birthDate = new Date(dateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
   useEffect(() => {
     if (userSession) {
       const fetchUserProfile = async () => {
@@ -178,14 +191,18 @@ const Perfil: React.FC = () => {
                 {userData.fecha_nacimiento}
               </p>
               <p>
-                <span className="font-medium">Edad:</span> {userData.edad} años
+                <span className="font-medium">Edad:</span>{" "}
+                {userData?.fecha_nacimiento
+                  ? `${calculateAge(userData.fecha_nacimiento)} años`
+                  : "No disponible"}
               </p>
               <p>
                 <span className="font-medium">Nacionalidad:</span>{" "}
                 {userData.nacionalidad}
               </p>
               <p>
-                <span className="font-medium">Talla:</span> {userData.talla}
+                <span className="font-medium">Talla:</span>{" "}
+                {userData.talla ? userData.talla : "No disponible"}
               </p>
 
               <p>
@@ -210,7 +227,9 @@ const Perfil: React.FC = () => {
                       Información Familiar
                     </h2>
                     <p>
-                      <span className="font-medium">Nucleo familiar:</span>{" "}
+                      <span className="font-medium">
+                        Núcleo familiar (cantidad):{" "}
+                      </span>{" "}
                       {userData.apoderado.nucleo_familiar}
                     </p>
                     <h3 className="text-lg pt-2 mb-2">Apoderado principal</h3>
@@ -224,7 +243,7 @@ const Perfil: React.FC = () => {
                       {userData.apoderado.rut_apoderado1}
                     </p>
                     <p>
-                      <span className="font-medium">Tipo:</span>
+                      <span className="font-medium">Tipo: </span>
                       {userData.apoderado.rut_tipo_apoderado1}
                     </p>
                     <p>

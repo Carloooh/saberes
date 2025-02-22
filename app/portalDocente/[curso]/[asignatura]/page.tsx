@@ -28,7 +28,11 @@ const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
   }, [params]);
 
   if (!curso || !asignatura) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-gray-500">Cargando información asignatura...</div>
+      </div>
+    );
   }
 
   const cursoNombre = decodeURIComponent(curso);

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
+import toast from "react-hot-toast";
 
 interface Archivo {
   id_archivo: string;
@@ -47,7 +48,7 @@ const TabTareas = ({ asignaturaId }: { asignaturaId: string }) => {
       }
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching tareas:", error);
+      toast.error(`Error fetching tareas: ${error}`);
       setLoading(false);
     }
   };
@@ -73,7 +74,7 @@ const TabTareas = ({ asignaturaId }: { asignaturaId: string }) => {
 
       const files = formData.getAll("archivos");
       if (files.length === 0) {
-        alert("Por favor, selecciona al menos un archivo");
+        toast("Por favor, selecciona al menos un archivo");
         return;
       }
 
@@ -85,14 +86,14 @@ const TabTareas = ({ asignaturaId }: { asignaturaId: string }) => {
       const data = await response.json();
 
       if (data.success) {
-        alert("Tarea entregada exitosamente");
+        toast.success("Tarea entregada exitosamente");
         fetchTareas();
       } else {
-        alert(data.error || "Error al entregar la tarea");
+        toast.error(`Error al entregar la tarea ${data.error}`);
       }
     } catch (error) {
       console.error("Error submitting tarea:", error);
-      alert("Error al entregar la tarea");
+      toast.error(`Error fetching tareas: ${error}`);
     } finally {
       setSubmitting(null);
     }

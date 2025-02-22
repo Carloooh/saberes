@@ -35,7 +35,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   } else if (path.startsWith("/perfil")) {
-    if (!["Estudiante", "Docente", "Administrador"].includes(userSession.tipo_usuario)) {
+    if (
+      !["Estudiante", "Docente", "Administrador"].includes(
+        userSession.tipo_usuario
+      )
+    ) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
@@ -45,5 +49,10 @@ export async function middleware(request: NextRequest) {
 
 // Configuración para aplicar el middleware solo a ciertas rutas
 export const config = {
-  matcher: ["/portalDocente/:path*", "/portalAdministrador/:path*", "/portalAlumno/:path*", "/perfil/:path*"],
+  matcher: [
+    "/portalDocente/:path*",
+    "/portalAdministrador/:path*",
+    "/portalAlumno/:path*",
+    "/perfil/:path*",
+  ],
 };

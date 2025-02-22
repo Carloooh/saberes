@@ -57,7 +57,7 @@ export default function Header() {
         router.push("/");
         toast.success("Sesión iniciada correctamente");
       } else {
-        toast.error("Credenciales incorrectas");
+        toast.error(data.error);
       }
     } catch (error) {
       toast.error(`Error: ${error}`);
