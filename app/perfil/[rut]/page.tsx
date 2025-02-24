@@ -232,12 +232,12 @@ const PerfilUsuario: React.FC = () => {
                 {isEditing ? "Guardar Cambios" : "Editar Perfil"}
               </button>
             )} */}
-            <button
+            {/* <button
               onClick={() => router.back()}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
             >
               Volver
-            </button>
+            </button> */}
           </div>
         </div>
 
