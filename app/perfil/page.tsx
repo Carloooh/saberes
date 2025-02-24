@@ -155,7 +155,13 @@ const Perfil: React.FC = () => {
   }, [userSession]);
 
   if (loading) {
-    return <div>Cargando...</div>;
+    return (
+      <div>
+        <div className="flex justify-center items-center p-8">
+          <div className="text-gray-500">Cargando datos del estudiante...</div>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -1,36 +1,5 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+0 - Recuperación de contraseña del usuario
 
-## Getting Started
+1 - en portalDocente/[id]/page.tsx quitar le botón agregar asistencia, dejar el total alumnos, total dias de asistencia y la último día de asistencia registrada, poner tab de listado de estudiantes y otra de asistencia, esos 2 seran componentes, en asistencia pues la mimssma lógica que ya tengo que agregar día y en otra poner el listado de estudiantes, y que al clicar, se expanda la card y aparezca su info del perfil, igual que en /perfil/page.tsx pero solo para que los profes o administradores la puedan visualizar. Vamos a utilizar los componentes components/docente/TabAsistencia.tsx y components/docente/TabEstudiantes.tsx, la página portalDocente/[id]/page.tsx, los endpoints que ya están creados en /api/perfil/route.ts y /api/perfil/documentos/[id]/route.ts. Tal vez es mejor hacer una página dedicada que sea para ver el perfil de un usuario en específico (aparte de la vista perfil/page.tsx que cada usuario ve la info de su propio perfil)
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2 - Si el estudiante cambia de curso se tienen que borrar sus registros de asistencia/entregas de tareas/calificaciones / Tal vez poner opcion de cambiar de curso en el listado de estudiantes pero le dejamos la info al administrador solamente mejor, y si un alumno es de tercero advertir que el usuario es de último año y solo se puede cambiar su estado a "Egresado" o eliminarlo del sistema
