@@ -483,10 +483,3 @@ export default function Header() {
     </>
   );
 }
-
-// https://www.youtube.com/watch?v=ANQfJrKIPGU
-
-// https://www.nodemailer.com/
-
-// https://react.email/docs/introduction
-// https://demo.react.email/preview/magic-links/plaid-verify-identity

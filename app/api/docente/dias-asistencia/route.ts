@@ -60,32 +60,6 @@ export async function POST(request: Request) {
       );
     }
   }
-// export async function POST(request: Request) {
-//     try {
-//       const { curso, fecha } = await request.json();
-  
-//       if (!curso || !fecha) {
-//         return NextResponse.json(
-//           { success: false, error: "Faltan campos obligatorios" },
-//           { status: 400 }
-//         );
-//       }
-  
-//       const insertDia = db.prepare(`
-//         INSERT INTO DiasAsistencia (id_dia, id_curso, fecha)
-//         VALUES (?, ?, ?)
-//       `);
-//       insertDia.run(`${curso}-${fecha}`, curso, fecha);
-  
-//       return NextResponse.json({ success: true });
-//     } catch (error) {
-//       console.error("Error creating attendance day:", error);
-//       return NextResponse.json(
-//         { success: false, error: "Error creating attendance day" },
-//         { status: 500 }
-//       );
-//     }
-//   }
 
   export async function DELETE(request: Request) {
     try {

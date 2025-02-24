@@ -13,12 +13,11 @@ function getMimeType(extension: string): string {
   return mimeTypes[extension.toLowerCase()] || "application/octet-stream";
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET( req: Request ) {
   try {
-    if (!params.id) {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) {
       return NextResponse.json(
         { success: false, error: "ID no proporcionado" },
         { status: 400 }
@@ -31,7 +30,7 @@ export async function GET(
       WHERE id_archivo = ?
     `);
 
-    const archivo = query.get(params.id);
+    const archivo = query.get(id);
 
     if (!archivo) {
       return NextResponse.json(
