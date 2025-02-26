@@ -4,6 +4,8 @@
 
 2 - Si el estudiante cambia de curso se tienen que borrar sus registros de asistencia/entregas de tareas/calificaciones / Tal vez poner opcion de cambiar de curso en el listado de estudiantes pero le dejamos la info al administrador solamente mejor, y si un alumno es de tercero advertir que el usuario es de último año y solo se puede cambiar su estado a "Egresado" o eliminarlo del sistema
 
+// https://www.youtube.com/watch?v=7tpco9Fplsg con brevo
+
 // https://www.youtube.com/watch?v=ANQfJrKIPGU
 
 // https://www.nodemailer.com/

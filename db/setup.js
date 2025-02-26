@@ -66,7 +66,8 @@ db.exec(`
         direccion TEXT,
         comuna TEXT,
         sector TEXT,
-        codigo_temporal TEXT
+        codigo_temporal TEXT,
+        codigo_expiracion TEXT
     );
 
     CREATE TABLE IF NOT EXISTS Curso (
