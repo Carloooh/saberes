@@ -70,6 +70,15 @@ const TabTareas = ({ asignaturaId, cursoId }: TabTareasProps) => {
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
+
+    const confirmed = confirm(
+      "¿Estás seguro de entregar esta tarea? Una vez entregada, no podrás modificarla."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     setSubmitting(tareaId);
 
     try {
