@@ -13,7 +13,7 @@ export async function GET(request: Request) {
         { status: 400 }
       );
     }
-
+    console.log(cursoId);
     // Obtener los días de asistencia
     const diasQuery = db.prepare(`
       SELECT * FROM DiasAsistencia
@@ -34,71 +34,70 @@ export async function GET(request: Request) {
 
 // Crear un nuevo día de asistencia
 export async function POST(request: Request) {
-    try {
-      const { curso, fecha } = await request.json();
-  
-      if (!curso || !fecha) {
-        return NextResponse.json(
-          { success: false, error: "Faltan campos obligatorios" },
-          { status: 400 }
-        );
-      }
-  
-      // Insertar un nuevo día de asistencia
-      const insertDia = db.prepare(`
+  try {
+    const { curso, fecha } = await request.json();
+    if (!curso || !fecha) {
+      return NextResponse.json(
+        { success: false, error: "Faltan campos obligatorios" },
+        { status: 400 }
+      );
+    }
+
+    // Insertar un nuevo día de asistencia
+    const insertDia = db.prepare(`
         INSERT INTO DiasAsistencia (id_dia, id_curso, fecha)
         VALUES (?, ?, ?)
       `);
-      insertDia.run(`${curso}-${fecha}`, curso, fecha);
-  
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      console.error("Error creating attendance day:", error);
+    insertDia.run(`${curso}-${fecha}`, curso, fecha);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error creating attendance day:", error);
+    return NextResponse.json(
+      { success: false, error: "Error creating attendance day" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const diaId = searchParams.get("dia");
+
+    if (!diaId) {
       return NextResponse.json(
-        { success: false, error: "Error creating attendance day" },
-        { status: 500 }
+        { success: false, error: "Falta el ID del día" },
+        { status: 400 }
       );
     }
-  }
 
-  export async function DELETE(request: Request) {
+    db.exec("BEGIN TRANSACTION");
+
     try {
-      const { searchParams } = new URL(request.url);
-      const diaId = searchParams.get("dia");
-  
-      if (!diaId) {
-        return NextResponse.json(
-          { success: false, error: "Falta el ID del día" },
-          { status: 400 }
-        );
-      }
-  
-      db.exec('BEGIN TRANSACTION');
-  
-      try {
-        // Primero eliminar las asistencias relacionadas
-        const deleteAsistencias = db.prepare(`
+      // Primero eliminar las asistencias relacionadas
+      const deleteAsistencias = db.prepare(`
           DELETE FROM Asistencia WHERE id_dia = ?
         `);
-        deleteAsistencias.run(diaId);
-  
-        // Luego eliminar el día
-        const deleteDia = db.prepare(`
+      deleteAsistencias.run(diaId);
+
+      // Luego eliminar el día
+      const deleteDia = db.prepare(`
           DELETE FROM DiasAsistencia WHERE id_dia = ?
         `);
-        deleteDia.run(diaId);
-  
-        db.exec('COMMIT');
-        return NextResponse.json({ success: true });
-      } catch (error) {
-        db.exec('ROLLBACK');
-        throw error;
-      }
+      deleteDia.run(diaId);
+
+      db.exec("COMMIT");
+      return NextResponse.json({ success: true });
     } catch (error) {
-      console.error("Error al eliminar día:", error);
-      return NextResponse.json(
-        { success: false, error: "Error al eliminar día" },
-        { status: 500 }
-      );
+      db.exec("ROLLBACK");
+      throw error;
     }
+  } catch (error) {
+    console.error("Error al eliminar día:", error);
+    return NextResponse.json(
+      { success: false, error: "Error al eliminar día" },
+      { status: 500 }
+    );
   }
+}
