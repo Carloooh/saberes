@@ -13,12 +13,10 @@ function getMimeType(extension: string): string {
   return mimeTypes[extension.toLowerCase()] || "application/octet-stream";
 }
 
-export async function GET(
-  request: Request,
-  context: { params: { id: string } }
-) {
+export async function GET(request: Request ) {
   try {
-    const { id } = await context.params;
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
 
     if (!id) {
       return NextResponse.json(

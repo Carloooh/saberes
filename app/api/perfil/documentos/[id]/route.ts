@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET( request: Request) {
   try {
-    const id = params.id;
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
 
     const query = db.prepare(`
       SELECT documento, titulo, extension
