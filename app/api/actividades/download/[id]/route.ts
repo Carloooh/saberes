@@ -13,17 +13,12 @@ function getMimeType(extension: string): string {
   return mimeTypes[extension.toLowerCase()] || "application/octet-stream";
 }
 
-export async function GET(
-  request: Request,
-  // context: { params: { id: string } }
-  // { params }: { params: { id: string } }
-
-) {
+export async function GET( request: Request,  { params }: { params: { id: string } }) {
   try {
-    // const { id } = await context.params;
-    // const { id } = params;
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+    // const { searchParams } = new URL(request.url);
+    // const id = searchParams.get("id");
+    const { id } = await params;
+    console.log(id)
     if (!id) {
       return NextResponse.json(
         { success: false, error: "ID no proporcionado" },
