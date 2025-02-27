@@ -23,7 +23,7 @@ export async function GET( request: Request,  context: { params: { id: string } 
   try {
     // const { searchParams } = new URL(request.url);
     // const id = searchParams.get("id");
-    const { id } = context.params;
+    const { id } = await context.params;
     if (!id) {
       return NextResponse.json(
         { success: false, error: "ID no proporcionado" },
