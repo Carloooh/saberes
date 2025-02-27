@@ -14,8 +14,11 @@ interface Material {
     extension: string;
   }[];
 }
-
-const TabMaterial = ({ asignaturaId }: { asignaturaId: string }) => {
+interface TabMaterialProps {
+  cursoId: string;
+  asignaturaId: string;
+}
+const TabMaterial = ({ asignaturaId, cursoId }: TabMaterialProps) => {
   const [materiales, setMateriales] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +26,7 @@ const TabMaterial = ({ asignaturaId }: { asignaturaId: string }) => {
     const fetchMateriales = async () => {
       try {
         const response = await fetch(
-          `/api/estudiante/material?asignaturaId=${asignaturaId}`
+          `/api/estudiante/material?cursoId=${cursoId}&asignaturaId=${asignaturaId}`
         );
         const data = await response.json();
         if (data.success) {
@@ -37,10 +40,13 @@ const TabMaterial = ({ asignaturaId }: { asignaturaId: string }) => {
     };
 
     fetchMateriales();
-  }, [asignaturaId]);
+  }, [asignaturaId, cursoId]);
 
   const handleDownload = (archivoId: string) => {
-    window.open(`/api/estudiante/material/download?id=${archivoId}`, "_blank");
+    window.open(
+      `/api/estudiante/material/download?id=${archivoId}&cursoId=${cursoId}`,
+      "_blank"
+    );
   };
 
   if (loading)

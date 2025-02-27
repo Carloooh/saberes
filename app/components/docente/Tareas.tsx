@@ -101,7 +101,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
   const fetchEntregas = async (id_tarea: string, id_asignatura: string) => {
     try {
       const response = await fetch(
-        `/api/docente/tareas/${id_tarea}/entregas?id_asignatura=${id_asignatura}`
+        `/api/docente/tareas/${id_tarea}/entregas?id_asignatura=${id_asignatura}&cursoId=${cursoId}`
       );
       const data = await response.json();
       if (data.success) {
@@ -141,7 +141,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id_entrega, estado }),
+        body: JSON.stringify({ id_entrega, estado, cursoId: cursoId }),
       });
       if (response.ok) {
         // Actualizamos las entregas para esta tarea
@@ -158,6 +158,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
     formData.append("titulo", newTarea.titulo);
     formData.append("descripcion", newTarea.descripcion);
     formData.append("id_asignatura", asignaturaId);
+    formData.append("cursoId", cursoId);
     for (let i = 0; i < newTarea.archivos.length; i++) {
       formData.append("archivos", newTarea.archivos[i]);
     }
@@ -181,7 +182,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
       const response = await fetch("/api/docente/tareas", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_tarea, id_asignatura }),
+        body: JSON.stringify({ id_tarea, id_asignatura, cursoId: cursoId }),
       });
       if (response.ok) {
         fetchTareas();

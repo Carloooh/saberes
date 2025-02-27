@@ -121,7 +121,9 @@ const PortalAlumno = () => {
                   // href={`/portalAlumno/${asignatura.id_asignatura}`}
                   href={`/portalAlumno/${
                     asignatura.id_asignatura
-                  }?nombre=${encodeURIComponent(asignatura.nombre_asignatura)}`}
+                  }?nombre=${encodeURIComponent(
+                    asignatura.nombre_asignatura
+                  )}&cursoId=${userData?.cursoAlumno.id_curso}`}
                   // href={`/portalAlumno/${asignatura.id_asignatura}?nombre=${asignatura.nombre_asignatura}`}
                   className="text-blue-600 hover:underline text-sm"
                 >

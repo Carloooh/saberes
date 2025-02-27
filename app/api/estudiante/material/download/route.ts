@@ -5,6 +5,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const archivoId = searchParams.get("id");
+    const cursoId = searchParams.get("cursoId");
+    const asignaturaId = searchParams.get("asignaturaId");
 
     if (!archivoId) {
       return NextResponse.json(
@@ -16,9 +18,9 @@ export async function GET(request: Request) {
     const query = db.prepare(`
       SELECT archivo, extension, titulo
       FROM Material_archivo
-      WHERE id_material_archivo = ?
+      WHERE id_material_archivo = ? AND id_curso = ? AND id_asignatura = ?
     `);
-    const material = query.get(archivoId);
+    const material = query.get(archivoId, cursoId, asignaturaId);
 
     if (!material) {
       return NextResponse.json(
@@ -28,11 +30,11 @@ export async function GET(request: Request) {
     }
 
     const buffer = Buffer.from(material.archivo);
-    
+
     return new NextResponse(buffer, {
       headers: {
-        'Content-Type': getMimeType(material.extension),
-        'Content-Disposition': `inline; filename="${material.titulo}.${material.extension}"`,
+        "Content-Type": getMimeType(material.extension),
+        "Content-Disposition": `inline; filename="${material.titulo}.${material.extension}"`,
       },
     });
   } catch (error) {
@@ -46,18 +48,18 @@ export async function GET(request: Request) {
 
 function getMimeType(extension: string): string {
   const mimeTypes: { [key: string]: string } = {
-    'pdf': 'application/pdf',
-    'doc': 'application/msword',
-    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'xls': 'application/vnd.ms-excel',
-    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'gif': 'image/gif',
-    'mp3': 'audio/mpeg',
-    'mp4': 'video/mp4',
+    pdf: "application/pdf",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
+    mp3: "audio/mpeg",
+    mp4: "video/mp4",
   };
-  
-  return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+
+  return mimeTypes[extension.toLowerCase()] || "application/octet-stream";
 }

@@ -10,13 +10,14 @@ const AsignaturaPage = () => {
   const params = useParams();
   const searchParams = useSearchParams();
   const asignaturaId = params?.asignatura as string;
+  const cursoId = searchParams.get("cursoId");
   const nombreAsignatura = searchParams.get("nombre");
   const [activeTab, setActiveTab] = useState("material");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAsignaturaData = async () => {
-      if (!asignaturaId) return;
+      if (!asignaturaId && !cursoId) return;
 
       try {
         setLoading(false);
@@ -27,7 +28,7 @@ const AsignaturaPage = () => {
     };
 
     fetchAsignaturaData();
-  }, [asignaturaId]);
+  }, [asignaturaId, cursoId]);
 
   if (loading) {
     return (
@@ -83,12 +84,14 @@ const AsignaturaPage = () => {
 
         <div className="mt-6">
           {activeTab === "material" && (
-            <TabMaterial asignaturaId={asignaturaId} />
+            <TabMaterial cursoId={cursoId} asignaturaId={asignaturaId} />
           )}
           {activeTab === "calificaciones" && (
-            <TabCalificaciones asignaturaId={asignaturaId} />
+            <TabCalificaciones cursoId={cursoId} asignaturaId={asignaturaId} />
           )}
-          {activeTab === "tareas" && <TabTareas asignaturaId={asignaturaId} />}
+          {activeTab === "tareas" && (
+            <TabTareas cursoId={cursoId} asignaturaId={asignaturaId} />
+          )}
         </div>
       </div>
     </div>

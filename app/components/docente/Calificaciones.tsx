@@ -74,6 +74,7 @@ export default function Calificaciones({
         body: JSON.stringify({
           ...newEvaluacion,
           id_asignatura: asignaturaId,
+          cursoId: cursoId,
         }),
       });
 
@@ -102,6 +103,7 @@ export default function Calificaciones({
           id_evaluacion: selectedEvaluacion,
           rut_estudiante,
           nota,
+          id_curso: cursoId,
         }),
       });
 

@@ -40,7 +40,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
   const fetchMateriales = async () => {
     try {
       const response = await fetch(
-        `/api/docente/material?asignaturaId=${asignaturaId}`
+        `/api/docente/material?cursoId=${cursoId}&asignaturaId=${asignaturaId}`
       );
       const data = await response.json();
       if (data.success) {
@@ -73,6 +73,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
     }
 
     formData.append("id_asignatura", asignaturaId);
+    formData.append("cursoId", cursoId);
 
     try {
       const response = await fetch("/api/docente/material", {
@@ -95,9 +96,12 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
     if (!confirm("¿Está seguro de eliminar este material?")) return;
 
     try {
-      const response = await fetch(`/api/docente/material?id=${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/docente/material?id=${id}&cursoId=${cursoId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         fetchMateriales();
@@ -114,12 +118,15 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
   };
 
   const handleFileView = (archivoId: string) => {
-    window.open(`/api/docente/material/download?id=${archivoId}`, "_blank");
+    window.open(
+      `/api/docente/material/download?cursoId=${cursoId}&asignaturaId=${asignaturaId}&id=${archivoId}`,
+      "_blank"
+    );
   };
 
   const handleFileDownload = (archivoId: string) => {
     const link = document.createElement("a");
-    link.href = `/api/docente/material/download?id=${archivoId}`;
+    link.href = `/api/docente/material/download?cursoId=${cursoId}&asignaturaId=${asignaturaId}&id=${archivoId}`;
     link.setAttribute("download", "");
     document.body.appendChild(link);
     link.click();

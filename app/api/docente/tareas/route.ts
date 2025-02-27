@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const asignaturaId = searchParams.get("asignaturaId");
+    const cursoId = searchParams.get("cursoId");
 
     if (!asignaturaId) {
       return NextResponse.json(
@@ -27,21 +28,21 @@ export async function GET(request: Request) {
         ) as archivos
       FROM Tareas t
       LEFT JOIN Tarea_archivo ta ON t.id_tarea = ta.id_tarea
-      WHERE t.id_asignatura = ?
+      WHERE t.id_asignatura = ? AND t.id_curso = ?
       GROUP BY t.id_tarea, t.id_asignatura
       ORDER BY t.fecha DESC
     `);
 
-    const tareas = query.all(asignaturaId);
-    const processedTareas = tareas.map(tarea => {
-      const parsedArchivos = JSON.parse(tarea.archivos || '[]').filter(Boolean);
+    const tareas = query.all(asignaturaId, cursoId);
+    const processedTareas = tareas.map((tarea) => {
+      const parsedArchivos = JSON.parse(tarea.archivos || "[]").filter(Boolean);
       return {
         id_tarea: tarea.id_tarea,
         id_asignatura: tarea.id_asignatura,
         titulo: tarea.titulo,
         descripcion: tarea.descripcion,
         fecha: tarea.fecha,
-        archivos: parsedArchivos
+        archivos: parsedArchivos,
       };
     });
 
@@ -61,7 +62,8 @@ export async function POST(request: Request) {
     const titulo = formData.get("titulo") as string;
     const descripcion = formData.get("descripcion") as string;
     const id_asignatura = formData.get("id_asignatura") as string;
-    const fecha = new Date().toISOString().split('T')[0];
+    const cursoId = formData.get("cursoId") as string;
+    const fecha = new Date().toISOString().split("T")[0];
     const archivos = formData.getAll("archivos");
 
     if (!titulo || !descripcion || !id_asignatura) {
@@ -73,31 +75,39 @@ export async function POST(request: Request) {
 
     const id_tarea = uuidv4();
 
-    db.exec('BEGIN TRANSACTION');
+    db.exec("BEGIN TRANSACTION");
 
     try {
       const insertTarea = db.prepare(`
-        INSERT INTO Tareas (id_tarea, id_asignatura, titulo, descripcion, fecha)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO Tareas (id_tarea, id_curso, id_asignatura, titulo, descripcion, fecha)
+        VALUES (?, ?, ?, ?, ?, ?)
       `);
-      insertTarea.run(id_tarea, id_asignatura, titulo, descripcion, fecha);
-      
+      insertTarea.run(
+        id_tarea,
+        cursoId,
+        id_asignatura,
+        titulo,
+        descripcion,
+        fecha
+      );
+
       // Procesa archivos
       for (const file of archivos) {
         if (file instanceof File) {
           const arrayBuffer = await file.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
-          const fileName = file.name.split('.')[0];
-          const extension = file.name.split('.').pop() || '';
+          const fileName = file.name.split(".")[0];
+          const extension = file.name.split(".").pop() || "";
           const id_archivo = uuidv4();
 
           const insertArchivo = db.prepare(`
-            INSERT INTO Tarea_archivo (id_archivo, id_tarea, id_asignatura, titulo, archivo, extension)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO Tarea_archivo (id_archivo, id_tarea, id_curso, id_asignatura, titulo, archivo, extension)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
           `);
           insertArchivo.run(
             id_archivo,
             id_tarea,
+            cursoId,
             id_asignatura,
             fileName,
             buffer,
@@ -106,10 +116,10 @@ export async function POST(request: Request) {
         }
       }
 
-      db.exec('COMMIT');
+      db.exec("COMMIT");
       return NextResponse.json({ success: true });
     } catch (error) {
-      db.exec('ROLLBACK');
+      db.exec("ROLLBACK");
       throw error;
     }
   } catch (error) {
@@ -123,7 +133,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const { id_tarea, id_asignatura } = await request.json();
+    const { id_tarea, id_asignatura, cursoId } = await request.json();
 
     if (!id_tarea || !id_asignatura) {
       return NextResponse.json(
@@ -132,25 +142,25 @@ export async function DELETE(request: Request) {
       );
     }
 
-    db.exec('BEGIN TRANSACTION');
+    db.exec("BEGIN TRANSACTION");
 
     try {
       const deleteArchivos = db.prepare(`
         DELETE FROM Tarea_archivo
-        WHERE id_tarea = ? AND id_asignatura = ?
+        WHERE id_tarea = ? AND id_asignatura = ? AND id_curso = ?
       `);
-      deleteArchivos.run(id_tarea, id_asignatura);
+      deleteArchivos.run(id_tarea, id_asignatura, cursoId);
 
       const deleteTarea = db.prepare(`
         DELETE FROM Tareas
-        WHERE id_tarea = ? AND id_asignatura = ?
+        WHERE id_tarea = ? AND id_asignatura = ? AND id_curso = ?
       `);
-      deleteTarea.run(id_tarea, id_asignatura);
+      deleteTarea.run(id_tarea, id_asignatura, cursoId);
 
-      db.exec('COMMIT');
+      db.exec("COMMIT");
       return NextResponse.json({ success: true });
     } catch (error) {
-      db.exec('ROLLBACK');
+      db.exec("ROLLBACK");
       throw error;
     }
   } catch (error) {

@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
     const query = db.prepare(`
       SELECT * FROM Asistencia
-      WHERE id_dia = ?
+      WHERE id_dia = ? AND id_curso = ?
     `);
     const asistencias = query.all(diaId);
 

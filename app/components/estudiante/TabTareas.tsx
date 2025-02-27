@@ -28,19 +28,24 @@ interface Tarea {
   entrega: Entrega | null;
 }
 
-const TabTareas = ({ asignaturaId }: { asignaturaId: string }) => {
+interface TabTareasProps {
+  cursoId: string;
+  asignaturaId: string;
+}
+
+const TabTareas = ({ asignaturaId, cursoId }: TabTareasProps) => {
   const [tareas, setTareas] = useState<Tarea[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTareas();
-  }, [asignaturaId]);
+  }, [asignaturaId, cursoId]);
 
   const fetchTareas = async () => {
     try {
       const response = await fetch(
-        `/api/estudiante/tareas?asignaturaId=${asignaturaId}`
+        `/api/estudiante/tareas?cursoId=${cursoId}&asignaturaId=${asignaturaId}`
       );
       const data = await response.json();
       if (data.success) {
@@ -55,7 +60,7 @@ const TabTareas = ({ asignaturaId }: { asignaturaId: string }) => {
 
   const handleDownload = (archivoId: string, tipo: "tarea" | "entrega") => {
     window.open(
-      `/api/docente/tareas/download?id=${archivoId}&tipo=${tipo}`,
+      `/api/docente/tareas/download?id=${archivoId}&tipo=${tipo}&cursoId=${cursoId}`,
       "_blank"
     );
   };
@@ -71,6 +76,7 @@ const TabTareas = ({ asignaturaId }: { asignaturaId: string }) => {
       const formData = new FormData(e.currentTarget);
       formData.append("tareaId", tareaId);
       formData.append("asignaturaId", asignaturaId);
+      formData.append("cursoId", cursoId);
 
       const files = formData.getAll("archivos");
       if (files.length === 0) {

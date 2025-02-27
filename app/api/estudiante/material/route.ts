@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const asignaturaId = searchParams.get("asignaturaId");
+    const cursoId = searchParams.get("cursoId");
 
     if (!asignaturaId) {
       return NextResponse.json(
@@ -25,16 +26,18 @@ export async function GET(request: Request) {
         ) as archivos
       FROM Material_educativo m
       LEFT JOIN Material_archivo ma ON m.id_material = ma.id_material
-      WHERE m.id_asignatura = ?
+      WHERE m.id_asignatura = ? AND m.id_curso = ?
       GROUP BY m.id_material
       ORDER BY m.fecha DESC
     `);
 
-    const materiales = query.all(asignaturaId);
+    const materiales = query.all(asignaturaId, cursoId);
 
     // Parse the JSON string to actual array
-    materiales.forEach(material => {
-      material.archivos = JSON.parse(material.archivos).filter(a => a.id_material_archivo);
+    materiales.forEach((material) => {
+      material.archivos = JSON.parse(material.archivos).filter(
+        (a) => a.id_material_archivo
+      );
     });
 
     return NextResponse.json({ success: true, materiales });

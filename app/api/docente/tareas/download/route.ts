@@ -3,18 +3,18 @@ import db from "@/db";
 
 function getMimeType(extension: string): string {
   const mimeTypes: { [key: string]: string } = {
-    'pdf': 'application/pdf',
-    'doc': 'application/msword',
-    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'xls': 'application/vnd.ms-excel',
-    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'gif': 'image/gif',
-    'txt': 'text/plain'
+    pdf: "application/pdf",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
+    txt: "text/plain",
   };
-  return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+  return mimeTypes[extension.toLowerCase()] || "application/octet-stream";
 }
 
 export async function GET(request: Request) {
@@ -22,6 +22,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const archivoId = searchParams.get("id");
     const tipo = searchParams.get("tipo") || "tarea"; // "tarea" o "entrega"
+    const id_tarea = searchParams.get("tareaId");
+    const asignaturaId = searchParams.get("asignaturaId");
+    const cursoId = searchParams.get("cursoId");
 
     if (!archivoId) {
       return NextResponse.json(
@@ -33,9 +36,9 @@ export async function GET(request: Request) {
     const query = db.prepare(`
       SELECT archivo, extension, titulo
       FROM ${tipo === "tarea" ? "Tarea_archivo" : "EntregaTarea_Archivo"}
-      WHERE id_archivo = ?
+      WHERE id_archivo = ? AND id_tarea = ? AND id_curso = ? AND id_asignatura = ?
     `);
-    const archivo = query.get(archivoId);
+    const archivo = query.get(archivoId, id_tarea, cursoId, asignaturaId);
 
     if (!archivo) {
       return NextResponse.json(
@@ -46,8 +49,8 @@ export async function GET(request: Request) {
 
     return new NextResponse(archivo.archivo, {
       headers: {
-        'Content-Type': getMimeType(archivo.extension),
-        'Content-Disposition': `inline; filename="${archivo.titulo}.${archivo.extension}"`,
+        "Content-Type": getMimeType(archivo.extension),
+        "Content-Disposition": `inline; filename="${archivo.titulo}.${archivo.extension}"`,
       },
     });
   } catch (error) {

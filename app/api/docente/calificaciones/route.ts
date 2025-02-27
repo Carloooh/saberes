@@ -19,10 +19,10 @@ export async function GET(request: Request) {
     const queryEvaluaciones = db.prepare(`
       SELECT id_evaluacion, fecha, titulo
       FROM Evaluaciones
-      WHERE id_asignatura = ?
+      WHERE id_asignatura = ? AND id_curso = ?
       ORDER BY fecha DESC
     `);
-    const evaluaciones = queryEvaluaciones.all(asignaturaId);
+    const evaluaciones = queryEvaluaciones.all(asignaturaId, cursoId);
 
     // Get students with their grades
     const queryEstudiantes = db.prepare(`
@@ -80,15 +80,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { titulo, fecha, id_asignatura } = await request.json();
+    const { titulo, fecha, id_asignatura, cursoId } = await request.json();
     const id_evaluacion = uuidv4();
 
     const insertEvaluacion = db.prepare(`
-      INSERT INTO Evaluaciones (id_evaluacion, id_asignatura, titulo, fecha)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO Evaluaciones (id_evaluacion, id_curso, id_asignatura, titulo, fecha)
+      VALUES (?, ?, ?, ?, ?)
     `);
 
-    insertEvaluacion.run(id_evaluacion, id_asignatura, titulo, fecha);
+    insertEvaluacion.run(id_evaluacion, cursoId, id_asignatura, titulo, fecha);
 
     // Get all students in the course
     const queryEstudiantes = db.prepare(`

@@ -10,8 +10,12 @@ interface Calificacion {
   fecha: string;
   nota: number;
 }
+interface CalificacionesProps {
+  cursoId: string;
+  asignaturaId: string;
+}
 
-const TabCalificaciones = ({ asignaturaId }: { asignaturaId: string }) => {
+const TabCalificaciones = ({ asignaturaId, cursoId }: CalificacionesProps) => {
   const [calificaciones, setCalificaciones] = useState<Calificacion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +26,7 @@ const TabCalificaciones = ({ asignaturaId }: { asignaturaId: string }) => {
         setLoading(true);
         setError(null);
         const response = await fetch(
-          `/api/estudiante/calificaciones?asignaturaId=${asignaturaId}`
+          `/api/estudiante/calificaciones?cursoId=${cursoId}&asignaturaId=${asignaturaId}`
         );
         const data = await response.json();
 
@@ -39,10 +43,10 @@ const TabCalificaciones = ({ asignaturaId }: { asignaturaId: string }) => {
       }
     };
 
-    if (asignaturaId) {
+    if (asignaturaId && cursoId) {
       fetchCalificaciones();
     }
-  }, [asignaturaId]);
+  }, [asignaturaId, cursoId]);
 
   if (loading) {
     return (

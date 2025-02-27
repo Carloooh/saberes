@@ -1,21 +1,21 @@
 import { NextResponse } from "next/server";
-import { cookies } from 'next/headers';
+import { cookies } from "next/headers";
 import db from "@/db";
 
 function getMimeType(extension: string): string {
   const mimeTypes: { [key: string]: string } = {
-    'pdf': 'application/pdf',
-    'doc': 'application/msword',
-    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'xls': 'application/vnd.ms-excel',
-    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'png': 'image/png',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'gif': 'image/gif',
-    'txt': 'text/plain'
+    pdf: "application/pdf",
+    doc: "application/msword",
+    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    xls: "application/vnd.ms-excel",
+    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    gif: "image/gif",
+    txt: "text/plain",
   };
-  return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+  return mimeTypes[extension.toLowerCase()] || "application/octet-stream";
 }
 
 export async function GET(request: Request) {
@@ -35,6 +35,9 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const archivoId = searchParams.get("id");
+    const tareaId = searchParams.get("tareaId");
+    const cursoId = searchParams.get("cursoId");
+    const asignaturaId = searchParams.get("asignaturaId");
     const tipo = searchParams.get("tipo") || "tarea"; // "tarea" o "entrega"
 
     if (!archivoId) {
@@ -52,20 +55,29 @@ export async function GET(request: Request) {
         FROM Tarea_archivo ta
         JOIN Tareas t ON ta.id_tarea = t.id_tarea
         JOIN CursosAsignaturasLink cal ON t.id_asignatura = cal.id_asignatura
-        WHERE ta.id_archivo = ? 
+        WHERE ta.id_archivo = ? AND id_tarea = ? AND id_curso = ? AND id_asignatura = ?
         AND cal.rut_usuario = ?
       `);
-      const archivo = query.get(archivoId, rutEstudiante);
+      const archivo = query.get(
+        archivoId,
+        tareaId,
+        cursoId,
+        asignaturaId,
+        rutEstudiante
+      );
       if (!archivo) {
         return NextResponse.json(
-          { success: false, error: "Archivo no encontrado o acceso no autorizado" },
+          {
+            success: false,
+            error: "Archivo no encontrado o acceso no autorizado",
+          },
           { status: 404 }
         );
       }
       return new NextResponse(archivo.archivo, {
         headers: {
-          'Content-Type': getMimeType(archivo.extension),
-          'Content-Disposition': `inline; filename="${archivo.titulo}.${archivo.extension}"`,
+          "Content-Type": getMimeType(archivo.extension),
+          "Content-Disposition": `inline; filename="${archivo.titulo}.${archivo.extension}"`,
         },
       });
     } else {
@@ -74,20 +86,29 @@ export async function GET(request: Request) {
         SELECT eta.archivo, eta.extension, eta.titulo
         FROM EntregaTarea_Archivo eta
         JOIN EntregaTarea et ON eta.id_entrega = et.id_entrega
-        WHERE eta.id_archivo = ? 
+        WHERE eta.id_archivo = ? AND id_tarea = ? AND id_curso = ? AND id_asignatura = ?
         AND et.rut_estudiante = ?
       `);
-      const archivo = query.get(archivoId, rutEstudiante);
+      const archivo = query.get(
+        archivoId,
+        tareaId,
+        cursoId,
+        asignaturaId,
+        rutEstudiante
+      );
       if (!archivo) {
         return NextResponse.json(
-          { success: false, error: "Archivo no encontrado o acceso no autorizado" },
+          {
+            success: false,
+            error: "Archivo no encontrado o acceso no autorizado",
+          },
           { status: 404 }
         );
       }
       return new NextResponse(archivo.archivo, {
         headers: {
-          'Content-Type': getMimeType(archivo.extension),
-          'Content-Disposition': `inline; filename="${archivo.titulo}.${archivo.extension}"`,
+          "Content-Type": getMimeType(archivo.extension),
+          "Content-Disposition": `inline; filename="${archivo.titulo}.${archivo.extension}"`,
         },
       });
     }
