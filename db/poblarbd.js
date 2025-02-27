@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 
 const db = new Database('db/database.sqlite', { verbose: console.log });
-// const workbook = xlsx.readFile('D:/Projects/saberes_venv/saberes_nextjs/db/MATRICULAS2025.xlsx');
-const workbook = xlsx.readFile('C:/Users/cazocar/Documents/proyectos/saberes_venv/saberes/db/MATRICULAS2025.xlsx');
+const workbook = xlsx.readFile('D:/Projects/saberes_venv/saberes/db/MATRICULAS2025.xlsx');
+// const workbook = xlsx.readFile('C:/Users/cazocar/Documents/proyectos/saberes_venv/saberes/db/MATRICULAS2025.xlsx');
 
 const sheetName = workbook.SheetNames[11];
 const worksheet = workbook.Sheets[sheetName];
