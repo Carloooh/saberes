@@ -75,14 +75,14 @@ const Noticias: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen overflow-x-hidden">
       <header className="text-black py-4">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-semibold text-center">Noticias</h1>
         </div>
       </header>
 
-      <div className="container mx-auto py-8 px-4">
+      <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {noticias.map((noticia) => (
             <div
@@ -145,62 +145,60 @@ const Noticias: React.FC = () => {
           ))}
         </div>
       </div>
-
       {selectedNoticia && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">
-              {selectedNoticia.titulo}
-            </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+          <div className="bg-white rounded-lg w-[95%] max-w-3xl mx-auto my-8">
+            <div className="p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-bold mb-4">
+                {selectedNoticia.titulo}
+              </h2>
 
-            {selectedNoticia.archivos &&
-              selectedNoticia.archivos.length > 0 && (
-                <div className="mb-6 aspect-[16/9] relative">
-                  <Slider {...sliderSettings}>
-                    {selectedNoticia.archivos.map((archivo) => (
-                      <div key={archivo.id_archivo}>
-                        <div className="relative aspect-[16/9]">
-                          {getMediaType(archivo.extension) === "video" ? (
-                            <video
-                              className="w-full h-full object-cover rounded-lg"
-                              controls
-                              muted
-                              loop
-                            >
-                              <source
-                                src={`/api/noticias/download/${archivo.id_archivo}`}
-                                type={`video/${archivo.extension}`}
-                              />
-                              Tu navegador no soporta el elemento de video.
-                            </video>
-                          ) : (
-                            <Image
-                              src={`/api/noticias/download/${archivo.id_archivo}`}
-                              alt={archivo.titulo}
-                              fill
-                              className="object-cover rounded-lg"
-                              unoptimized
-                            />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </Slider>
-                </div>
-              )}
+              {selectedNoticia.archivos &&
+                selectedNoticia.archivos.length > 0 && (
+                  <div className="mb-6 aspect-[16/9] relative w-full">
+                    {getMediaType(selectedNoticia.archivos[0].extension) ===
+                    "video" ? (
+                      <video
+                        className="w-full h-full object-cover rounded-lg"
+                        controls
+                        muted
+                        loop
+                      >
+                        <source
+                          src={`/api/noticias/download/${selectedNoticia.archivos[0].id_archivo}`}
+                          type={`video/${selectedNoticia.archivos[0].extension}`}
+                        />
+                        Tu navegador no soporta el elemento de video.
+                      </video>
+                    ) : (
+                      <Image
+                        src={`/api/noticias/download/${selectedNoticia.archivos[0].id_archivo}`}
+                        alt={selectedNoticia.titulo}
+                        fill
+                        className="object-cover rounded-lg"
+                        unoptimized
+                      />
+                    )}
+                  </div>
+                )}
 
-            <p className="text-sm text-gray-600 mb-4">
-              {new Date(selectedNoticia.fecha).toLocaleDateString()}
-            </p>
-            <p className="mb-6 whitespace-pre-wrap">
-              {selectedNoticia.contenido}
-            </p>
-            <button
-              onClick={() => setSelectedNoticia(null)}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-            >
-              Cerrar
-            </button>
+              <p className="text-sm text-gray-600 mb-4">
+                {new Date(selectedNoticia.fecha).toLocaleDateString()}
+              </p>
+              <div className="prose max-w-none mb-6 overflow-x-hidden">
+                <p className="whitespace-pre-wrap break-words">
+                  {selectedNoticia.contenido}
+                </p>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setSelectedNoticia(null)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
