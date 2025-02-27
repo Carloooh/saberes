@@ -19,11 +19,11 @@ function getMimeType(extension: string): string {
   return mimeTypes[extension.toLowerCase()] || "application/octet-stream";
 }
 
-export async function GET( request: Request,  { params }: { params: { id: string } }) {
+export async function GET( request: Request,  context: { params: { id: string } }) {
   try {
     // const { searchParams } = new URL(request.url);
     // const id = searchParams.get("id");
-    const { id } = await params;
+    const { id } = context.params;
     if (!id) {
       return NextResponse.json(
         { success: false, error: "ID no proporcionado" },
