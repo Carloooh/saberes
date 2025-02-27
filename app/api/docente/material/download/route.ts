@@ -18,9 +18,9 @@ export async function GET(request: Request) {
     const query = db.prepare(`
       SELECT archivo, extension, titulo
       FROM Material_archivo
-      WHERE id_material_archivo = ? AND id_asignatura = ? AND id_curso = ?
+      WHERE id_material_archivo = ?
     `);
-    const material = query.get(archivoId, asignaturaId, cursoId);
+    const material = query.get(archivoId);
 
     if (!material) {
       return NextResponse.json(

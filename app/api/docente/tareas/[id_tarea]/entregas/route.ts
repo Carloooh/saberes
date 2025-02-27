@@ -2,10 +2,11 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 
-export async function GET(request: Request, { params }: { params: { id_tarea: string } }) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id_asignatura = searchParams.get("id_asignatura");
+    const id_tarea = searchParams.get("id_tarea");
 
     if (!id_asignatura) {
       return NextResponse.json(
@@ -13,8 +14,6 @@ export async function GET(request: Request, { params }: { params: { id_tarea: st
         { status: 400 }
       );
     }
-
-    const id_tarea = params.id_tarea;
 
     const query = db.prepare(`
       SELECT 

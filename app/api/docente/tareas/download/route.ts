@@ -36,9 +36,10 @@ export async function GET(request: Request) {
     const query = db.prepare(`
       SELECT archivo, extension, titulo
       FROM ${tipo === "tarea" ? "Tarea_archivo" : "EntregaTarea_Archivo"}
-      WHERE id_archivo = ? AND id_tarea = ? AND id_curso = ? AND id_asignatura = ?
+      WHERE id_archivo = ? 
     `);
-    const archivo = query.get(archivoId, id_tarea, cursoId, asignaturaId);
+    // const archivo = query.get(archivoId, id_tarea, cursoId, asignaturaId);
+    const archivo = query.get(archivoId);
 
     if (!archivo) {
       return NextResponse.json(
