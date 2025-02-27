@@ -97,32 +97,3 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: false, error: 'Error en el servidor' }, { status: 500 });
   }
 }
-
-// GET: Descargar un archivo
-// export async function GET_DOWNLOAD(req: Request) {
-//   try {
-//     const { searchParams } = new URL(req.url);
-//     const id = searchParams.get('id');
-
-//     if (!id) {
-//       return NextResponse.json({ success: false, error: 'ID de archivo no proporcionado' }, { status: 400 });
-//     }
-
-//     const stmt = db.prepare('SELECT archivo, extension FROM Galeria WHERE id_archivo = ?');
-//     const file = stmt.get(id) as { archivo: Buffer, extension: string };
-
-//     if (!file) {
-//       return NextResponse.json({ success: false, error: 'Archivo no encontrado' }, { status: 404 });
-//     }
-
-//     return new Response(file.archivo, {
-//       headers: {
-//         'Content-Type': file.extension === 'mp4' ? 'video/mp4' : `image/${file.extension}`,
-//         'Content-Disposition': `attachment; filename="${id}.${file.extension}"`,
-//       },
-//     });
-//   } catch (error) {
-//     console.error('Error al descargar el archivo:', error);
-//     return NextResponse.json({ success: false, error: 'Error en el servidor' }, { status: 500 });
-//   }
-// }

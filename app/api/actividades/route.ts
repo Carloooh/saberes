@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import db from "@/db";
 
+interface ActividadRow {
+  id_actividad: string;
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  archivo_ids?: string | null;
+  archivo_titulos?: string | null;
+  archivo_extensions?: string | null;
+}
+
 export async function GET() {
   try {
     const query = db.prepare(`
@@ -14,7 +24,9 @@ export async function GET() {
       ORDER BY a.fecha DESC
     `);
 
-    const actividades = query.all().map((actividad) => {
+    const rows = query.all() as ActividadRow[];
+    // const actividades = query.all().map((actividad) => {
+      const actividades = rows.map((actividad) => {
       const archivo_ids = actividad.archivo_ids
         ? actividad.archivo_ids.split(",")
         : [];

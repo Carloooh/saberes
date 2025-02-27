@@ -18,17 +18,21 @@ export async function GET() {
       ORDER BY c.nombre_curso
     `);
 
-    const cursos = stmt.all().map((curso) => ({
+    const cursos = (stmt.all() as { 
+      id_curso: string; 
+      nombre_curso: string; 
+      asignaturas_ids: string | null; 
+      asignaturas_nombres: string | null; 
+    }[]).map((curso) => ({
       id_curso: curso.id_curso,
       nombre_curso: curso.nombre_curso,
       asignaturas: curso.asignaturas_ids
         ? curso.asignaturas_ids.split(",").map((id: string, index: number) => ({
             id_asignatura: id,
-            nombre_asignatura: curso.asignaturas_nombres.split(",")[index],
+            nombre_asignatura: curso.asignaturas_nombres!.split(",")[index],
           }))
         : [],
     }));
-
     // Get all available asignaturas
     const asignaturasStmt = db.prepare(
       "SELECT * FROM Asignatura ORDER BY nombre_asignatura"
@@ -84,7 +88,8 @@ export async function POST(req: Request) {
           VALUES (?, ?, ?, ?)
         `);
 
-      const admins = getAdmins.all();
+      // const admins = getAdmins.all();
+      const admins = getAdmins.all() as { rut_usuario: string }[];
       admins.forEach((admin: { rut_usuario: string }) => {
         asignaturas.forEach((asignaturaId: string) => {
           insertAdminLink.run(
@@ -146,7 +151,8 @@ export async function PUT(req: Request) {
 
       deleteAdminLinks.run(id_curso);
 
-      const admins = getAdmins.all();
+      // const admins = getAdmins.all();
+      const admins = getAdmins.all() as { rut_usuario: string }[];
       admins.forEach((admin: { rut_usuario: string }) => {
         asignaturas.forEach((asignaturaId: string) => {
           insertAdminLink.run(

@@ -47,7 +47,6 @@
 //   }
 // }
 
-
 import { NextResponse } from "next/server";
 import db from "@/db";
 
@@ -57,10 +56,18 @@ interface Archivo {
   titulo: string;
 }
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const { id } = await context.params;
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID no proporcionado" },
+        { status: 400 }
+      );
+    }
 
     const query = db.prepare(`
       SELECT documento, titulo, extension
@@ -79,8 +86,8 @@ export async function GET(request: Request) {
 
     const fileName = `${documento.titulo}.${documento.extension}`;
     const headers = new Headers();
-    headers.set('Content-Disposition', `attachment; filename="${fileName}"`);
-    headers.set('Content-Type', `application/${documento.extension}`);
+    headers.set("Content-Disposition", `attachment; filename="${fileName}"`);
+    headers.set("Content-Type", `application/${documento.extension}`);
 
     const buffer = Buffer.from(documento.documento);
 

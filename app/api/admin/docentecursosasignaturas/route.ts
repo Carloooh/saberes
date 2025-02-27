@@ -1,65 +1,3 @@
-// import { NextResponse } from "next/server";
-// import db from "@/db";
-
-// export async function GET() {
-//   try {
-//     const query = db.prepare(`
-//       SELECT id_curso, nombre_curso 
-//       FROM Curso 
-//       ORDER BY id_curso
-//     `);
-    
-//     const cursos = query.all();
-//     return NextResponse.json({ success: true, data: cursos });
-//   } catch (error) {
-//     console.error("Error fetching courses:", error);
-//     return NextResponse.json(
-//       { success: false, error: "Error al obtener cursos" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-// export async function PUT(request: Request) {
-//   try {
-//     const data = await request.json();
-//     const { rut_usuario, id_curso } = data;
-
-//     db.exec("BEGIN TRANSACTION");
-
-//     try {
-//       // Delete old course assignments
-//       const deleteOld = db.prepare(`
-//         DELETE FROM CursosAsignaturasLink 
-//         WHERE rut_usuario = ?
-//       `);
-//       deleteOld.run(rut_usuario);
-
-//       // Insert new course assignment
-//       const insertNew = db.prepare(`
-//         INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso)
-//         VALUES (?, ?, ?)
-//       `);
-//       insertNew.run(crypto.randomUUID(), rut_usuario, id_curso);
-
-//       db.exec("COMMIT");
-//       return NextResponse.json({ success: true });
-//     } catch (error) {
-//       db.exec("ROLLBACK");
-//       throw error;
-//     }
-//   } catch (error) {
-//     console.error("Error updating student course:", error);
-//     return NextResponse.json(
-//       { success: false, error: "Error al actualizar curso del estudiante" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-
-
-
 import { NextResponse } from "next/server";
 import db from "@/db";
 
@@ -78,7 +16,9 @@ export async function GET(request: Request) {
         WHERE cal.rut_usuario = ?
       `);
       
-      const assignments = query.all(rut);
+      // const assignments = query.all(rut);
+      const assignments = query.all(rut) as { id_curso: string; id_asignatura: string }[];
+
       
       // Transform into the expected format
       const teacherCourses: { [key: string]: string[] } = {};
@@ -138,9 +78,9 @@ export async function PUT(request: Request) {
           VALUES (?, ?, ?, ?)
         `);
 
-        cursosAsignaturas.forEach(({ cursoId, asignaturas }) => {
-          asignaturas.forEach(asignaturaId => {
-            insertNew.run(crypto.randomUUID(), rut_usuario, cursoId, asignaturaId);
+        cursosAsignaturas.forEach((curso: { cursoId: string; asignaturas: string[] }) => {
+          curso.asignaturas.forEach((asignaturaId: string) => {
+            insertNew.run(crypto.randomUUID(), rut_usuario, curso.cursoId, asignaturaId);
           });
         });
       }

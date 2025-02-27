@@ -44,7 +44,7 @@ const TabMaterial = ({ asignaturaId, cursoId }: TabMaterialProps) => {
 
   const handleDownload = (archivoId: string) => {
     window.open(
-      `/api/estudiante/material/download?id=${archivoId}&cursoId=${cursoId}`,
+      `/api/estudiante/material/download?id=${archivoId}&cursoId=${cursoId}&asignaturaId=${asignaturaId}`,
       "_blank"
     );
   };

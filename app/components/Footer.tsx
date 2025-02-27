@@ -11,7 +11,9 @@ export default function Footer() {
 
   return (
     <footer>
-      <div className="mx-auto max-w-5xl py-4 mt-4 sm:px-6 lg:px-8 border-gray-400 border-t text-center">
+      {/* <div className="mx-auto max-w-5xl py-4 mt-4 sm:px-6 lg:px-8 border-gray-400 border-t text-center"> */}
+      <div className="mx-auto container w-full py-4 mt-4 sm:px-6 lg:px-8 border-gray-400 border-t text-center">
+        {/* <div className="min-h-screen w-full container mx-auto px-4 py-8"> */}
         {/* Logo */}
         <div className="mb-4">
           <Image

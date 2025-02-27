@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import db from "@/db";
 
+
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const destacado = searchParams.get("destacado");
@@ -29,7 +31,9 @@ export async function GET(request: NextRequest) {
       `);
     }
 
-    const noticias = query.all().map((noticia) => {
+    // const noticias = query.all().map((noticia) => {
+      const noticias = query.all().map((noticia: any) => {
+
       const archivo_ids = noticia.archivo_ids
         ? noticia.archivo_ids.split(",")
         : [];
