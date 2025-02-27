@@ -1,10 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import db from "@/db";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const destacado = searchParams.get("destacado");
+
   try {
-    const query = db.prepare(`
+    let query = db.prepare(`
       SELECT n.*, GROUP_CONCAT(na.id_archivo) as archivo_ids,
              GROUP_CONCAT(na.titulo) as archivo_titulos,
              GROUP_CONCAT(na.extension) as archivo_extensions
@@ -13,6 +16,18 @@ export async function GET() {
       GROUP BY n.id_noticia
       ORDER BY n.fecha DESC
     `);
+    if (destacado) {
+      query = db.prepare(`
+        SELECT n.*, GROUP_CONCAT(na.id_archivo) as archivo_ids,
+               GROUP_CONCAT(na.titulo) as archivo_titulos,
+               GROUP_CONCAT(na.extension) as archivo_extensions
+        FROM Noticia n
+        LEFT JOIN Noticia_Archivo na ON n.id_noticia = na.id_noticia
+        WHERE n.destacado = '1'
+        GROUP BY n.id_noticia
+        ORDER BY n.fecha DESC
+      `);
+    }
 
     const noticias = query.all().map((noticia) => {
       const archivo_ids = noticia.archivo_ids

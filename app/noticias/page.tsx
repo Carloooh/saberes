@@ -78,7 +78,7 @@ const Noticias: React.FC = () => {
     <div>
       <header className="text-black py-4">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-semi text-center w-full">Noticias</h1>
+          <h1 className="text-3xl font-semibold text-center">Noticias</h1>
         </div>
       </header>
 
@@ -89,8 +89,8 @@ const Noticias: React.FC = () => {
               key={noticia.id_noticia}
               className="border rounded-lg p-4 hover:shadow-lg transition-shadow"
             >
-              {noticia.archivos && noticia.archivos.length > 0 && (
-                <div className="mb-4 aspect-[16/9] relative">
+              <div className="mb-4 aspect-[16/9] relative">
+                {noticia.archivos && noticia.archivos.length > 0 ? (
                   <Slider {...sliderSettings}>
                     {noticia.archivos.map((archivo) => (
                       <div key={archivo.id_archivo}>
@@ -121,8 +121,15 @@ const Noticias: React.FC = () => {
                       </div>
                     ))}
                   </Slider>
-                </div>
-              )}
+                ) : (
+                  <Image
+                    src="/noimage.webp"
+                    alt="No hay imagen disponible"
+                    fill
+                    className="object-cover rounded-lg"
+                  />
+                )}
+              </div>
               <h3 className="font-semibold text-lg mb-2">{noticia.titulo}</h3>
               <p className="text-sm text-gray-600 mb-2">
                 {new Date(noticia.fecha).toLocaleDateString()}
