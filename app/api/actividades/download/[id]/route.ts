@@ -15,10 +15,12 @@ function getMimeType(extension: string): string {
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  // context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params;
+    // const { id } = await context.params;
+    const { id } = params;
 
     if (!id) {
       return NextResponse.json(
