@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 
+interface Archivo {
+  archivo: Buffer;
+  extension: string;
+  titulo: string;
+}
+
 function getMimeType(extension: string): string {
   const mimeTypes: { [key: string]: string } = {
     jpg: "image/jpeg",
@@ -18,7 +24,6 @@ export async function GET( request: Request,  { params }: { params: { id: string
     // const { searchParams } = new URL(request.url);
     // const id = searchParams.get("id");
     const { id } = await params;
-    console.log(id)
     if (!id) {
       return NextResponse.json(
         { success: false, error: "ID no proporcionado" },
@@ -32,7 +37,7 @@ export async function GET( request: Request,  { params }: { params: { id: string
       WHERE id_archivo = ?
     `);
 
-    const archivo = query.get(id);
+    const archivo = query.get(id) as Archivo | null;
 
     if (!archivo || !archivo.archivo) {
       return NextResponse.json(
