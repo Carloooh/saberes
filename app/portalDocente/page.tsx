@@ -79,7 +79,12 @@ const PortalDocente = () => {
                     {curso.asignaturas.length} asignatura(s)
                   </p>
                   <div className="flex space-x-4 justify-evenly">
-                    <a href={`/portalDocente/${curso.id_curso}`}>
+                    {/* <a href={`/portalDocente/${curso.id_curso}`}> */}
+                    <a
+                      href={`/portalDocente/${
+                        curso.id_curso
+                      }?nombreCurso=${encodeURIComponent(curso.nombre_curso)}`}
+                    >
                       <button
                         className="text-sm text-green-600 hover:text-green-800 font-medium transition duration-300 flex items-center"
                         title="Asistencia"
@@ -139,8 +144,18 @@ const PortalDocente = () => {
                   <ul className="space-y-2">
                     {modalCurso.asignaturas.map((asignatura) => (
                       <li key={asignatura.id_asignatura}>
-                        <a
+                        {/* <a
                           href={`/portalDocente/${modalCurso.id_curso}/${asignatura.id_asignatura}`}
+                          className="block w-full text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition duration-300 mb-2"
+                        > */}
+                        <a
+                          href={`/portalDocente/${modalCurso.id_curso}/${
+                            asignatura.id_asignatura
+                          }?nombre=${encodeURIComponent(
+                            asignatura.nombre_asignatura
+                          )}&nombreCurso=${encodeURIComponent(
+                            modalCurso.nombre_curso
+                          )}`}
                           className="block w-full text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition duration-300 mb-2"
                         >
                           <div className="flex items-center">

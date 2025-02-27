@@ -5,6 +5,7 @@ import React from "react";
 import Material from "@/app/components/docente/Material";
 import Calificaciones from "@/app/components/docente/Calificaciones";
 import Tareas from "@/app/components/docente/Tareas";
+import { useSearchParams } from "next/navigation";
 // import { useRouter } from "next/navigation";
 
 interface AsignaturaPageProps {
@@ -20,6 +21,10 @@ const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
   >("material");
   const [curso, setCurso] = useState<string | null>(null);
   const [asignatura, setAsignatura] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const nombreCurso = searchParams.get("nombreCurso");
+  const nombreAsignatura = searchParams.get("nombre");
+
   // const router = useRouter();
 
   useEffect(() => {
@@ -37,14 +42,12 @@ const AsignaturaPage = ({ params }: AsignaturaPageProps) => {
     );
   }
 
-  const cursoNombre = decodeURIComponent(curso);
-  const asignaturaNombre = decodeURIComponent(asignatura);
-
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Curso: {cursoNombre}</h1>
+      <h1 className="text-2xl font-bold mb-4">Curso: {nombreCurso || curso}</h1>
       <h2 className="text-xl font-semibold mb-6">
-        Asignatura: {asignaturaNombre}
+        {" "}
+        Asignatura: {nombreAsignatura || asignatura}{" "}
       </h2>
       {/* <button
         onClick={() => router.back()}

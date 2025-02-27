@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import es from "date-fns/locale/es";
+import { useSearchParams } from "next/navigation";
 
 interface Estudiante {
   rut_usuario: string;
@@ -30,6 +31,8 @@ const AsistenciaPage = ({ params }: { params: Promise<{ curso: string }> }) => {
   const [curso, setCurso] = useState<string | null>(null);
   const [savingAttendance, setSavingAttendance] = useState<string | null>(null);
   const [deletingDay, setDeletingDay] = useState(false);
+  const searchParams = useSearchParams();
+  const nombreCurso = searchParams.get("nombreCurso");
 
   useEffect(() => {
     params.then((resolvedParams) => {
@@ -173,7 +176,9 @@ const AsistenciaPage = ({ params }: { params: Promise<{ curso: string }> }) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Control de Asistencia</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        Curso: {nombreCurso || "Curso"}
+      </h1>
       {!curso ? (
         <div>Cargando curso...</div>
       ) : (
