@@ -3,6 +3,38 @@ import db from "@/db";
 import { v4 as uuidv4 } from "uuid";
 import { cookies } from "next/headers";
 
+interface TareaArchivo {
+  id_archivo: string;
+  titulo: string;
+  extension: string;
+}
+
+interface TareaDB {
+  id_tarea: string;
+  id_curso: string;
+  id_asignatura: string;
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  archivos: string;
+  id_entrega: string | null;
+  fecha_entrega: string | null;
+  estado: string | null;
+  comentario: string | null;
+  archivos_entrega: string;
+}
+
+interface TareaProcessed extends Omit<TareaDB, 'archivos' | 'archivos_entrega'> {
+  archivos: TareaArchivo[];
+  entrega: {
+    id_entrega: string;
+    fecha_entrega: string;
+    estado: string;
+    comentario: string | null;
+    archivos: TareaArchivo[];
+  } | null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -64,22 +96,35 @@ export async function GET(request: NextRequest) {
       ORDER BY t.fecha DESC
     `);
 
-    const tareas = query.all(rutEstudiante, asignaturaId, cursoId);
+    const tareas = query.all(rutEstudiante, asignaturaId, cursoId)  as TareaDB[];
 
     // Process the results
-    const processedTareas = tareas.map((tarea) => ({
+    const processedTareas = tareas.map((tarea: TareaDB): TareaProcessed => ({
       ...tarea,
       archivos: JSON.parse(tarea.archivos).filter(Boolean),
       entrega: tarea.id_entrega
         ? {
             id_entrega: tarea.id_entrega,
-            fecha_entrega: tarea.fecha_entrega,
-            estado: tarea.estado,
+            fecha_entrega: tarea.fecha_entrega!,
+            estado: tarea.estado!,
             comentario: tarea.comentario,
             archivos: JSON.parse(tarea.archivos_entrega).filter(Boolean),
           }
         : null,
     }));
+    // const processedTareas = tareas.map((tarea) => ({
+    //   ...tarea,
+    //   archivos: JSON.parse(tarea.archivos).filter(Boolean),
+    //   entrega: tarea.id_entrega
+    //     ? {
+    //         id_entrega: tarea.id_entrega,
+    //         fecha_entrega: tarea.fecha_entrega,
+    //         estado: tarea.estado,
+    //         comentario: tarea.comentario,
+    //         archivos: JSON.parse(tarea.archivos_entrega).filter(Boolean),
+    //       }
+    //     : null,
+    // }));
 
     return NextResponse.json({ success: true, tareas: processedTareas });
   } catch (error) {

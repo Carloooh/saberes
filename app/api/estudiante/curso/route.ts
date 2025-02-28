@@ -2,6 +2,25 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import db from "@/db";
 
+interface Asignatura {
+  id_asignatura: string;
+  nombre_asignatura: string;
+}
+
+interface CursoResult {
+  id_curso: string;
+  nombre_curso: string;
+  asignaturas: string;
+}
+
+interface CursoResponse {
+  cursoAlumno: {
+    id_curso: string;
+    nombre_curso: string;
+  };
+  asignaturas: Asignatura[];
+}
+
 export async function GET(request: NextRequest) {
     try {
       const userSessionCookie = request.cookies.get("userSession")?.value;
@@ -34,7 +53,7 @@ export async function GET(request: NextRequest) {
         GROUP BY c.id_curso, c.nombre_curso
       `);
   
-      const result = queryCurso.get(rutUsuario);
+      const result = queryCurso.get(rutUsuario) as CursoResult;;
 
       if (!result) {
         return NextResponse.json(
@@ -44,26 +63,38 @@ export async function GET(request: NextRequest) {
       }
   
       // Parse asignaturas JSON string and ensure it's an array
-      let asignaturas = [];
+      let asignaturas: Asignatura[] = [];
       try {
         asignaturas = JSON.parse(result.asignaturas || '[]').filter(
-          (a: any) => a.id_asignatura !== null && a.nombre_asignatura !== null
+          (a: Asignatura) => a.id_asignatura !== null && a.nombre_asignatura !== null
         );
       } catch (error) {
         console.error("Error parsing asignaturas:", error);
         asignaturas = [];
       }
 
+      const response: CursoResponse = {
+        cursoAlumno: {
+          id_curso: result.id_curso,
+          nombre_curso: result.nombre_curso
+        },
+        asignaturas
+      };
+
       return NextResponse.json({
         success: true,
-        data: {
-          cursoAlumno: {
-            id_curso: result.id_curso,
-            nombre_curso: result.nombre_curso
-          },
-          asignaturas
-        }
+        data: response
       });
+      // return NextResponse.json({
+      //   success: true,
+      //   data: {
+      //     cursoAlumno: {
+      //       id_curso: result.id_curso,
+      //       nombre_curso: result.nombre_curso
+      //     },
+      //     asignaturas
+      //   }
+      // });
     } catch (error) {
       console.error("Error fetching student course:", error);
       return NextResponse.json(

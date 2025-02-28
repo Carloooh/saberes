@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 
+interface Archivo {
+  extension: string;
+  archivo: Buffer;
+  titulo: string;
+}
+
 function getMimeType(extension: string): string {
   const mimeTypes: { [key: string]: string } = {
     pdf: "application/pdf",
@@ -22,9 +28,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const archivoId = searchParams.get("id");
     const tipo = searchParams.get("tipo") || "tarea"; // "tarea" o "entrega"
-    const id_tarea = searchParams.get("tareaId");
-    const asignaturaId = searchParams.get("asignaturaId");
-    const cursoId = searchParams.get("cursoId");
+    // const id_tarea = searchParams.get("tareaId");
+    // const asignaturaId = searchParams.get("asignaturaId");
+    // const cursoId = searchParams.get("cursoId");
 
     if (!archivoId) {
       return NextResponse.json(
@@ -39,7 +45,7 @@ export async function GET(request: Request) {
       WHERE id_archivo = ? 
     `);
     // const archivo = query.get(archivoId, id_tarea, cursoId, asignaturaId);
-    const archivo = query.get(archivoId);
+    const archivo = query.get(archivoId) as Archivo | null;
 
     if (!archivo) {
       return NextResponse.json(

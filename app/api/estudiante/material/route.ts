@@ -1,6 +1,23 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 
+interface MaterialArchivo {
+  id_material_archivo: string;
+  titulo: string;
+  extension: string;
+}
+
+interface Material {
+  id_material: string;
+  id_curso: string;
+  id_asignatura: string;
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  enlace: string | null;
+  archivos: string;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -31,12 +48,12 @@ export async function GET(request: Request) {
       ORDER BY m.fecha DESC
     `);
 
-    const materiales = query.all(asignaturaId, cursoId);
+    const materiales = query.all(asignaturaId, cursoId) as Material[];
 
     // Parse the JSON string to actual array
     materiales.forEach((material) => {
       material.archivos = JSON.parse(material.archivos).filter(
-        (a) => a.id_material_archivo
+        (a: MaterialArchivo) => a.id_material_archivo
       );
     });
 

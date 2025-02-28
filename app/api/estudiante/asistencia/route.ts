@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import db from "@/db";
 
+interface AsistenciaDB {
+  id_dia: string;
+  fecha: string;
+  estado: 'Presente' | 'Ausente' | 'Justificado';
+}
+
+
 export async function GET(request: NextRequest) {
     try {
       const userSessionCookie = request.cookies.get("userSession")?.value;
@@ -32,17 +39,27 @@ export async function GET(request: NextRequest) {
         ORDER BY d.fecha DESC
       `);
   
-      const asistencias = query.all(rutUsuario).map(row => ({
+
+      const asistencias = query.all(rutUsuario).map((row: any): AsistenciaDB => ({
         id_dia: row.id_dia,
         fecha: row.fecha,
-        estado: row.estado || 'Ausente' // Ensure we always have a estado
+        estado: row.estado || 'Ausente'
       }));
   
-      // Ensure we have valid dates and estados
-      const validAsistencias = asistencias.filter(a => 
+      const validAsistencias = asistencias.filter((a: AsistenciaDB) => 
         a.fecha && 
         ['Presente', 'Ausente', 'Justificado'].includes(a.estado)
       );
+      // const asistencias = query.all(rutUsuario).map(row => ({
+      //   id_dia: row.id_dia,
+      //   fecha: row.fecha,
+      //   estado: row.estado || 'Ausente' // Ensure we always have a estado
+      // }));
+  
+      // const validAsistencias = asistencias.filter(a => 
+      //   a.fecha && 
+      //   ['Presente', 'Ausente', 'Justificado'].includes(a.estado)
+      // );
 
       return NextResponse.json({
         success: true,

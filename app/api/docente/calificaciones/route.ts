@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { v4 as uuidv4 } from "uuid";
 
-// interface Calificacion {
-//   id_evaluacion: string;
-//   nota: number;
-// }
+interface Calificacion {
+  id_evaluacion: string;
+  nota: number;
+}
 
 interface Estudiante {
   rut_usuario: string;

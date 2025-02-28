@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 
+interface Archivo {
+  extension: string;
+  archivo: Buffer;
+  titulo: string;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -20,7 +26,7 @@ export async function GET(request: Request) {
       FROM Material_archivo
       WHERE id_material_archivo = ? AND id_curso = ? AND id_asignatura = ?
     `);
-    const material = query.get(archivoId, cursoId, asignaturaId);
+    const material = query.get(archivoId, cursoId, asignaturaId) as Archivo | null;
 
     if (!material) {
       return NextResponse.json(

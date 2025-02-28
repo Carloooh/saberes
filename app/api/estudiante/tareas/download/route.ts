@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import db from "@/db";
 
+interface Archivo {
+  extension: string;
+  titulo: string;
+  archivo: Buffer
+}
+
 function getMimeType(extension: string): string {
   const mimeTypes: { [key: string]: string } = {
     pdf: "application/pdf",
@@ -64,7 +70,7 @@ export async function GET(request: Request) {
         cursoId,
         asignaturaId,
         rutEstudiante
-      );
+      ) as Archivo | null;
       if (!archivo) {
         return NextResponse.json(
           {
@@ -95,7 +101,7 @@ export async function GET(request: Request) {
         cursoId,
         asignaturaId,
         rutEstudiante
-      );
+      ) as Archivo | null;
       if (!archivo) {
         return NextResponse.json(
           {

@@ -2,6 +2,30 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 
+interface ArchivoEntrega {
+  id_archivo: string;
+  titulo: string;
+  extension: string;
+}
+
+interface EntregaDB {
+  id_entrega: string;
+  id_tarea: string;
+  id_curso: string;
+  id_asignatura: string;
+  rut_estudiante: string;
+  fecha_entrega: string;
+  comentario: string | null;
+  estado: string;
+  nombres: string;
+  apellidos: string;
+  archivos_entrega: string;
+}
+
+interface EntregaResponse extends Omit<EntregaDB, 'archivos_entrega'> {
+  archivos_entrega: ArchivoEntrega[];
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -38,11 +62,16 @@ export async function GET(request: Request) {
       WHERE et.id_tarea = ? AND et.id_asignatura = ?
     `);
 
-    const entregas = query.all(id_tarea, id_asignatura);
-    const processedEntregas = entregas.map(e => ({
+    const entregas = query.all(id_tarea, id_asignatura) as EntregaDB[];
+    const processedEntregas = entregas.map((e: EntregaDB): EntregaResponse => ({
       ...e,
       archivos_entrega: JSON.parse(e.archivos_entrega || '[]')
     }));
+    // const entregas = query.all(id_tarea, id_asignatura);
+    // const processedEntregas = entregas.map(e => ({
+    //   ...e,
+    //   archivos_entrega: JSON.parse(e.archivos_entrega || '[]')
+    // }));
 
     return NextResponse.json({ success: true, entregas: processedEntregas });
   } catch (error) {

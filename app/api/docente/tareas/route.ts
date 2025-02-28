@@ -1,7 +1,31 @@
-// api/docente/tareas/route.ts
 import { NextResponse } from "next/server";
 import db from "@/db";
 import { v4 as uuidv4 } from "uuid";
+
+interface TareaArchivo {
+  id_archivo: string;
+  titulo: string;
+  extension: string;
+}
+
+interface TareaDB {
+  id_tarea: string;
+  id_asignatura: string;
+  id_curso: string;
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  archivos: string;
+}
+
+interface TareaResponse {
+  id_tarea: string;
+  id_asignatura: string;
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  archivos: TareaArchivo[];
+}
 
 export async function GET(request: Request) {
   try {
@@ -33,9 +57,9 @@ export async function GET(request: Request) {
       ORDER BY t.fecha DESC
     `);
 
-    const tareas = query.all(asignaturaId, cursoId);
-    const processedTareas = tareas.map((tarea) => {
-      const parsedArchivos = JSON.parse(tarea.archivos || "[]").filter(Boolean);
+    const tareas = query.all(asignaturaId, cursoId) as TareaDB[];
+    const processedTareas = tareas.map((tarea): TareaResponse => {
+      const parsedArchivos = JSON.parse(tarea.archivos || "[]").filter(Boolean) as TareaArchivo[];
       return {
         id_tarea: tarea.id_tarea,
         id_asignatura: tarea.id_asignatura,
@@ -45,6 +69,17 @@ export async function GET(request: Request) {
         archivos: parsedArchivos,
       };
     });
+    // const processedTareas = tareas.map((tarea) => {
+    //   const parsedArchivos = JSON.parse(tarea.archivos || "[]").filter(Boolean);
+    //   return {
+    //     id_tarea: tarea.id_tarea,
+    //     id_asignatura: tarea.id_asignatura,
+    //     titulo: tarea.titulo,
+    //     descripcion: tarea.descripcion,
+    //     fecha: tarea.fecha,
+    //     archivos: parsedArchivos,
+    //   };
+    // });
 
     return NextResponse.json({ success: true, tareas: processedTareas });
   } catch (error) {

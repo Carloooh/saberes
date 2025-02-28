@@ -2,6 +2,34 @@ import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import db from "@/db";
 
+interface SedeArchivo {
+  id_archivo: string;
+  titulo: string;
+  extension: string;
+}
+
+interface SedeDB {
+  id_sede: string;
+  nombre: string;
+  direccion: string;
+  url: string;
+  url_iframe: string;
+  cursos: string;
+  archivo_ids: string | null;
+  archivo_titulos: string | null;
+  archivo_extensions: string | null;
+}
+
+interface SedeProcessed {
+  id_sede: string;
+  nombre: string;
+  direccion: string;
+  url: string;
+  url_iframe: string;
+  cursos: string[];
+  archivos: SedeArchivo[];
+}
+
 export async function GET() {
   try {
     const query = db.prepare(`
@@ -14,13 +42,14 @@ export async function GET() {
       ORDER BY s.nombre ASC
     `);
 
-    const sedes = query.all().map((sede) => {
-      const archivo_ids = sede.archivo_ids ? sede.archivo_ids.split(",") : [];
-      const archivo_titulos = sede.archivo_titulos
-        ? sede.archivo_titulos.split(",")
+    const sedes = query.all().map((sede: unknown): SedeProcessed => {
+      const sedeCasted = sede as SedeDB;
+      const archivo_ids = sedeCasted.archivo_ids ? sedeCasted.archivo_ids.split(",") : [];
+      const archivo_titulos = sedeCasted.archivo_titulos
+        ? sedeCasted.archivo_titulos.split(",")
         : [];
-      const archivo_extensions = sede.archivo_extensions
-        ? sede.archivo_extensions.split(",")
+      const archivo_extensions = sedeCasted.archivo_extensions
+        ? sedeCasted.archivo_extensions.split(",")
         : [];
 
       const archivos = archivo_ids.map((id: string, index: number) => ({
@@ -29,16 +58,39 @@ export async function GET() {
         extension: archivo_extensions[index],
       }));
 
-      delete sede.archivo_ids;
-      delete sede.archivo_titulos;
-      delete sede.archivo_extensions;
+      const { archivo_ids: _, archivo_titulos: __, archivo_extensions: ___, ...sedeData } = sedeCasted;
 
       return {
-        ...sede,
-        cursos: sede.cursos ? JSON.parse(sede.cursos) : [],
+        ...sedeData,
+        cursos: sedeCasted.cursos ? JSON.parse(sedeCasted.cursos) : [],
         archivos: archivo_ids[0] ? archivos : [],
       };
     });
+    // const sedes = query.all().map((sede) => {
+    //   const archivo_ids = sede.archivo_ids ? sede.archivo_ids.split(",") : [];
+    //   const archivo_titulos = sede.archivo_titulos
+    //     ? sede.archivo_titulos.split(",")
+    //     : [];
+    //   const archivo_extensions = sede.archivo_extensions
+    //     ? sede.archivo_extensions.split(",")
+    //     : [];
+
+    //   const archivos = archivo_ids.map((id: string, index: number) => ({
+    //     id_archivo: id,
+    //     titulo: archivo_titulos[index],
+    //     extension: archivo_extensions[index],
+    //   }));
+
+    //   delete sede.archivo_ids;
+    //   delete sede.archivo_titulos;
+    //   delete sede.archivo_extensions;
+
+    //   return {
+    //     ...sede,
+    //     cursos: sede.cursos ? JSON.parse(sede.cursos) : [],
+    //     archivos: archivo_ids[0] ? archivos : [],
+    //   };
+    // });
 
     return NextResponse.json({ success: true, data: sedes });
   } catch (error) {
