@@ -10,7 +10,7 @@ const AsignaturaPage = () => {
   const params = useParams();
   const searchParams = useSearchParams();
   const asignaturaId = params?.asignatura as string;
-  const cursoId = searchParams.get("cursoId");
+  const cursoId = searchParams.get("cursoId") || "";
   const nombreAsignatura = searchParams.get("nombre");
   const [activeTab, setActiveTab] = useState("material");
   const [loading, setLoading] = useState(true);

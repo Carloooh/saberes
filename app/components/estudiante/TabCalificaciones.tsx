@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import es from "date-fns/locale/es";
+import { es } from "date-fns/locale/es";
 
 interface Calificacion {
   id_evaluacion: string;

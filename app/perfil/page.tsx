@@ -30,6 +30,7 @@ interface UserProfile {
   direccion: string;
   comuna: string;
   sector: string;
+  sexo: string;
 
   cursoAlumno?: {
     nombre_curso: string;

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
-import es from "date-fns/locale/es";
+import { es } from "date-fns/locale/es";
 
 interface Archivo {
   id_archivo: string;
@@ -121,13 +121,22 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
   }, [cursoId, asignaturaId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    const files = e.target.files;
+    if (files && files.length > 0) {
       setNewTarea((prev) => ({
         ...prev,
-        archivos: Array.from(e.target.files),
+        archivos: Array.from(files),
       }));
     }
   };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files) {
+  //     setNewTarea((prev) => ({
+  //       ...prev,
+  //       archivos: Array.from(e.target.files),
+  //     }));
+  //   }
+  // };
 
   const handleUpdateStatus = async (
     id_entrega: string,
