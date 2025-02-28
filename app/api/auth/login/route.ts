@@ -22,6 +22,15 @@ interface UserData {
   codigo_temporal?: string;
 }
 
+interface UserResponse {
+  rut_usuario: string;
+  email: string;
+  nombres: string;
+  apellidos: string;
+  tipo_usuario: string;
+  estado: string;
+}
+
 export async function POST(req: Request) {
   try {
     const { rut_usuario, clave } = await req.json();
@@ -67,20 +76,30 @@ export async function POST(req: Request) {
       );
     }
 
-    delete user.clave;
-    delete user.edad;
-    delete user.sexo;
-    delete user.nacionalidad;
-    delete user.talla;
-    delete user.fecha_nacimiento;
-    delete user.direccion;
-    delete user.comuna;
-    delete user.sector;
-    delete user.codigo_temporal;
-    delete user.rut_tipo;
+    // delete user.clave;
+    // delete user.edad;
+    // delete user.sexo;
+    // delete user.nacionalidad;
+    // delete user.talla;
+    // delete user.fecha_nacimiento;
+    // delete user.direccion;
+    // delete user.comuna;
+    // delete user.sector;
+    // delete user.codigo_temporal;
+    // delete user.rut_tipo;
+
+    const userResponse: UserResponse = {
+      rut_usuario: user.rut_usuario,
+      email: user.email,
+      nombres: user.nombres,
+      apellidos: user.apellidos,
+      tipo_usuario: user.tipo_usuario,
+      estado: user.estado,
+    };
 
     const response = NextResponse.json(
-      { success: true, user },
+      // { success: true, user },
+      { success: true, user: userResponse },
       { status: 200 }
     );
 
