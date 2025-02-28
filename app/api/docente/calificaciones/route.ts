@@ -2,6 +2,18 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { v4 as uuidv4 } from "uuid";
 
+// interface Calificacion {
+//   id_evaluacion: string;
+//   nota: number;
+// }
+
+interface Estudiante {
+  rut_usuario: string;
+  nombres: string;
+  apellidos: string;
+  calificaciones: string;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -53,7 +65,8 @@ export async function GET(request: Request) {
       GROUP BY u.rut_usuario
     `);
 
-    const estudiantes = queryEstudiantes.all(asignaturaId, cursoId);
+    // const estudiantes = queryEstudiantes.all(asignaturaId, cursoId);
+    const estudiantes = queryEstudiantes.all(asignaturaId, cursoId) as Estudiante[];
 
     // Parse the JSON string to actual array for each student
     estudiantes.forEach((estudiante) => {
@@ -99,7 +112,8 @@ export async function POST(request: Request) {
         AND u.tipo_usuario = 'Estudiante'
     `);
 
-    const estudiantes = queryEstudiantes.all(id_asignatura);
+    // const estudiantes = queryEstudiantes.all(id_asignatura);
+    const estudiantes = queryEstudiantes.all(id_asignatura) as Estudiante[];
 
     // Insert default grade (0.0) for each student
     const insertCalificacion = db.prepare(`
