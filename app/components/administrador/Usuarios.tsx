@@ -46,8 +46,11 @@ const Usuarios: React.FC = () => {
   >([]);
   const [selectedTeacherCourses, setSelectedTeacherCourses] =
     useState<TeacherCourses>({});
+  // const [openMenus, setOpenMenus] = useState<{
+  //   [rut: string]: "status" | "courses" | null;
+  // }>({});
   const [openMenus, setOpenMenus] = useState<{
-    [rut: string]: "status" | "courses" | null;
+    [rut: string]: "status" | "courses" | "student-course" | null;
   }>({});
 
   useEffect(() => {
