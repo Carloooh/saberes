@@ -3,7 +3,7 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 
 export default function Footer() {
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast.success(`Copiado al portapapeles: ${text}`);
     });
