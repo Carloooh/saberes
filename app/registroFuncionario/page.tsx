@@ -30,6 +30,89 @@ const RegistroFuncionario = () => {
     }));
   };
 
+  const [passwordError, setPasswordError] = useState("");
+
+  // Add password validation function
+  const validatePasswords = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const formElement = e.target.form as HTMLFormElement;
+    const password = formElement?.clave.value;
+    const confirmPassword = formElement?.clave2.value;
+
+    if (name === "clave" || name === "clave2") {
+      if (password && confirmPassword && password !== confirmPassword) {
+        setPasswordError("Las contraseñas no coinciden");
+      } else if (value.length < 8) {
+        setPasswordError("La contraseña debe tener al menos 8 caracteres");
+      } else {
+        setPasswordError("");
+      }
+    }
+  };
+
+  const [emailError, setEmailError] = useState("");
+
+  const validateEmails = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const formElement = e.target.form as HTMLFormElement;
+    const email = formElement?.email.value;
+    const confirmEmail = formElement?.email2.value;
+
+    if (name === "email" || name === "email2") {
+      if (email && confirmEmail) {
+        if (email !== confirmEmail) {
+          setEmailError("Los emails no coinciden");
+        } else {
+          setEmailError("");
+        }
+      }
+    }
+  };
+
+  const Fn = {
+    validaRut: (rutCompleto: string) => {
+      rutCompleto = rutCompleto.replace(/\./g, "");
+      if (!/^[0-9]+-[0-9kK]{1}$/.test(rutCompleto)) return false;
+      const tmp = rutCompleto.split("-");
+      const digv = tmp[1].toLowerCase();
+      const rut = parseInt(tmp[0]);
+      return Fn.dv(rut) === digv;
+    },
+    dv: (T: number): string => {
+      let M = 0,
+        S = 1;
+      for (; T; T = Math.floor(T / 10)) {
+        S = (S + (T % 10) * (9 - (M++ % 6))) % 11;
+      }
+      return S ? (S - 1).toString() : "k";
+    },
+  };
+  const [rutError, setRutError] = useState("");
+  const handleRutFormat = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, "");
+    const length = value.length;
+
+    if (length > 2) {
+      if (length <= 8) {
+        value = value.replace(/(\d{1})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
+      } else if (length === 9) {
+        value = value.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
+      } else if (length === 10) {
+        value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1})/, "$1.$2.$3-$4");
+      }
+    }
+
+    e.target.value = value;
+
+    if (value.includes("-")) {
+      if (!Fn.validaRut(value)) {
+        setRutError("RUT inválido");
+      } else {
+        setRutError("");
+      }
+    }
+  };
+
   // Cargar cursos con sus asignaturas
   useEffect(() => {
     fetch("/api/cursos-con-asignaturas")
@@ -71,6 +154,22 @@ const RegistroFuncionario = () => {
     e.preventDefault();
     const formElement = e.target as HTMLFormElement;
     const formData = new FormData(e.target as HTMLFormElement);
+    const rut = formData.get("rut") as string;
+
+    if (formData.get("clave") !== formData.get("clave2")) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
+
+    if (formData.get("email") !== formData.get("email2")) {
+      toast.error("Los emails no coinciden");
+      return;
+    }
+
+    if (!Fn.validaRut(rut)) {
+      toast.error("RUT inválido");
+      return;
+    }
 
     const payload = {
       rut_usuario: formData.get("rut") as string,
@@ -120,6 +219,7 @@ const RegistroFuncionario = () => {
               type="text"
               name="name"
               required
+              minLength={3}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
             />
           </div>
@@ -131,6 +231,7 @@ const RegistroFuncionario = () => {
               type="text"
               name="apellido"
               required
+              minLength={3}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
             />
           </div>
@@ -142,21 +243,29 @@ const RegistroFuncionario = () => {
               type="email"
               name="email"
               required
+              onChange={validateEmails}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
             />
+            {emailError && (
+              <p className="mt-1 text-sm text-red-600">{emailError}</p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              RUT
+              Confirmación Email
             </label>
             <input
-              type="text"
-              name="rut"
+              type="email"
+              name="email2"
               required
-              placeholder="12.345.678-9"
+              onChange={validateEmails}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
             />
+            {emailError && (
+              <p className="mt-1 text-sm text-red-600">{emailError}</p>
+            )}
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Contraseña
@@ -166,6 +275,8 @@ const RegistroFuncionario = () => {
                 type={showPasswords.login ? "text" : "password"}
                 name="clave"
                 required
+                min={8}
+                onChange={validatePasswords}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
               />
               <button
@@ -195,6 +306,67 @@ const RegistroFuncionario = () => {
                 </svg>
               </button>
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Confirmación Contraseña
+            </label>
+            <div className="relative">
+              <input
+                type={showPasswords.login ? "text" : "password"}
+                name="clave2"
+                required
+                min={8}
+                onChange={validatePasswords}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility("login")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="size-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+              </button>
+            </div>
+            {passwordError && (
+              <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              RUT
+            </label>
+            <input
+              type="text"
+              name="rut"
+              required
+              maxLength={13}
+              placeholder="12.345.678-9"
+              onChange={handleRutFormat}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
+            />
+            {rutError && (
+              <p className="mt-1 text-sm text-red-600">{rutError}</p>
+            )}
           </div>
         </div>
 

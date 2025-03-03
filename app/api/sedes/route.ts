@@ -59,38 +59,13 @@ export async function GET() {
       }));
 
       const { archivo_ids: _, archivo_titulos: __, archivo_extensions: ___, ...sedeData } = sedeCasted;
-
+      
       return {
         ...sedeData,
         cursos: sedeCasted.cursos ? JSON.parse(sedeCasted.cursos) : [],
         archivos: archivo_ids[0] ? archivos : [],
       };
     });
-    // const sedes = query.all().map((sede) => {
-    //   const archivo_ids = sede.archivo_ids ? sede.archivo_ids.split(",") : [];
-    //   const archivo_titulos = sede.archivo_titulos
-    //     ? sede.archivo_titulos.split(",")
-    //     : [];
-    //   const archivo_extensions = sede.archivo_extensions
-    //     ? sede.archivo_extensions.split(",")
-    //     : [];
-
-    //   const archivos = archivo_ids.map((id: string, index: number) => ({
-    //     id_archivo: id,
-    //     titulo: archivo_titulos[index],
-    //     extension: archivo_extensions[index],
-    //   }));
-
-    //   delete sede.archivo_ids;
-    //   delete sede.archivo_titulos;
-    //   delete sede.archivo_extensions;
-
-    //   return {
-    //     ...sede,
-    //     cursos: sede.cursos ? JSON.parse(sede.cursos) : [],
-    //     archivos: archivo_ids[0] ? archivos : [],
-    //   };
-    // });
 
     return NextResponse.json({ success: true, data: sedes });
   } catch (error) {

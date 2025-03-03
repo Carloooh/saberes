@@ -53,6 +53,7 @@ const Sedes: React.FC = () => {
       const result = await response.json();
       if (result.success) {
         setSedes(result.data);
+        console.log(result.data);
       } else {
         setError("Error al cargar las sedes");
       }
