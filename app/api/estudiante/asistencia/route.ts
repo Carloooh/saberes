@@ -50,16 +50,6 @@ export async function GET(request: NextRequest) {
         a.fecha && 
         ['Presente', 'Ausente', 'Justificado'].includes(a.estado)
       );
-      // const asistencias = query.all(rutUsuario).map(row => ({
-      //   id_dia: row.id_dia,
-      //   fecha: row.fecha,
-      //   estado: row.estado || 'Ausente' // Ensure we always have a estado
-      // }));
-  
-      // const validAsistencias = asistencias.filter(a => 
-      //   a.fecha && 
-      //   ['Presente', 'Ausente', 'Justificado'].includes(a.estado)
-      // );
 
       return NextResponse.json({
         success: true,
