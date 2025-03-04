@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import TabMaterial from "@/app/components/estudiante/TabMaterial";
 import TabCalificaciones from "@/app/components/estudiante/TabCalificaciones";
 import TabTareas from "@/app/components/estudiante/TabTareas";
+import TabAsistencias from "@/app/components/estudiante/TabAsistencias";
 
 const AsignaturaPage = () => {
   const params = useParams();
@@ -79,6 +80,16 @@ const AsignaturaPage = () => {
             >
               Tareas
             </button>
+            <button
+              onClick={() => setActiveTab("asistencias")}
+              className={`${
+                activeTab === "asistencias"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            >
+              Asistencias
+            </button>
           </nav>
         </div>
 
@@ -91,6 +102,9 @@ const AsignaturaPage = () => {
           )}
           {activeTab === "tareas" && (
             <TabTareas cursoId={cursoId} asignaturaId={asignaturaId} />
+          )}
+          {activeTab === "asistencias" && (
+            <TabAsistencias cursoId={cursoId} asignaturaId={asignaturaId} />
           )}
         </div>
       </div>
