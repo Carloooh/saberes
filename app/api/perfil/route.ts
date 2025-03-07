@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     let perfilData = { ...usuario };
-
+    // perfilData["tipo_usuario"]
     if (tipoUsuario === "Estudiante") {
       // Obtener información específica del estudiante
       const queryMatricula = db.prepare(`
@@ -118,20 +118,13 @@ export async function GET(request: NextRequest) {
         downloadUrl: `/api/perfil/documentos/${archivo.id_documento}`,
       }));
 
-      // const archivos = queryArchivos.all(rutUsuario).map(archivo => ({
-      //   id_documento: archivo.id_documento,
-      //   titulo: archivo.titulo,
-      //   extension: archivo.extension,
-      //   downloadUrl: `/api/perfil/documentos/${archivo.id_documento}`
-      // }));
-
       perfilData = {
         ...perfilData,
         matricula,
         apoderado,
         contactoEmergencia,
         infoMedica,
-        archivosFormateados,
+        archivos: archivosFormateados,
         cursoAlumno,
       };
     } else {
