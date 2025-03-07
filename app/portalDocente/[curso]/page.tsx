@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale/es";
 import { useSearchParams } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 interface Estudiante {
   rut_usuario: string;
@@ -84,6 +85,7 @@ const AsistenciaPage = ({ params }: { params: Promise<{ curso: string }> }) => {
       }
     } catch (error) {
       console.error("Error al eliminar día:", error);
+      toast.error(`Error al eliminar día: ${error}`);
     } finally {
       setDeletingDay(false);
     }
@@ -168,8 +170,12 @@ const AsistenciaPage = ({ params }: { params: Promise<{ curso: string }> }) => {
       if (response.ok) {
         fetchDias();
         setNewFecha("");
+        toast.success("Día agregado con éxito");
+      } else {
+        toast.error(`Error al agregar día`);
       }
     } catch (error) {
+      toast.error(`Error al agregar día: ${error}`);
       console.error("Error al agregar día:", error);
     }
   };
