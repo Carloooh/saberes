@@ -12,7 +12,7 @@ interface Curso {
   asignaturas: string;
 }
 
-interface CursoWithAsignaturas extends Omit<Curso, 'asignaturas'> {
+interface CursoWithAsignaturas extends Omit<Curso, "asignaturas"> {
   asignaturas: Asignatura[];
 }
 
@@ -24,6 +24,9 @@ interface MatriculaArchivo {
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const rut = searchParams.get("rut") ? searchParams.get("rut") : null;
+
     const userSessionCookie = request.cookies.get("userSession")?.value;
     if (!userSessionCookie) {
       return NextResponse.json(
@@ -46,8 +49,17 @@ export async function GET(request: NextRequest) {
     const rutUsuario = userSession.rut_usuario;
     const tipoUsuario = userSession.tipo_usuario;
 
-    const queryUsuario = db.prepare("SELECT * FROM Usuario WHERE rut_usuario = ?");
-    const usuario = queryUsuario.get(rutUsuario);
+    const queryUsuario = db.prepare(
+      "SELECT * FROM Usuario WHERE rut_usuario = ?"
+    );
+
+    let usuario;
+
+    if (rut) {
+      usuario = queryUsuario.get(rut);
+    } else {
+      usuario = queryUsuario.get(rutUsuario);
+    }
 
     if (!usuario) {
       return NextResponse.json(
@@ -69,7 +81,9 @@ export async function GET(request: NextRequest) {
         SELECT id_curso FROM CursosAsignaturasLink WHERE rut_usuario = ?
       `);
 
-      const cursoAlumnoId = queryCursoAlumnoId.get(rutUsuario) as { id_curso: string };
+      const cursoAlumnoId = queryCursoAlumnoId.get(rutUsuario) as {
+        id_curso: string;
+      };
 
       const queryCursoAlumno = db.prepare(`
         SELECT nombre_curso FROM Curso WHERE id_curso = ?
@@ -97,11 +111,11 @@ export async function GET(request: NextRequest) {
       `);
 
       const archivos = queryArchivos.all(rutUsuario) as MatriculaArchivo[];
-      const archivosFormateados = archivos.map(archivo => ({
+      const archivosFormateados = archivos.map((archivo) => ({
         id_documento: archivo.id_documento,
         titulo: archivo.titulo,
         extension: archivo.extension,
-        downloadUrl: `/api/perfil/documentos/${archivo.id_documento}`
+        downloadUrl: `/api/perfil/documentos/${archivo.id_documento}`,
       }));
 
       // const archivos = queryArchivos.all(rutUsuario).map(archivo => ({
@@ -118,7 +132,7 @@ export async function GET(request: NextRequest) {
         contactoEmergencia,
         infoMedica,
         archivosFormateados,
-        cursoAlumno
+        cursoAlumno,
       };
     } else {
       const queryCursos = db.prepare(`
@@ -143,15 +157,17 @@ export async function GET(request: NextRequest) {
         ORDER BY c.id_curso ASC
       `);
 
-      const cursos = queryCursos.all(rutUsuario, rutUsuario).map((curso: unknown): CursoWithAsignaturas => ({
-        id_curso: (curso as Curso).id_curso,
-        nombre_curso: (curso as Curso).nombre_curso,
-        asignaturas: JSON.parse((curso as Curso).asignaturas || '[]')
-      }));
+      const cursos = queryCursos.all(rutUsuario, rutUsuario).map(
+        (curso: unknown): CursoWithAsignaturas => ({
+          id_curso: (curso as Curso).id_curso,
+          nombre_curso: (curso as Curso).nombre_curso,
+          asignaturas: JSON.parse((curso as Curso).asignaturas || "[]"),
+        })
+      );
 
       perfilData = {
         ...perfilData,
-        cursos
+        cursos,
       };
     }
     console.log(perfilData);
