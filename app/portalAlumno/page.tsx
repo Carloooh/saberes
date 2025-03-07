@@ -8,10 +8,13 @@ interface Asignatura {
   nombre_asignatura: string;
 }
 
-interface AsistenciaDia {
-  id_dia: string;
-  fecha: string;
-  estado: "Presente" | "Ausente" | "Justificado";
+interface AsignaturaResumen {
+  id_asignatura: string;
+  nombre_asignatura: string;
+  promedio_calificaciones: number | null;
+  porcentaje_asistencia: number | null;
+  tiene_evaluaciones: boolean;
+  tiene_asistencia: boolean;
 }
 
 interface UserData {
@@ -22,16 +25,20 @@ interface UserData {
 }
 
 const PortalAlumno = () => {
-  const [filter, setFilter] = useState("all");
   const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
-  const [asistencias, setAsistencias] = useState<AsistenciaDia[]>([]);
+  const [resumenAsignaturas, setResumenAsignaturas] = useState<
+    AsignaturaResumen[]
+  >([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [promedioGeneral, setPromedioGeneral] = useState<number | null>(null);
+  const [asistenciaGeneral, setAsistenciaGeneral] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch course and subjects data
         const cursoResponse = await fetch("/api/estudiante/curso");
         const cursoData = await cursoResponse.json();
 
@@ -42,14 +49,76 @@ const PortalAlumno = () => {
               nombre_curso: cursoData.data.cursoAlumno.nombre_curso,
             },
           });
-          setAsignaturas(cursoData.data.asignaturas || []);
 
-          // Fetch attendance data
-          const asistenciaResponse = await fetch("/api/estudiante/asistencia");
-          const asistenciaData = await asistenciaResponse.json();
+          const asignaturasData = cursoData.data.asignaturas || [];
+          setAsignaturas(asignaturasData);
 
-          if (asistenciaData.success) {
-            setAsistencias(asistenciaData.data || []);
+          if (asignaturasData.length > 0) {
+            const resumenPromises = asignaturasData.map(
+              async (asignatura: Asignatura) => {
+                const asistenciaResponse = await fetch(
+                  `/api/estudiante/asistencia/resumen?cursoId=${cursoData.data.cursoAlumno.id_curso}&asignaturaId=${asignatura.id_asignatura}`
+                );
+                const asistenciaData = await asistenciaResponse.json();
+
+                const calificacionesResponse = await fetch(
+                  `/api/estudiante/calificaciones/resumen?asignaturaId=${asignatura.id_asignatura}`
+                );
+                const calificacionesData = await calificacionesResponse.json();
+
+                return {
+                  id_asignatura: asignatura.id_asignatura,
+                  nombre_asignatura: asignatura.nombre_asignatura,
+                  promedio_calificaciones: calificacionesData.success
+                    ? calificacionesData.promedio
+                    : null,
+                  porcentaje_asistencia: asistenciaData.success
+                    ? asistenciaData.porcentaje
+                    : null,
+                  tiene_evaluaciones:
+                    calificacionesData.success &&
+                    calificacionesData.tieneEvaluaciones,
+                  tiene_asistencia:
+                    asistenciaData.success && asistenciaData.tieneRegistros,
+                };
+              }
+            );
+
+            const resumenData = await Promise.all(resumenPromises);
+            setResumenAsignaturas(resumenData);
+
+            // Calculate overall averages only from subjects with data
+            const asignaturasConNotas = resumenData.filter(
+              (asignatura) =>
+                asignatura.tiene_evaluaciones &&
+                asignatura.promedio_calificaciones !== null
+            );
+
+            const asignaturasConAsistencia = resumenData.filter(
+              (asignatura) =>
+                asignatura.tiene_asistencia &&
+                asignatura.porcentaje_asistencia !== null
+            );
+
+            if (asignaturasConNotas.length > 0) {
+              const sumaPromedios = asignaturasConNotas.reduce(
+                (sum, asignatura) =>
+                  sum + (asignatura.promedio_calificaciones || 0),
+                0
+              );
+              setPromedioGeneral(sumaPromedios / asignaturasConNotas.length);
+            }
+
+            if (asignaturasConAsistencia.length > 0) {
+              const sumaAsistencias = asignaturasConAsistencia.reduce(
+                (sum, asignatura) =>
+                  sum + (asignatura.porcentaje_asistencia || 0),
+                0
+              );
+              setAsistenciaGeneral(
+                sumaAsistencias / asignaturasConAsistencia.length
+              );
+            }
           }
         }
       } catch (error) {
@@ -61,32 +130,6 @@ const PortalAlumno = () => {
 
     fetchData();
   }, []);
-
-  const updateFilter = (selectedFilter: string) => {
-    setFilter((currentFilter) =>
-      currentFilter === selectedFilter ? "all" : selectedFilter
-    );
-  };
-
-  const filteredAsistencia = asistencias.filter(
-    (dia) => filter === "all" || dia.estado === filter
-  );
-
-  // Calculate attendance statistics
-  const totalDias = asistencias.length;
-  const diasPresentes = asistencias.filter(
-    (dia) => dia.estado === "Presente"
-  ).length;
-  const diasJustificados = asistencias.filter(
-    (dia) => dia.estado === "Justificado"
-  ).length;
-  const diasAusentes = asistencias.filter(
-    (dia) => dia.estado === "Ausente"
-  ).length;
-  const porcentajeAsistencia =
-    totalDias > 0
-      ? (((diasPresentes + diasJustificados) / totalDias) * 100).toFixed(1)
-      : "0.0";
 
   if (loading) {
     return (
@@ -118,13 +161,11 @@ const PortalAlumno = () => {
                   {asignatura.nombre_asignatura}
                 </h3>
                 <a
-                  // href={`/portalAlumno/${asignatura.id_asignatura}`}
                   href={`/portalAlumno/${
                     asignatura.id_asignatura
                   }?nombre=${encodeURIComponent(
                     asignatura.nombre_asignatura
                   )}&cursoId=${userData?.cursoAlumno.id_curso}`}
-                  // href={`/portalAlumno/${asignatura.id_asignatura}?nombre=${asignatura.nombre_asignatura}`}
                   className="text-blue-600 hover:underline text-sm"
                 >
                   Ver asignatura
@@ -134,91 +175,110 @@ const PortalAlumno = () => {
           </div>
         </div>
 
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Asistencia</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
-            <div
-              className={`bg-blue-100 p-4 rounded-lg cursor-pointer ${
-                filter === "all" ? "ring-2 ring-blue-500" : ""
-              }`}
-              onClick={() => updateFilter("all")}
-            >
-              <p className="text-sm text-blue-800">Asistencia Total</p>
-              <p className="text-2xl font-bold text-blue-800">
-                {porcentajeAsistencia}%
-              </p>
-            </div>
-            <div
-              className={`bg-green-100 p-4 rounded-lg cursor-pointer ${
-                filter === "Presente" ? "ring-2 ring-green-500" : ""
-              }`}
-              onClick={() => updateFilter("Presente")}
-            >
-              <p className="text-sm text-green-800">Días Presentes</p>
-              <p className="text-2xl font-bold text-green-800">
-                {diasPresentes}
-              </p>
-            </div>
-            <div
-              className={`bg-yellow-100 p-4 rounded-lg cursor-pointer ${
-                filter === "Justificado" ? "ring-2 ring-yellow-500" : ""
-              }`}
-              onClick={() => updateFilter("Justificado")}
-            >
-              <p className="text-sm text-yellow-800">Faltas Justificadas</p>
-              <p className="text-2xl font-bold text-yellow-800">
-                {diasJustificados}
-              </p>
-            </div>
-            <div
-              className={`bg-red-100 p-4 rounded-lg cursor-pointer ${
-                filter === "Ausente" ? "ring-2 ring-red-500" : ""
-              }`}
-              onClick={() => updateFilter("Ausente")}
-            >
-              <p className="text-sm text-red-800">Faltas Injustificadas</p>
-              <p className="text-2xl font-bold text-red-800">{diasAusentes}</p>
-            </div>
-          </div>
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Resumen Académico</h2>
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="max-h-96 overflow-y-auto">
-              <table className="w-full">
-                <thead className="sticky top-0 bg-gray-100">
-                  <tr>
-                    <th className="p-2 text-left">Fecha</th>
-                    <th className="p-2 text-left">Estado</th>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Asignatura
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Promedio Calificaciones
+                  </th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Porcentaje Asistencia
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {resumenAsignaturas.map((asignatura) => (
+                  <tr key={asignatura.id_asignatura}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {asignatura.nombre_asignatura}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      {asignatura.tiene_evaluaciones ? (
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            asignatura.promedio_calificaciones >= 4
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {asignatura.promedio_calificaciones.toFixed(1)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-500">
+                          Sin evaluaciones
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      {asignatura.tiene_asistencia ? (
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            asignatura.porcentaje_asistencia >= 85
+                              ? "bg-green-100 text-green-800"
+                              : asignatura.porcentaje_asistencia >= 75
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {asignatura.porcentaje_asistencia.toFixed(1)}%
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-500">
+                          Sin registros
+                        </span>
+                      )}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredAsistencia
-                    .sort(
-                      (a, b) =>
-                        new Date(b.fecha).getTime() -
-                        new Date(a.fecha).getTime()
-                    )
-                    .map((dia) => (
-                      <tr key={dia.id_dia}>
-                        <td className="p-2 border-t">
-                          {new Date(dia.fecha).toLocaleDateString("es-CL")}
-                        </td>
-                        <td className="p-2 border-t">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs ${
-                              dia.estado === "Presente"
-                                ? "bg-green-200 text-green-800"
-                                : dia.estado === "Justificado"
-                                ? "bg-yellow-200 text-yellow-800"
-                                : "bg-red-200 text-red-800"
-                            }`}
-                          >
-                            {dia.estado}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+                <tr className="bg-gray-50 font-semibold">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      PROMEDIO GENERAL
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    {promedioGeneral !== null ? (
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-bold ${
+                          promedioGeneral >= 4
+                            ? "bg-green-200 text-green-800"
+                            : "bg-red-200 text-red-800"
+                        }`}
+                      >
+                        {promedioGeneral.toFixed(1)}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-500">Sin datos</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    {asistenciaGeneral !== null ? (
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-bold ${
+                          asistenciaGeneral >= 85
+                            ? "bg-green-200 text-green-800"
+                            : asistenciaGeneral >= 75
+                            ? "bg-yellow-200 text-yellow-800"
+                            : "bg-red-200 text-red-800"
+                        }`}
+                      >
+                        {asistenciaGeneral.toFixed(1)}%
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-500">Sin datos</span>
+                    )}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

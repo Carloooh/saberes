@@ -1,45 +1,3 @@
-// "use client";
-
-// import React, { useState, useEffect } from "react";
-// import { format } from "date-fns";
-// import { es } from "date-fns/locale/es";
-// import toast from "react-hot-toast";
-
-// interface AsistenciasProps {
-//   cursoId: string;
-//   asignaturaId: string;
-// }
-
-// export default function Asistencias({
-//   cursoId,
-//   asignaturaId,
-// }: AsistenciasProps) {
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     setLoading(false);
-//   }, []);
-
-//   if (loading)
-//     return (
-//       <div className="flex justify-center items-center p-8">
-//         <div className="text-gray-500">Cargando información de asistencias</div>
-//       </div>
-//     );
-
-//   return (
-//     <div className="space-y-4">
-//       <div className="flex justify-between items-center">
-//         <h2 className="text-xl font-bold">Asistencias</h2>
-//         <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-//           Nueva Asistencia
-//         </button>
-//       </div>
-//       test
-//     </div>
-//   );
-// }
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -234,16 +192,6 @@ export default function Asistencias({
       toast.error("Error al agregar día");
     }
   };
-
-  if (loading && !dias.length) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <div className="text-gray-500">
-          Cargando información de asistencias...
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4">
