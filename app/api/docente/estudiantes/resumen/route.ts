@@ -2,6 +2,34 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import db from "@/db";
 
+// Define interfaces for the database results
+interface Estudiante {
+  rut_usuario: string;
+  nombres: string;
+  apellidos: string;
+}
+
+interface Asignatura {
+  id_asignatura: string;
+}
+
+interface Nota {
+  nota: number;
+}
+
+interface Asistencia {
+  presentes: number;
+  total: number;
+}
+
+interface EstudianteResumen {
+  rut_usuario: string;
+  nombres: string;
+  apellidos: string;
+  promedio_general: number | null;
+  porcentaje_asistencia: number | null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -25,18 +53,18 @@ export async function GET(request: NextRequest) {
       WHERE cal.id_curso = ? AND u.tipo_usuario = 'Estudiante'
     `);
 
-    const estudiantes = queryEstudiantes.all(cursoId);
+    const estudiantes = queryEstudiantes.all(cursoId) as Estudiante[];
 
     // For each student, get their grades and attendance for each subject
     const estudiantesResumen = await Promise.all(
-      estudiantes.map(async (estudiante: any) => {
+      estudiantes.map(async (estudiante: Estudiante) => {
         // Get all subjects for this course
         const queryAsignaturas = db.prepare(`
           SELECT id_asignatura
           FROM Asignaturas
           WHERE id_curso = ?
         `);
-        const asignaturas = queryAsignaturas.all(cursoId);
+        const asignaturas = queryAsignaturas.all(cursoId) as Asignatura[];
 
         // Calculate averages across all subjects
         let sumaPromedios = 0;
@@ -57,16 +85,16 @@ export async function GET(request: NextRequest) {
             estudiante.rut_usuario,
             asignatura.id_asignatura,
             cursoId
-          );
+          ) as Nota[];
 
           const notasValidas = notas.filter(
-            (nota: any) => nota.nota !== null && nota.nota > 0
+            (nota: Nota) => nota.nota !== null && nota.nota > 0
           );
 
           if (notasValidas.length > 0) {
             const promedio =
               notasValidas.reduce(
-                (sum: number, nota: any) => sum + nota.nota,
+                (sum: number, nota: Nota) => sum + nota.nota,
                 0
               ) / notasValidas.length;
             sumaPromedios += promedio;
@@ -87,7 +115,7 @@ export async function GET(request: NextRequest) {
             estudiante.rut_usuario,
             cursoId,
             asignatura.id_asignatura
-          );
+          ) as Asistencia;
 
           if (asistencia && asistencia.total > 0) {
             const porcentaje = (asistencia.presentes / asistencia.total) * 100;
@@ -96,7 +124,7 @@ export async function GET(request: NextRequest) {
           }
         }
 
-        return {
+        const estudianteResumen: EstudianteResumen = {
           rut_usuario: estudiante.rut_usuario,
           nombres: estudiante.nombres,
           apellidos: estudiante.apellidos,
@@ -107,6 +135,8 @@ export async function GET(request: NextRequest) {
               ? sumaAsistencias / contadorAsistencias
               : null,
         };
+
+        return estudianteResumen;
       })
     );
 
