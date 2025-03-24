@@ -204,12 +204,14 @@ const PortalAlumno = () => {
                       {asignatura.tiene_evaluaciones ? (
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
-                            asignatura.promedio_calificaciones >= 4
+                            (asignatura.promedio_calificaciones || 0) >= 4
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {asignatura.promedio_calificaciones.toFixed(1)}
+                          {asignatura.promedio_calificaciones !== null
+                            ? asignatura.promedio_calificaciones.toFixed(1)
+                            : "0.0"}
                         </span>
                       ) : (
                         <span className="text-xs text-gray-500">
@@ -221,14 +223,17 @@ const PortalAlumno = () => {
                       {asignatura.tiene_asistencia ? (
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
-                            asignatura.porcentaje_asistencia >= 85
+                            (asignatura.porcentaje_asistencia || 0) >= 85
                               ? "bg-green-100 text-green-800"
-                              : asignatura.porcentaje_asistencia >= 75
+                              : (asignatura.porcentaje_asistencia || 0) >= 75
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {asignatura.porcentaje_asistencia.toFixed(1)}%
+                          {asignatura.porcentaje_asistencia !== null
+                            ? asignatura.porcentaje_asistencia.toFixed(1)
+                            : "0.0"}
+                          %
                         </span>
                       ) : (
                         <span className="text-xs text-gray-500">
