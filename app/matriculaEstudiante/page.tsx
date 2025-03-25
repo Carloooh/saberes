@@ -34,6 +34,25 @@ const MatriculaEstudiante = () => {
     celular_contacto: "",
   });
 
+  const [flagFields, setFlagFields] = useState({
+    flag_apoyo_especial: false,
+    consentimiento_apoyo_especial: false,
+    flag_discapacidad: false,
+    flag_necesidad_especial: false,
+    flag_enfermedad: false,
+    flag_medicamentos: false,
+    flag_alergia: false,
+  });
+
+  // Function to handle flag field changes
+  const handleFlagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFlagFields((prev) => ({
+      ...prev,
+      [name]: value === "1", // Set to true if value is "1" (Yes)
+    }));
+  };
+
   // Modify the handlePhoneFormat function to track errors per field
   const handlePhoneFormat = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -793,6 +812,7 @@ const MatriculaEstudiante = () => {
                         value="1"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
                       />
                       <span className="ml-2 text-sm text-gray-700">Sí</span>
                     </label>
@@ -803,19 +823,24 @@ const MatriculaEstudiante = () => {
                         value="0"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
+                        defaultChecked
                       />
                       <span className="ml-2 text-sm text-gray-700">No</span>
                     </label>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      id="apoyo_especial"
-                      name="apoyo_especial"
-                      placeholder="Especifique el tipo de apoyo especial (opcional)"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
+                  {flagFields.flag_apoyo_especial && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        id="apoyo_especial"
+                        name="apoyo_especial"
+                        placeholder="Especifique el tipo de apoyo especial"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -831,6 +856,7 @@ const MatriculaEstudiante = () => {
                         value="1"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
                       />
                       <span className="ml-2 text-sm text-gray-700">Sí</span>
                     </label>
@@ -841,19 +867,24 @@ const MatriculaEstudiante = () => {
                         value="0"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
+                        defaultChecked
                       />
                       <span className="ml-2 text-sm text-gray-700">No</span>
                     </label>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      id="razon_consentimiento_apoyo_especial"
-                      name="razon_consentimiento_apoyo_especial"
-                      placeholder="Especifique la razón del consentimiento (opcional)"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
+                  {flagFields.consentimiento_apoyo_especial && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        id="razon_consentimiento_apoyo_especial"
+                        name="razon_consentimiento_apoyo_especial"
+                        placeholder="Especifique la razón del consentimiento"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1257,7 +1288,7 @@ const MatriculaEstudiante = () => {
               <div className="space-y-4 mt-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    ¿Tiene control médico regular?{" "}
+                    ¿Tiene control médico al día?{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="flex space-x-4 mt-1">
@@ -1268,6 +1299,7 @@ const MatriculaEstudiante = () => {
                         value="1"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        defaultChecked
                       />
                       <span className="ml-2 text-sm text-gray-700">Sí</span>
                     </label>
@@ -1297,6 +1329,7 @@ const MatriculaEstudiante = () => {
                         value="1"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
                       />
                       <span className="ml-2 text-sm text-gray-700">Sí</span>
                     </label>
@@ -1307,18 +1340,23 @@ const MatriculaEstudiante = () => {
                         value="0"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
+                        defaultChecked
                       />
                       <span className="ml-2 text-sm text-gray-700">No</span>
                     </label>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      name="discapacidad"
-                      placeholder="Especifique la discapacidad (opcional)"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
+                  {flagFields.flag_discapacidad && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        name="discapacidad"
+                        placeholder="Especifique la discapacidad"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1334,6 +1372,7 @@ const MatriculaEstudiante = () => {
                         value="1"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
                       />
                       <span className="ml-2 text-sm text-gray-700">Sí</span>
                     </label>
@@ -1344,18 +1383,23 @@ const MatriculaEstudiante = () => {
                         value="0"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
+                        defaultChecked
                       />
                       <span className="ml-2 text-sm text-gray-700">No</span>
                     </label>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      name="necesidad_especial"
-                      placeholder="Especifique la necesidad especial (opcional)"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
+                  {flagFields.flag_necesidad_especial && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        name="necesidad_especial"
+                        placeholder="Especifique la necesidad especial"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1371,6 +1415,7 @@ const MatriculaEstudiante = () => {
                         value="1"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
                       />
                       <span className="ml-2 text-sm text-gray-700">Sí</span>
                     </label>
@@ -1381,18 +1426,23 @@ const MatriculaEstudiante = () => {
                         value="0"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
+                        defaultChecked
                       />
                       <span className="ml-2 text-sm text-gray-700">No</span>
                     </label>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      name="enfermedad"
-                      placeholder="Especifique la enfermedad (opcional)"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
+                  {flagFields.flag_enfermedad && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        name="enfermedad"
+                        placeholder="Especifique la enfermedad"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1408,6 +1458,7 @@ const MatriculaEstudiante = () => {
                         value="1"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
                       />
                       <span className="ml-2 text-sm text-gray-700">Sí</span>
                     </label>
@@ -1418,18 +1469,23 @@ const MatriculaEstudiante = () => {
                         value="0"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
+                        defaultChecked
                       />
                       <span className="ml-2 text-sm text-gray-700">No</span>
                     </label>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      name="medicamentos"
-                      placeholder="Especifique los medicamentos (opcional)"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
+                  {flagFields.flag_medicamentos && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        name="medicamentos"
+                        placeholder="Especifique los medicamentos"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1445,6 +1501,7 @@ const MatriculaEstudiante = () => {
                         value="1"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
                       />
                       <span className="ml-2 text-sm text-gray-700">Sí</span>
                     </label>
@@ -1455,18 +1512,23 @@ const MatriculaEstudiante = () => {
                         value="0"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         required
+                        onChange={handleFlagChange}
+                        defaultChecked
                       />
                       <span className="ml-2 text-sm text-gray-700">No</span>
                     </label>
                   </div>
-                  <div className="mt-2">
-                    <input
-                      type="text"
-                      name="alergia"
-                      placeholder="Especifique la alergia (opcional)"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
+                  {flagFields.flag_alergia && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        name="alergia"
+                        placeholder="Especifique la alergia"
+                        className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
