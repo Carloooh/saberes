@@ -94,7 +94,7 @@ export async function POST(req: Request) {
     const reuniones = formData.get("reuniones") === "1";
     // Se usa un campo distinto para el consentimiento de apoyo especial en este bloque
     const apoyo_especial_consent =
-      formData.get("apoyo_especial_consent") === "1";
+      formData.get("compromiso_apoyo_especial") === "1";
     const sedes = formData.get("sedes") === "1";
     const multimedia = formData.get("multimedia") === "1";
     const cumplimiento_compromisos =
