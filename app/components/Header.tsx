@@ -39,113 +39,8 @@ export default function Header() {
     setShowMenu(false);
   };
 
-  const [rutError, setRutError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-
-  // Add password validation function
-  const validatePassword = (password: string): boolean => {
-    const hasMinLength = password.length >= 8;
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(
-      password
-    );
-    const hasNumber = /\d/.test(password);
-
-    if (!hasMinLength || !hasSpecialChar || !hasNumber) {
-      setPasswordError(
-        "La contraseña debe tener al menos 8 caracteres, un carácter especial y un número"
-      );
-      return false;
-    }
-
-    setPasswordError("");
-    return true;
-  };
-
-  // Add RUT validation functions
-  const Fn = {
-    validaRut: (rutCompleto: string) => {
-      rutCompleto = rutCompleto.replace(/\./g, "");
-      if (!/^[0-9]+-[0-9kK]{1}$/.test(rutCompleto)) return false;
-      const tmp = rutCompleto.split("-");
-      const digv = tmp[1].toLowerCase();
-      const rut = parseInt(tmp[0]);
-      return Fn.dv(rut) === digv;
-    },
-    dv: (T: number): string => {
-      let M = 0,
-        S = 1;
-      for (; T; T = Math.floor(T / 10)) {
-        S = (S + (T % 10) * (9 - (M++ % 6))) % 11;
-      }
-      return S ? (S - 1).toString() : "k";
-    },
-  };
-
-  const handleRutFormat = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/[^\dkK]/g, ""); // Allow digits and 'k'/'K'
-
-    // Extract the verification digit if present
-    let verificationDigit = "";
-    if (value.length > 0 && /[kK\d]$/.test(value)) {
-      verificationDigit = value.slice(-1);
-      // Convert lowercase 'k' to uppercase 'K'
-      if (verificationDigit === "k") {
-        verificationDigit = "K";
-      }
-      value = value.slice(0, -1);
-    }
-
-    // Format only the numeric part
-    let numericPart = value.replace(/\D/g, "");
-    const length = numericPart.length;
-
-    if (length > 0) {
-      if (length <= 6) {
-        numericPart = numericPart.replace(/(\d{1,3})(\d{0,3})/, "$1.$2");
-      } else if (length <= 9) {
-        numericPart = numericPart.replace(
-          /(\d{1,2})(\d{3})(\d{0,3})/,
-          "$1.$2.$3"
-        );
-      } else {
-        numericPart = numericPart.replace(
-          /(\d{1,3})(\d{3})(\d{3})/,
-          "$1.$2.$3"
-        );
-      }
-    }
-
-    // Add back the verification digit with a hyphen
-    if (verificationDigit) {
-      e.target.value = `${numericPart}-${verificationDigit}`;
-    } else {
-      e.target.value = numericPart;
-    }
-
-    // Validate the RUT if it has a verification digit
-    if (e.target.value.includes("-")) {
-      if (!Fn.validaRut(e.target.value)) {
-        setRutError("RUT inválido");
-      } else {
-        setRutError("");
-      }
-    }
-  };
-
   const handleLogin = async (rut_usuario: string, clave: string) => {
     try {
-      // Validate RUT before sending
-      if (!Fn.validaRut(rut_usuario)) {
-        toast.error("RUT inválido");
-        return;
-      }
-
-      // Validate password
-      if (!validatePassword(clave)) {
-        toast.error(passwordError);
-        return;
-      }
-
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -456,14 +351,10 @@ export default function Header() {
                       id="rut_usuario"
                       name="rut_usuario"
                       required
-                      maxLength={13}
-                      placeholder="12.345.678-9"
-                      onChange={handleRutFormat}
+                      maxLength={11}
+                      placeholder="12345678-9 o identificador"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2196F3] focus:border-[#2196F3]"
                     />
-                    {rutError && (
-                      <p className="mt-1 text-sm text-red-600">{rutError}</p>
-                    )}
                   </div>
                   <div>
                     <label
@@ -477,8 +368,8 @@ export default function Header() {
                         type={showPasswords.login ? "text" : "password"}
                         id="clave"
                         name="clave"
+                        placeholder="Ingrese su contraseña"
                         required
-                        onChange={(e) => validatePassword(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2196F3] focus:border-[#2196F3]"
                       />
                       <button
@@ -508,11 +399,6 @@ export default function Header() {
                         </svg>
                       </button>
                     </div>
-                    {passwordError && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {passwordError}
-                      </p>
-                    )}
                   </div>
                   <div className="text-right">
                     <a

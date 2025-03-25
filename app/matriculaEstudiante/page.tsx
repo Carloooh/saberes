@@ -44,6 +44,47 @@ const MatriculaEstudiante = () => {
     flag_alergia: false,
   });
 
+  const [selectedRutTypes, setSelectedRutTypes] = useState({
+    rut_tipo: "",
+    tipo_rut_apoderado1: "",
+  });
+
+  // Handle RUT type selection
+  const handleRutTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setSelectedRutTypes((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Reset the corresponding RUT input field when type changes
+    if (name === "rut_tipo") {
+      const rutInput = document.getElementById(
+        "rut_usuario"
+      ) as HTMLInputElement;
+      if (rutInput) {
+        rutInput.value = "";
+        // Also clear any error messages
+        setRutError((prev) => ({
+          ...prev,
+          rut_usuario: "",
+        }));
+      }
+    } else if (name === "tipo_rut_apoderado1") {
+      const rutInput = document.getElementById(
+        "rut_apoderado1"
+      ) as HTMLInputElement;
+      if (rutInput) {
+        rutInput.value = "";
+        // Also clear any error messages
+        setRutError((prev) => ({
+          ...prev,
+          rut_apoderado1: "",
+        }));
+      }
+    }
+  };
+
   // Function to handle flag field changes
   const handleFlagChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -165,56 +206,48 @@ const MatriculaEstudiante = () => {
     const { name, value } = e.target;
     let formattedValue = value.replace(/[^\dkK]/g, ""); // Allow digits and 'k'/'K'
 
-    // Extract the verification digit if present
-    let verificationDigit = "";
-    if (formattedValue.length > 0 && /[kK\d]$/.test(formattedValue)) {
-      verificationDigit = formattedValue.slice(-1);
-      // Convert lowercase 'k' to uppercase 'K'
-      if (verificationDigit === "k") {
-        verificationDigit = "K";
+    // Get the corresponding RUT type field name
+    const rutTypeName =
+      name === "rut_usuario" ? "rut_tipo" : "tipo_rut_apoderado1";
+    const rutType =
+      selectedRutTypes[rutTypeName as keyof typeof selectedRutTypes];
+
+    // Only format and validate if the RUT type is "RUT"
+    if (rutType === "RUT") {
+      // Extract the verification digit if present
+      let verificationDigit = "";
+      if (formattedValue.length > 0 && /[kK\d]$/.test(formattedValue)) {
+        verificationDigit = formattedValue.slice(-1);
+        // Convert lowercase 'k' to uppercase 'K'
+        if (verificationDigit === "k") {
+          verificationDigit = "K";
+        }
+        formattedValue = formattedValue.slice(0, -1);
       }
-      formattedValue = formattedValue.slice(0, -1);
-    }
 
-    // Format only the numeric part
-    let numericPart = formattedValue.replace(/\D/g, "");
-    const length = numericPart.length;
+      // Format only the numeric part - without dots
+      const numericPart = formattedValue.replace(/\D/g, "");
 
-    if (length > 0) {
-      if (length <= 6) {
-        numericPart = numericPart.replace(/(\d{1,3})(\d{0,3})/, "$1.$2");
-      } else if (length <= 9) {
-        numericPart = numericPart.replace(
-          /(\d{1,2})(\d{3})(\d{0,3})/,
-          "$1.$2.$3"
-        );
+      // Add back the verification digit with a hyphen
+      if (verificationDigit) {
+        e.target.value = `${numericPart}-${verificationDigit}`;
       } else {
-        numericPart = numericPart.replace(
-          /(\d{1,3})(\d{3})(\d{3})/,
-          "$1.$2.$3"
-        );
+        e.target.value = numericPart;
       }
-    }
 
-    // Add back the verification digit with a hyphen
-    if (verificationDigit) {
-      e.target.value = `${numericPart}-${verificationDigit}`;
-    } else {
-      e.target.value = numericPart;
-    }
-
-    // Validate the RUT if it has a verification digit
-    if (e.target.value.includes("-")) {
-      if (!Fn.validaRut(e.target.value)) {
-        setRutError((prev) => ({
-          ...prev,
-          [name]: "RUT inválido",
-        }));
-      } else {
-        setRutError((prev) => ({
-          ...prev,
-          [name]: "",
-        }));
+      // Validate the RUT if it has a verification digit
+      if (e.target.value.includes("-")) {
+        if (!Fn.validaRut(e.target.value)) {
+          setRutError((prev) => ({
+            ...prev,
+            [name]: "RUT inválido",
+          }));
+        } else {
+          setRutError((prev) => ({
+            ...prev,
+            [name]: "",
+          }));
+        }
       }
     }
   };
@@ -436,30 +469,6 @@ const MatriculaEstudiante = () => {
               <div className="space-y-4 mt-3">
                 <div>
                   <label
-                    htmlFor="rut_usuario"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    RUT <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="rut_usuario"
-                    name="rut_usuario"
-                    placeholder="Ejemplo: 12345678-9"
-                    className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    required
-                    onChange={handleRutFormat}
-                    maxLength={13}
-                  />
-                  {rutError.rut_usuario && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {rutError.rut_usuario}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label
                     htmlFor="rut_tipo"
                     className="block text-sm font-medium text-gray-700"
                   >
@@ -470,6 +479,8 @@ const MatriculaEstudiante = () => {
                     name="rut_tipo"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
+                    onChange={handleRutTypeChange}
+                    value={selectedRutTypes.rut_tipo}
                   >
                     <option value="">Seleccione una opción</option>
                     <option value="RUT">RUT</option>
@@ -478,7 +489,43 @@ const MatriculaEstudiante = () => {
                     <option value="OTRO">Otro</option>
                   </select>
                 </div>
-
+                {selectedRutTypes.rut_tipo && (
+                  <div>
+                    <label
+                      htmlFor="rut_usuario"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      {selectedRutTypes.rut_tipo === "RUT"
+                        ? "RUT"
+                        : selectedRutTypes.rut_tipo === "RUT_EXTRANJERO"
+                        ? "RUT Extranjero"
+                        : selectedRutTypes.rut_tipo === "PASAPORTE"
+                        ? "Pasaporte"
+                        : "Identificación"}{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="rut_usuario"
+                      name="rut_usuario"
+                      placeholder={
+                        selectedRutTypes.rut_tipo === "RUT"
+                          ? "Ejemplo: 12345678-9"
+                          : "Ingrese su identificación"
+                      }
+                      className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      required
+                      onChange={handleRutFormat}
+                      maxLength={selectedRutTypes.rut_tipo === "RUT" ? 11 : 20}
+                    />
+                    {rutError.rut_usuario &&
+                      selectedRutTypes.rut_tipo === "RUT" && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {rutError.rut_usuario}
+                        </p>
+                      )}
+                  </div>
+                )}
                 <div>
                   <label
                     htmlFor="nombres"
@@ -971,29 +1018,6 @@ const MatriculaEstudiante = () => {
                 </div>
                 <div>
                   <label
-                    htmlFor="rut_apoderado1"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    RUT <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="rut_apoderado1"
-                    name="rut_apoderado1"
-                    placeholder="Ejemplo: 12345678-9"
-                    className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    required
-                    onChange={handleRutFormat}
-                    maxLength={13}
-                  />
-                  {rutError.rut_apoderado1 && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {rutError.rut_apoderado1}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label
                     htmlFor="tipo_rut_apoderado1"
                     className="block text-sm font-medium text-gray-700"
                   >
@@ -1004,6 +1028,8 @@ const MatriculaEstudiante = () => {
                     name="tipo_rut_apoderado1"
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     required
+                    onChange={handleRutTypeChange}
+                    value={selectedRutTypes.tipo_rut_apoderado1}
                   >
                     <option value="">Seleccione una opción</option>
                     <option value="RUT">RUT</option>
@@ -1012,6 +1038,46 @@ const MatriculaEstudiante = () => {
                     <option value="OTRO">Otro</option>
                   </select>
                 </div>
+                {selectedRutTypes.tipo_rut_apoderado1 && (
+                  <div>
+                    <label
+                      htmlFor="rut_apoderado1"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      {selectedRutTypes.tipo_rut_apoderado1 === "RUT"
+                        ? "RUT"
+                        : selectedRutTypes.tipo_rut_apoderado1 ===
+                          "RUT_EXTRANJERO"
+                        ? "RUT Extranjero"
+                        : selectedRutTypes.tipo_rut_apoderado1 === "PASAPORTE"
+                        ? "Pasaporte"
+                        : "Identificación"}{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="rut_apoderado1"
+                      name="rut_apoderado1"
+                      placeholder={
+                        selectedRutTypes.tipo_rut_apoderado1 === "RUT"
+                          ? "Ejemplo: 12345678-9"
+                          : "Ingrese su identificación"
+                      }
+                      className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      required
+                      onChange={handleRutFormat}
+                      maxLength={
+                        selectedRutTypes.tipo_rut_apoderado1 === "RUT" ? 11 : 20
+                      }
+                    />
+                    {rutError.rut_apoderado1 &&
+                      selectedRutTypes.tipo_rut_apoderado1 === "RUT" && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {rutError.rut_apoderado1}
+                        </p>
+                      )}
+                  </div>
+                )}
                 <div>
                   <label
                     htmlFor="nacionalidad_apoderado1"

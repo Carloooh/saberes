@@ -90,32 +90,21 @@ const RegistroFuncionario = () => {
   const [rutError, setRutError] = useState("");
   const handleRutFormat = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^\dkK]/g, ""); // Allow digits and 'k'/'K'
-    
+
     // Extract the verification digit if present
     let verificationDigit = "";
     if (value.length > 0 && /[kK\d]$/.test(value)) {
       verificationDigit = value.slice(-1);
       // Convert lowercase 'k' to uppercase 'K'
-      if (verificationDigit === 'k') {
-        verificationDigit = 'K';
+      if (verificationDigit === "k") {
+        verificationDigit = "K";
       }
       value = value.slice(0, -1);
     }
-    
-    // Format only the numeric part
-    let numericPart = value.replace(/\D/g, "");
-    const length = numericPart.length;
 
-    if (length > 0) {
-      if (length <= 6) {
-        numericPart = numericPart.replace(/(\d{1,3})(\d{0,3})/, "$1.$2");
-      } else if (length <= 9) {
-        numericPart = numericPart.replace(/(\d{1,2})(\d{3})(\d{0,3})/, "$1.$2.$3");
-      } else {
-        numericPart = numericPart.replace(/(\d{1,3})(\d{3})(\d{3})/, "$1.$2.$3");
-      }
-    }
-    
+    // Format only the numeric part - without dots
+    const numericPart = value.replace(/\D/g, "");
+
     // Add back the verification digit with a hyphen
     if (verificationDigit) {
       e.target.value = `${numericPart}-${verificationDigit}`;
@@ -376,8 +365,8 @@ const RegistroFuncionario = () => {
               type="text"
               name="rut"
               required
-              maxLength={13}
-              placeholder="12.345.678-9"
+              maxLength={11}
+              placeholder="12345678-9"
               onChange={handleRutFormat}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#E91E63] focus:border-[#E91E63]"
             />
