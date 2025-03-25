@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: imagen-saberes:latest
+    container_name: saberes-container
+    ports:
+      - "8081:3000"
+    env_file:
+      - .env
+    volumes:
+      # - ./:/app
+      - ./db:/app/db
+    depends_on: []
