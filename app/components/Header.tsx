@@ -351,7 +351,7 @@ export default function Header() {
                       id="rut_usuario"
                       name="rut_usuario"
                       required
-                      maxLength={11}
+                      maxLength={30}
                       placeholder="12345678-9 o identificador"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2196F3] focus:border-[#2196F3]"
                     />

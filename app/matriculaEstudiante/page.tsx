@@ -516,7 +516,7 @@ const MatriculaEstudiante = () => {
                       className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                       required
                       onChange={handleRutFormat}
-                      maxLength={selectedRutTypes.rut_tipo === "RUT" ? 11 : 20}
+                      maxLength={selectedRutTypes.rut_tipo === "RUT" ? 11 : 30}
                     />
                     {rutError.rut_usuario &&
                       selectedRutTypes.rut_tipo === "RUT" && (
@@ -1067,7 +1067,7 @@ const MatriculaEstudiante = () => {
                       required
                       onChange={handleRutFormat}
                       maxLength={
-                        selectedRutTypes.tipo_rut_apoderado1 === "RUT" ? 11 : 20
+                        selectedRutTypes.tipo_rut_apoderado1 === "RUT" ? 11 : 30
                       }
                     />
                     {rutError.rut_apoderado1 &&
