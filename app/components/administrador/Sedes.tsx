@@ -297,7 +297,7 @@ const Sedes: React.FC = () => {
       )}
 
       {showCreateForm && (
-        <div className="mb-6 p-6 border rounded-lg shadow-sm bg-gray-50">
+        <div className="mb-6 p-6 border rounded-lg shadow-sm ">
           <h2 className="text-lg font-medium mb-4">Crear Sede</h2>
           <form onSubmit={handleCreateSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

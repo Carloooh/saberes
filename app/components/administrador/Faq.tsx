@@ -17,6 +17,7 @@ const Faq: React.FC = () => {
   const [editId, setEditId] = useState<string | null>(null);
   const [editQuestion, setEditQuestion] = useState("");
   const [editAnswer, setEditAnswer] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
 
   // Obtener FAQs al cargar el componente
   useEffect(() => {
@@ -63,6 +64,7 @@ const Faq: React.FC = () => {
       if (result.success) {
         setNewQuestion("");
         setNewAnswer("");
+        setShowAddForm(false); // Hide form after successful addition
         fetchFaqs();
         toast.success("Pregunta agregada correctamente");
       } else {
@@ -163,13 +165,53 @@ const Faq: React.FC = () => {
 
   return (
     <div className="bg-white shadow sm:rounded-lg p-6">
-      <div className="mb-6">
-        <h1 className="text-xl font-medium text-gray-900 mb-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-xl font-medium text-gray-900">
           Preguntas Frecuentes
         </h1>
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="border border-indigo-600 text-indigo-600 bg-white px-4 py-2 rounded-md hover:bg-indigo-600 hover:text-white transition-colors flex items-center"
+        >
+          {showAddForm ? (
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-1"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Cancelar
+            </>
+          ) : (
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-1"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Nueva Pregunta
+            </>
+          )}
+        </button>
+      </div>
 
-        {/* Formulario para agregar una nueva FAQ */}
-        <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+      {/* Formulario para agregar una nueva FAQ */}
+      {showAddForm && (
+        <div className="mb-8 p-6 rounded-lg border border-gray-200">
           <h2 className="text-lg font-medium text-gray-800 mb-4">
             Agregar nueva pregunta
           </h2>
@@ -228,7 +270,7 @@ const Faq: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Listado de FAQs */}
       <div className="space-y-4">

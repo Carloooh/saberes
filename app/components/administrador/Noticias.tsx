@@ -220,7 +220,7 @@ const Noticias: React.FC = () => {
 
       {/* Formulario para crear noticia */}
       {showCreateForm && (
-        <div className="mb-6 p-6 border rounded-lg shadow-sm bg-gray-50">
+        <div className="mb-6 p-6 border rounded-lg shadow-sm ">
           <h2 className="text-lg font-medium mb-4">Crear Noticia</h2>
           <form onSubmit={handleCreateSubmit}>
             <div className="grid grid-cols-1 gap-4 mb-4">
