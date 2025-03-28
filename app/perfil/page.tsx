@@ -113,16 +113,26 @@ const Perfil: React.FC = () => {
   }, []);
 
   const calculateAge = (dateString: string): number => {
+    if (!dateString) return 0;
+    
+    // Parse the date string properly (assuming format DD-MM-YYYY)
+    const parts = dateString.split('-');
+    if (parts.length !== 3) return 0;
+    
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed in JS
+    const year = parseInt(parts[2], 10);
+    
+    const birthDate = new Date(year, month, day);
     const today = new Date();
-    const birthDate = new Date(dateString);
+    
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDifference = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDifference < 0 ||
-      (monthDifference === 0 && today.getDate() < birthDate.getDate())
-    ) {
+    
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
       age--;
     }
+    
     return age;
   };
 

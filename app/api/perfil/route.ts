@@ -54,6 +54,8 @@ export async function GET(request: NextRequest) {
     );
 
     let usuario;
+    // Determine which RUT to use for the query
+    const targetRut = rut || rutUsuario;
 
     if (rut) {
       usuario = queryUsuario.get(rut);
@@ -69,48 +71,51 @@ export async function GET(request: NextRequest) {
     }
 
     let perfilData = { ...usuario };
-    // perfilData["tipo_usuario"]
-    if (tipoUsuario === "Estudiante") {
+    
+    // Check if we're viewing a student profile (either our own or as admin/teacher)
+    if (usuario.tipo_usuario === "Estudiante") {
       // Obtener información específica del estudiante
       const queryMatricula = db.prepare(`
         SELECT * FROM Matricula WHERE rut_usuario = ?
       `);
-      const matricula = queryMatricula.get(rutUsuario);
+      const matricula = queryMatricula.get(targetRut);
 
       const queryCursoAlumnoId = db.prepare(`
         SELECT id_curso FROM CursosAsignaturasLink WHERE rut_usuario = ?
       `);
 
-      const cursoAlumnoId = queryCursoAlumnoId.get(rutUsuario) as {
+      const cursoAlumnoId = queryCursoAlumnoId.get(targetRut) as {
         id_curso: string;
       };
 
-      const queryCursoAlumno = db.prepare(`
-        SELECT nombre_curso FROM Curso WHERE id_curso = ?
-      `);
-
-      const cursoAlumno = queryCursoAlumno.get(cursoAlumnoId.id_curso);
+      let cursoAlumno = null;
+      if (cursoAlumnoId) {
+        const queryCursoAlumno = db.prepare(`
+          SELECT nombre_curso FROM Curso WHERE id_curso = ?
+        `);
+        cursoAlumno = queryCursoAlumno.get(cursoAlumnoId.id_curso);
+      }
 
       const queryApoderado = db.prepare(`
         SELECT * FROM Info_apoderado WHERE rut_usuario = ?
       `);
-      const apoderado = queryApoderado.get(rutUsuario);
+      const apoderado = queryApoderado.get(targetRut);
 
       const queryContactoEmergencia = db.prepare(`
         SELECT * FROM Contacto_emergencia WHERE rut_usuario = ?
       `);
-      const contactoEmergencia = queryContactoEmergencia.get(rutUsuario);
+      const contactoEmergencia = queryContactoEmergencia.get(targetRut);
 
       const queryInfoMedica = db.prepare(`
         SELECT * FROM Info_medica WHERE rut_usuario = ?
       `);
-      const infoMedica = queryInfoMedica.get(rutUsuario);
+      const infoMedica = queryInfoMedica.get(targetRut);
 
       const queryArchivos = db.prepare(`
         SELECT * FROM Matricula_archivo WHERE rut_usuario = ?
       `);
 
-      const archivos = queryArchivos.all(rutUsuario) as MatriculaArchivo[];
+      const archivos = queryArchivos.all(targetRut) as MatriculaArchivo[];
       const archivosFormateados = archivos.map((archivo) => ({
         id_documento: archivo.id_documento,
         titulo: archivo.titulo,
@@ -127,7 +132,8 @@ export async function GET(request: NextRequest) {
         archivos: archivosFormateados,
         cursoAlumno,
       };
-    } else {
+    } else if (tipoUsuario === "Docente" || tipoUsuario === "Administrador") {
+      // Get courses and subjects for teachers/admins
       const queryCursos = db.prepare(`
         SELECT DISTINCT c.*,
           (
@@ -150,7 +156,7 @@ export async function GET(request: NextRequest) {
         ORDER BY c.id_curso ASC
       `);
 
-      const cursos = queryCursos.all(rutUsuario, rutUsuario).map(
+      const cursos = queryCursos.all(targetRut, targetRut).map(
         (curso: unknown): CursoWithAsignaturas => ({
           id_curso: (curso as Curso).id_curso,
           nombre_curso: (curso as Curso).nombre_curso,
@@ -163,7 +169,7 @@ export async function GET(request: NextRequest) {
         cursos,
       };
     }
-    console.log(perfilData);
+    
     return NextResponse.json({ success: true, data: perfilData });
   } catch (error) {
     console.error("Error al obtener el perfil del usuario:", error);
