@@ -104,6 +104,15 @@ const PerfilUsuario: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isRequestingCode, setIsRequestingCode] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const storedSession = localStorage.getItem("userSession");
@@ -118,7 +127,7 @@ const PerfilUsuario: React.FC = () => {
     } else {
       router.push("/");
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (userSession) {
@@ -128,33 +137,33 @@ const PerfilUsuario: React.FC = () => {
         return;
       }
 
-      const fetchUserProfile = async () => {
-        try {
-          const response = await fetch(`/api/perfil?rut=${params.rut}`, {
-            method: "GET",
-          });
-
-          if (!response.ok) {
-            throw new Error("Error al obtener el perfil del usuario");
-          }
-
-          const data = await response.json();
-          if (data.success) {
-            setUserData(data.data);
-          } else {
-            setError(data.error || "Error al cargar el perfil");
-          }
-        } catch (error) {
-          setError("Error al cargar el perfil");
-          console.error("Error al cargar el perfil:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchUserProfile();
+      fetchUserData();
     }
   }, [userSession, params.rut]);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(`/api/perfil?rut=${params.rut}`, {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al obtener el perfil del usuario");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setUserData(data.data);
+      } else {
+        setError(data.error || "Error al cargar el perfil");
+      }
+    } catch (error) {
+      setError("Error al cargar el perfil");
+      console.error("Error al cargar el perfil:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     try {
@@ -207,6 +216,128 @@ const PerfilUsuario: React.FC = () => {
     return age;
   };
 
+  const handleRequestCode = async () => {
+    if (!userData) return;
+
+    setIsRequestingCode(true);
+    try {
+      const response = await fetch("/api/perfil/request-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          targetRut: userData.rut_usuario,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(
+          "Código de verificación enviado al correo del administrador"
+        );
+        setShowVerificationModal(true);
+      } else {
+        toast.error(data.error || "Error al solicitar código de verificación");
+      }
+    } catch (error) {
+      console.error("Error requesting verification code:", error);
+      toast.error("Error al solicitar código de verificación");
+    } finally {
+      setIsRequestingCode(false);
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verificationCode.trim()) {
+      toast.error("Por favor ingrese el código de verificación");
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const response = await fetch("/api/perfil/verify-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: verificationCode,
+          targetRut: userData?.rut_usuario,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Código verificado correctamente");
+        setShowVerificationModal(false);
+        setShowEditModal(true);
+        setNewEmail(userData?.email || "");
+      } else {
+        toast.error(data.error || "Código de verificación incorrecto");
+      }
+    } catch (error) {
+      console.error("Error verifying code:", error);
+      toast.error("Error al verificar el código");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate inputs
+    if (newPassword && newPassword !== confirmPassword) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
+
+    if (newEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      toast.error("El formato del correo electrónico no es válido");
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      const response = await fetch("/api/perfil/update-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          targetRut: userData?.rut_usuario,
+          email: newEmail !== userData?.email ? newEmail : undefined,
+          password: newPassword || undefined,
+        }),
+      });
+
+      const data = await response.json();
+    
+      if (response.ok) {
+        toast.success("Usuario actualizado correctamente");
+        setShowEditModal(false);
+        // Reset form fields
+        setNewEmail("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setVerificationCode("");
+        // Refresh user data
+        fetchUserData();
+      } else {
+        toast.error(data.error || "Error al actualizar usuario");
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("Error al actualizar usuario");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -232,25 +363,12 @@ const PerfilUsuario: React.FC = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Perfil de Usuario</h1>
           <div className="flex gap-2">
-            {/* Botón editar perfil */}
-            {/* {userSession?.tipo_usuario === "Administrador" && (
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className={`px-4 py-2 rounded ${
-                  isEditing
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-blue-500 text-white hover:bg-blue-600"
-                }`}
-              >
-                {isEditing ? "Guardar Cambios" : "Editar Perfil"}
-              </button>
-            )} */}
-            {/* <button
+            <button
               onClick={() => router.back()}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
             >
               Volver
-            </button> */}
+            </button>
           </div>
         </div>
 
@@ -313,6 +431,19 @@ const PerfilUsuario: React.FC = () => {
                 <span className="font-medium">Tipo de Usuario:</span>{" "}
                 {userData.tipo_usuario}
               </p>
+
+              {/* Admin Edit Button */}
+              {userSession?.tipo_usuario === "Administrador" && (
+                <div className="mt-4">
+                  <button
+                    onClick={handleRequestCode}
+                    disabled={isRequestingCode}
+                    className="border border-blue-600 text-blue-600 bg-white hover:bg-blue-600 hover:text-white font-medium py-2 px-4 rounded transition-colors duration-200"
+                  >
+                    {isRequestingCode ? "Enviando..." : "Editar Credenciales"}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Información específica del estudiante */}
@@ -548,62 +679,58 @@ const PerfilUsuario: React.FC = () => {
                 </div>
 
                 {/* Documentos */}
-                {userData.tipo_usuario === "Estudiante" && (
-                  <>
-                    <div className="border-b pb-4">
-                      <h2 className="text-xl font-semibold mb-3">Documentos</h2>
-                      <div className="space-y-2">
-                        {userData.archivos && userData.archivos.length > 0 ? (
-                          userData.archivos.map((archivo) => (
-                            <div
-                              key={archivo.id_documento}
-                              className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                <div className="border-b pb-4">
+                  <h2 className="text-xl font-semibold mb-3">Documentos</h2>
+                  <div className="space-y-2">
+                    {userData.archivos && userData.archivos.length > 0 ? (
+                      userData.archivos.map((archivo) => (
+                        <div
+                          key={archivo.id_documento}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                        >
+                          <span className="flex items-center">
+                            <svg
+                              className="w-5 h-5 mr-2"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
                             >
-                              <span className="flex items-center">
-                                <svg
-                                  className="w-5 h-5 mr-2"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                  />
-                                </svg>
-                                {archivo.titulo}.{archivo.extension}
-                              </span>
-                              <a
-                                href={archivo.downloadUrl}
-                                download
-                                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center"
-                              >
-                                <svg
-                                  className="w-4 h-4 mr-1"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                  />
-                                </svg>
-                                Descargar
-                              </a>
-                            </div>
-                          ))
-                        ) : (
-                          <p>No hay documentos disponibles</p>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                            {archivo.titulo}.{archivo.extension}
+                          </span>
+                          <a
+                            href={archivo.downloadUrl}
+                            download
+                            className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 hover:underline flex items-center"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                              />
+                            </svg>
+                            Descargar
+                          </a>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No hay documentos disponibles</p>
+                    )}
+                  </div>
+                </div>
               </>
             )}
 
@@ -645,6 +772,137 @@ const PerfilUsuario: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Verification Code Modal */}
+      {showVerificationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">
+              Verificación de Administrador
+            </h2>
+            <p className="mb-4">
+              Se ha enviado un código de verificación a su correo electrónico.
+              Por favor, ingréselo a continuación:
+            </p>
+
+            <form onSubmit={handleVerifyCode}>
+              <div className="mb-4">
+                <label
+                  htmlFor="verificationCode"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Código de Verificación
+                </label>
+                <input
+                  type="text"
+                  id="verificationCode"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowVerificationModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isVerifying}
+                  className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  {isVerifying ? "Verificando..." : "Verificar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Editar Credenciales</h2>
+
+            <form onSubmit={handleUpdateUser}>
+              <div className="mb-4">
+                <label
+                  htmlFor="newEmail"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Correo Electrónico
+                </label>
+                <input
+                  type="email"
+                  id="newEmail"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                />
+              </div>
+
+              <div className="mb-4">
+                <label
+                  htmlFor="newPassword"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Nueva Contraseña (dejar en blanco para no cambiar)
+                </label>
+                <input
+                  type="password"
+                  id="newPassword"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              {newPassword && (
+                <div className="mb-4">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Confirmar Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required={!!newPassword}
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  {isUpdating ? "Actualizando..." : "Guardar Cambios"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

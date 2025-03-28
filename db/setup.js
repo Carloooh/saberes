@@ -548,7 +548,9 @@ CREATE TABLE IF NOT EXISTS Usuario (
     direccion TEXT,
     comuna TEXT,
     sector TEXT,
-    codigo_temporal TEXT
+    codigo_temporal TEXT,
+    codigo_temporal_expira TEXT,
+    codigo_temporal_target TEXT
 );
 
 CREATE TABLE IF NOT EXISTS Curso (
