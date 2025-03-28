@@ -447,7 +447,7 @@ const Cursos: React.FC = () => {
                         {curso.asignaturas.map((asignatura) => (
                           <div
                             key={asignatura.id_asignatura}
-                            className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-md flex items-center"
+                            className="text-sm text-gray-600 px-3 py-1.5 rounded-md flex items-center"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"

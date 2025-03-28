@@ -100,7 +100,11 @@ const AdminPanel: React.FC = () => {
                   <button
                     key={option.id}
                     onClick={() => handleSectionChange(option.id)}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#2196F3] transition-colors z-9"
+                    className={`w-full text-left px-4 py-2 text-sm ${
+                      activeSection === option.id
+                        ? "bg-indigo-50 text-indigo-600 font-medium"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-[#2196F3]"
+                    } transition-colors z-9`}
                   >
                     <div className="flex items-center gap-3">
                       <Image
@@ -125,11 +129,15 @@ const AdminPanel: React.FC = () => {
                 <button
                   key={option.id}
                   onClick={() => handleSectionChange(option.id)}
-                  className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#2196F3] transition-colors hover:fill-[#2196F3]"
+                  className={`w-full text-left flex items-center gap-3 px-3 py-2 text-sm font-medium ${
+                    activeSection === option.id
+                      ? "bg-indigo-50 text-indigo-600 border-r-4 border-indigo-600"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-[#2196F3]"
+                  } transition-colors`}
                 >
                   <Image
                     src={`/icons/${option.icon}`}
-                    className="hover:filter-[invert(1) sepia"
+                    className={activeSection === option.id ? "text-indigo-600" : ""}
                     alt=""
                     width={24}
                     height={24}
