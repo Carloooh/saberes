@@ -184,7 +184,8 @@ const MatriculaEstudiante = () => {
 
   // Add RUT validation functions
   const Fn = {
-    validaRut: (rutCompleto: string) => {
+    validaRut: (rutCompleto: string | null) => {
+      if (!rutCompleto) return false;
       rutCompleto = rutCompleto.replace(/\./g, "");
       if (!/^[0-9]+-[0-9kK]{1}$/.test(rutCompleto)) return false;
       const tmp = rutCompleto.split("-");
@@ -336,21 +337,134 @@ const MatriculaEstudiante = () => {
       input.checked = false;
     });
   };
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const formElement = e.target as HTMLFormElement;
+  //   const formData = new FormData(e.target as HTMLFormElement);
+
+  //   const rut = formData.get("rut_usuario") as string;
+  //   const password = formData.get("clave") as string;
+  //   const confirmPassword = formData.get("clave2") as string;
+  //   const rut2 = formData.get("rut__apoderado1") as string;
+  //   const email = formData.get("email") as string;
+  //   const email2 = formData.get("email2") as string;
+  //   const emailApoderado = formData.get("email_apoderado1") as string;
+  //   const phoneApoderado1 = formData.get("celular_apoderado1") as string;
+  //   const phoneApoderado2 = formData.get("celular_apoderado2") as string;
+  //   const phoneContacto = formData.get("celular_contacto") as string;
+
+  //   // Validate phone format for primary guardian
+  //   if (phoneApoderado1.length !== 12 || !phoneApoderado1.startsWith("+569")) {
+  //     toast.error(
+  //       "El número de celular del apoderado principal debe tener el formato +569XXXXXXXX"
+  //     );
+  //     return;
+  //   }
+
+  //   // Validate phone format for secondary guardian if provided
+  //   if (
+  //     phoneApoderado2 &&
+  //     phoneApoderado2.length > 0 &&
+  //     (phoneApoderado2.length !== 12 || !phoneApoderado2.startsWith("+569"))
+  //   ) {
+  //     toast.error(
+  //       "El número de celular del apoderado secundario debe tener el formato +569XXXXXXXX"
+  //     );
+  //     return;
+  //   }
+
+  //   // Validate phone format for emergency contact
+  //   if (phoneContacto.length !== 12 || !phoneContacto.startsWith("+569")) {
+  //     toast.error(
+  //       "El número de celular del contacto de emergencia debe tener el formato +569XXXXXXXX"
+  //     );
+  //     return;
+  //   }
+
+  //   // Validate email format
+  //   if (!validateEmail(email)) {
+  //     toast.error("El formato del email del estudiante no es válido");
+  //     return;
+  //   }
+
+  //   // Validate email confirmation
+  //   if (email !== email2) {
+  //     toast.error("Los correos electrónicos del estudiante no coinciden");
+  //     return;
+  //   }
+
+  //   if (!validateEmail(emailApoderado)) {
+  //     toast.error("El formato del email del apoderado no es válido");
+  //     return;
+  //   }
+
+  //   // Validate RUT
+  //   if (!Fn.validaRut(rut)) {
+  //     toast.error("RUT inválido");
+  //     return;
+  //   }
+
+  //   if (!Fn.validaRut(rut2)) {
+  //     toast.error("RUT inválido");
+  //     return;
+  //   }
+
+  //   // Validate password format
+  //   if (!validatePassword(password)) {
+  //     toast.error(passwordError);
+  //     return;
+  //   }
+
+  //   // Validate password matching
+  //   if (password !== confirmPassword) {
+  //     toast.error("Las contraseñas no coinciden");
+  //     return;
+  //   }
+
+  //   const response = await fetch("/api/auth/register/matricula", {
+  //     method: "POST",
+  //     body: formData,
+  //   });
+
+  //   if (response.ok) {
+  //     toast.success("Registro exitoso");
+  //     resetForm(formElement);
+  //   } else {
+  //     toast.error("Error en el registro");
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const formElement = e.target as HTMLFormElement;
     const formData = new FormData(e.target as HTMLFormElement);
 
-    const rut = formData.get("rut_usuario") as string;
-    const password = formData.get("clave") as string;
-    const confirmPassword = formData.get("clave2") as string;
-    const rut2 = formData.get("rut__apoderado1") as string;
-    const email = formData.get("email") as string;
-    const email2 = formData.get("email2") as string;
-    const emailApoderado = formData.get("email_apoderado1") as string;
-    const phoneApoderado1 = formData.get("celular_apoderado1") as string;
-    const phoneApoderado2 = formData.get("celular_apoderado2") as string;
-    const phoneContacto = formData.get("celular_contacto") as string;
+    const rut = formData.get("rut_usuario") as string | null;
+    const password = formData.get("clave") as string | null;
+    const confirmPassword = formData.get("clave2") as string | null;
+    const rut2 = formData.get("rut_apoderado1") as string | null;
+    const email = formData.get("email") as string | null;
+    const email2 = formData.get("email2") as string | null;
+    const emailApoderado = formData.get("email_apoderado1") as string | null;
+    const phoneApoderado1 = formData.get("celular_apoderado1") as string | null;
+    const phoneApoderado2 = formData.get("celular_apoderado2") as string | null;
+    const phoneContacto = formData.get("celular_contacto") as string | null;
+
+    // Check if required fields are present
+    if (
+      !rut ||
+      !password ||
+      !confirmPassword ||
+      !rut2 ||
+      !email ||
+      !email2 ||
+      !emailApoderado ||
+      !phoneApoderado1 ||
+      !phoneContacto
+    ) {
+      toast.error("Por favor complete todos los campos obligatorios");
+      return;
+    }
 
     // Validate phone format for primary guardian
     if (phoneApoderado1.length !== 12 || !phoneApoderado1.startsWith("+569")) {
@@ -397,14 +511,14 @@ const MatriculaEstudiante = () => {
       return;
     }
 
-    // Validate RUT
-    if (!Fn.validaRut(rut)) {
-      toast.error("RUT inválido");
+    // Validate RUT only if the type is RUT
+    if (selectedRutTypes.rut_tipo === "RUT" && !Fn.validaRut(rut)) {
+      toast.error("RUT del estudiante inválido");
       return;
     }
 
-    if (!Fn.validaRut(rut2)) {
-      toast.error("RUT inválido");
+    if (selectedRutTypes.tipo_rut_apoderado1 === "RUT" && !Fn.validaRut(rut2)) {
+      toast.error("RUT del apoderado inválido");
       return;
     }
 
@@ -420,16 +534,23 @@ const MatriculaEstudiante = () => {
       return;
     }
 
-    const response = await fetch("/api/auth/register/matricula", {
-      method: "POST",
-      body: formData,
-    });
+    // Continue with form submission
+    try {
+      const response = await fetch("/api/auth/register/matricula", {
+        method: "POST",
+        body: formData,
+      });
 
-    if (response.ok) {
-      toast.success("Registro exitoso");
-      resetForm(formElement);
-    } else {
-      toast.error("Error en el registro");
+      if (response.ok) {
+        toast.success("Registro exitoso");
+        resetForm(formElement);
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Error en el registro");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Error en el registro. Por favor intente nuevamente.");
     }
   };
   return (
