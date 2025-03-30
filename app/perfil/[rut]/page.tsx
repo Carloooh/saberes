@@ -103,7 +103,6 @@ const PerfilUsuario: React.FC = () => {
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -117,6 +116,58 @@ const PerfilUsuario: React.FC = () => {
     newPassword: false,
     confirmPassword: false,
   });
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateEmailField = (email: string) => {
+    if (!email || !validateEmail(email)) {
+      setEmailError("Formato de correo inválido");
+      return false;
+    } else {
+      setEmailError("");
+      return true;
+    }
+  };
+
+  const validatePasswordField = (password: string) => {
+    if (password.trim() === "") {
+      setPasswordError("");
+      return true;
+    }
+
+    const errors = [];
+    if (password.length < 8) errors.push("mínimo 8 caracteres");
+    if (!/[A-Z]/.test(password)) errors.push("una mayúscula");
+    if (!/\d/.test(password)) errors.push("un número");
+    // Corregir la expresión regular de caracteres especiales
+    if (!/[!@#$%^&*()_+=[\]{};':"\\|,.<>/?-]/.test(password)) {
+      errors.push("un carácter especial");
+    }
+
+    if (errors.length > 0) {
+      setPasswordError(`Debe incluir: ${errors.join(", ")}.`);
+      return false;
+    } else {
+      setPasswordError("");
+      return true;
+    }
+  };
+
+  const validateConfirmPasswordField = (confirmPass: string) => {
+    if (newPassword && confirmPass !== newPassword) {
+      setConfirmPasswordError("Las contraseñas no coinciden");
+      return false;
+    } else {
+      setConfirmPasswordError("");
+      return true;
+    }
+  };
 
   useEffect(() => {
     const storedSession = localStorage.getItem("userSession");
@@ -169,30 +220,6 @@ const PerfilUsuario: React.FC = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    try {
-      const response = await fetch(`/api/perfil/${params.rut}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("Perfil actualizado correctamente");
-        setIsEditing(false);
-      } else {
-        toast.error(data.error || "Error al actualizar el perfil");
-      }
-    } catch (error) {
-      console.error("Error al actualizar el perfil:", error);
-      toast.error("Error al actualizar el perfil");
-    }
-  };
-
   const calculateAge = (dateString: string): number => {
     if (!dateString) return 0;
 
@@ -225,24 +252,6 @@ const PerfilUsuario: React.FC = () => {
       ...prev,
       [field]: !prev[field],
     }));
-  };
-
-  const validateEmail = (email: string): boolean => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  const validatePasswords = () => {
-    if (newPassword && newPassword.length < 8) {
-      toast.error("La contraseña debe tener al menos 8 caracteres");
-      return false;
-    }
-
-    if (newPassword && newPassword !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
-      return false;
-    }
-
-    return true;
   };
 
   const handleRequestCode = async () => {
@@ -319,13 +328,16 @@ const PerfilUsuario: React.FC = () => {
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate inputs
-    if (newPassword && !validatePasswords()) {
-      return;
-    }
+    const isEmailValid = validateEmailField(newEmail);
+    const isPasswordValid = validatePasswordField(newPassword);
+    const isConfirmPasswordValid =
+      validateConfirmPasswordField(confirmPassword);
 
-    if (newEmail && !validateEmail(newEmail)) {
-      toast.error("El formato del correo electrónico no es válido");
+    if (
+      !isEmailValid ||
+      (newPassword && (!isPasswordValid || !isConfirmPasswordValid))
+    ) {
+      toast.error("Por favor corrija los errores del formulario");
       return;
     }
 
@@ -870,10 +882,16 @@ const PerfilUsuario: React.FC = () => {
                   type="email"
                   id="newEmail"
                   value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
+                  onChange={(e) => {
+                    setNewEmail(e.target.value);
+                    validateEmailField(e.target.value);
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   required
                 />
+                {emailError && (
+                  <p className="mt-1 text-sm text-red-600">{emailError}</p>
+                )}
               </div>
 
               <div className="mb-4">
@@ -888,7 +906,11 @@ const PerfilUsuario: React.FC = () => {
                     type={showPasswords.newPassword ? "text" : "password"}
                     id="newPassword"
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      validatePasswordField(e.target.value);
+                      validateConfirmPasswordField(confirmPassword);
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                   <button
@@ -934,6 +956,9 @@ const PerfilUsuario: React.FC = () => {
                     )}
                   </button>
                 </div>
+                {passwordError && (
+                  <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+                )}
               </div>
 
               {newPassword && (
@@ -949,7 +974,10 @@ const PerfilUsuario: React.FC = () => {
                       type={showPasswords.confirmPassword ? "text" : "password"}
                       id="confirmPassword"
                       value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value); // Fixed: was incorrectly updating newPassword
+                        validateConfirmPasswordField(e.target.value);
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                       required={!!newPassword}
                     />
@@ -998,6 +1026,11 @@ const PerfilUsuario: React.FC = () => {
                       )}
                     </button>
                   </div>
+                  {confirmPasswordError && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {confirmPasswordError}
+                    </p>
+                  )}
                 </div>
               )}
 
