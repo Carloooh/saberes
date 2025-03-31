@@ -53,14 +53,19 @@ export async function GET(request: NextRequest) {
       "SELECT * FROM Usuario WHERE rut_usuario = ?"
     );
 
-    let usuario;
+    let usuario: {
+      tipo_usuario: string;
+      rut_usuario: string;
+      [key: string]: any;
+    } | null;
+    
     // Determine which RUT to use for the query
     const targetRut = rut || rutUsuario;
 
     if (rut) {
-      usuario = queryUsuario.get(rut);
+      usuario = queryUsuario.get(rut) as any;
     } else {
-      usuario = queryUsuario.get(rutUsuario);
+      usuario = queryUsuario.get(rutUsuario) as any;
     }
 
     if (!usuario) {
