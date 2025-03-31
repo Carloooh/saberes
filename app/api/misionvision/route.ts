@@ -62,7 +62,7 @@ export async function GET() {
         // Handle each row as it comes in
         request.on("row", (columns) => {
           const row: any = {};
-          columns.forEach((column) => {
+          columns.forEach((column: any) => {
             row[column.metadata.colName] = column.value;
           });
           resultados.push(row);
