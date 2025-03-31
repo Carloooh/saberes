@@ -218,8 +218,8 @@ export async function POST(req: Request) {
 
       // Insertar archivos en Matricula_archivo
       const matriculaArchivoStmt = db.prepare(`
-        INSERT INTO Matricula_archivo (id_documento, id_matricula, rut_usuario, titulo, documento, extension)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO Matricula_archivo (id_documento, id_matricula, rut_usuario, titulo, documento, extension, tipo)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
 
       // Definir nombres específicos para cada tipo de documento
@@ -259,7 +259,8 @@ export async function POST(req: Request) {
             rut_usuario,
             fileName,
             fileBuffer,
-            fileExtension
+            fileExtension,
+            fileType
           );
         }
       }

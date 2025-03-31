@@ -17,7 +17,7 @@
 //       FROM Matricula_archivo
 //       WHERE id_documento = ?
 //     `);
-    
+
 //     const documento = query.get(id) as Archivo | null;
 
 //     if (!documento) {
@@ -54,6 +54,7 @@ interface Archivo {
   documento: Buffer;
   extension: string;
   titulo: string;
+  tipo: string;
 }
 
 export async function GET(
@@ -70,11 +71,11 @@ export async function GET(
     }
 
     const query = db.prepare(`
-      SELECT documento, titulo, extension
+      SELECT documento, titulo, extension, tipo
       FROM Matricula_archivo
       WHERE id_documento = ?
     `);
-    
+
     const documento = query.get(id) as Archivo | null;
 
     if (!documento) {

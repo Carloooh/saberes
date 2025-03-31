@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import db from "@/db";
 import { Connection, Request, TYPES, ConnectionConfiguration } from "tedious";
 
@@ -85,7 +85,7 @@ export async function GET() {
 }
 
 // PUT: Actualizar misión y visión
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
   try {
     const { mision, vision } = await req.json();
 
