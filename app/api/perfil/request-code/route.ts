@@ -48,7 +48,10 @@ export async function POST(request: Request) {
     const adminQuery = db.prepare(
       "SELECT email, nombres FROM Usuario WHERE rut_usuario = ?"
     );
-    const admin = adminQuery.get(userSession.rut_usuario);
+    const admin = adminQuery.get(userSession.rut_usuario) as {
+      email?: string;
+      nombres?: string;
+    };
 
     if (!admin || !admin.email) {
       return NextResponse.json(
@@ -87,7 +90,7 @@ export async function POST(request: Request) {
     );
 
     // Send verification code via email
-    await sendVerificationCode(admin.email, verificationCode, admin.nombres);
+    await sendVerificationCode(admin.email, verificationCode, admin.nombres || "");
 
     return NextResponse.json({ success: true });
   } catch (error) {

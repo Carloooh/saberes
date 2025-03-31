@@ -55,7 +55,11 @@ export async function POST(request: Request) {
     const userQuery = db.prepare(
       "SELECT email, nombres, apellidos FROM Usuario WHERE rut_usuario = ?"
     );
-    const user = userQuery.get(targetRut);
+    const user = userQuery.get(targetRut) as {
+      email: string;
+      nombres: string;
+      apellidos: string;
+    };
 
     if (!user) {
       return NextResponse.json(

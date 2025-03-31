@@ -5,11 +5,13 @@ import bcrypt from "bcrypt";
 export async function POST(request: Request) {
   try {
     const { code, targetRut } = await request.json();
-    
+
     // Get admin info from cookies
     const cookies = request.headers.get("cookie") || "";
-    const userSessionCookie = cookies.split(';').find(c => c.trim().startsWith('userSession='));
-    
+    const userSessionCookie = cookies
+      .split(";")
+      .find((c) => c.trim().startsWith("userSession="));
+
     if (!userSessionCookie) {
       return NextResponse.json(
         { success: false, error: "No se encontró la sesión del usuario" },
@@ -19,7 +21,9 @@ export async function POST(request: Request) {
 
     let userSession;
     try {
-      userSession = JSON.parse(decodeURIComponent(userSessionCookie.split('=')[1]));
+      userSession = JSON.parse(
+        decodeURIComponent(userSessionCookie.split("=")[1])
+      );
     } catch (error) {
       console.error("Error al parsear la sesión del usuario:", error);
       return NextResponse.json(
@@ -31,7 +35,10 @@ export async function POST(request: Request) {
     // Verify admin permissions
     if (userSession.tipo_usuario !== "Administrador") {
       return NextResponse.json(
-        { success: false, error: "No tienes permisos para realizar esta acción" },
+        {
+          success: false,
+          error: "No tienes permisos para realizar esta acción",
+        },
         { status: 403 }
       );
     }
@@ -42,11 +49,18 @@ export async function POST(request: Request) {
       FROM Usuario 
       WHERE rut_usuario = ?
     `);
-    const admin = adminQuery.get(userSession.rut_usuario);
-    
+    const admin = adminQuery.get(userSession.rut_usuario) as {
+      codigo_temporal: string;
+      codigo_temporal_expira: string;
+      codigo_temporal_target: string;
+    };
+
     if (!admin || !admin.codigo_temporal) {
       return NextResponse.json(
-        { success: false, error: "No se encontró un código de verificación activo" },
+        {
+          success: false,
+          error: "No se encontró un código de verificación activo",
+        },
         { status: 400 }
       );
     }
