@@ -221,20 +221,38 @@ export async function POST(req: Request) {
         INSERT INTO Matricula_archivo (id_documento, id_matricula, rut_usuario, titulo, documento, extension)
         VALUES (?, ?, ?, ?, ?, ?)
       `);
-      // Se recorren los archivos disponibles
-      const fileFields: (File | null)[] = [
-        cert_nacimiento,
-        cert_carnet,
-        cert_estudios,
-        cert_rsh,
-        cert_diagnostico,
+
+      // Definir nombres específicos para cada tipo de documento
+      const documentTypes = {
+        cert_nacimiento: "Certificado de Nacimiento",
+        cert_carnet: "Fotocopia Carnet",
+        cert_estudios: "Certificado de Estudios",
+        cert_rsh: "Registro Social de Hogares",
+        cert_diagnostico: "Certificado de Diagnóstico",
+      };
+
+      // Mapeo de archivos con sus tipos
+      const fileMapping = [
+        { field: cert_nacimiento, type: "cert_nacimiento" },
+        { field: cert_carnet, type: "cert_carnet" },
+        { field: cert_estudios, type: "cert_estudios" },
+        { field: cert_rsh, type: "cert_rsh" },
+        { field: cert_diagnostico, type: "cert_diagnostico" },
       ];
-      for (const file of fileFields) {
+
+      // Se recorren los archivos disponibles con sus tipos específicos
+      for (const fileInfo of fileMapping) {
+        const file = fileInfo.field;
+        const fileType = fileInfo.type;
+
         if (file && file.size > 0) {
           const fileBuffer = Buffer.from(await file.arrayBuffer());
-          const fileName =
-            file.name.split(".").slice(0, -1).join(".") || "archivo";
+          // Usar el nombre específico del tipo de documento
+          const fileName = `${
+            documentTypes[fileType as keyof typeof documentTypes]
+          }_${rut_usuario}`;
           const fileExtension = file.name.split(".").pop() || "";
+
           matriculaArchivoStmt.run(
             uuidv4(),
             id_matricula,
