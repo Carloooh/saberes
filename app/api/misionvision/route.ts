@@ -1,84 +1,68 @@
 import { NextResponse, NextRequest } from "next/server";
-import db from "@/db";
-import { Connection, Request, TYPES, ConnectionConfiguration } from "tedious";
+import { Connection, Request, TYPES } from "tedious";
+import config from "@/app/api/dbConfig";
 
 // GET: Obtener misión y visión
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   try {
-    const stmt = db.prepare(
-      "SELECT * FROM informacion_institucional WHERE tipo IN (?, ?)"
-    );
-    const result = stmt.all("mision", "vision") as {
-      tipo: string;
-      contenido: string;
-    }[];
-
-    // Formatear los datos para devolverlos como un objeto
-    const data = {
-      mision: result.find((item) => item.tipo === "mision")?.contenido || "",
-      vision: result.find((item) => item.tipo === "vision")?.contenido || "",
-    };
-
-    // Nueva conexión para obtener todos los resultados de dbo.Informacion_institucional
-    const config: ConnectionConfiguration = {
-      server: process.env.BD_HOST || "", // Reemplaza con la IP de tu VM
-      authentication: {
-        type: "default",
-        options: {
-          userName: process.env.BD_USER || "",
-          password: process.env.BD_PASSWORD || "",
-        },
-      },
-      options: {
-        database: process.env.BD_NAME || "",
-        encrypt: true, // Si es necesario
-        trustServerCertificate: true,
-        cryptoCredentialsDetails: {
-          minVersion: "TLSv1.2",
-        },
-      },
-    };
-
     const connection = new Connection(config);
 
-    connection.on("connect", (err) => {
-      if (err) {
-        console.error("Error al conectar a la base de datos:", err.message);
-      } else {
-        // Create an array to collect the rows
-        const resultados: any[] = [];
+    return new Promise<NextResponse>((resolve, reject) => {
+      connection.on("connect", (err) => {
+        if (err) {
+          console.error("Error al conectar a la base de datos:", err.message);
+          reject(
+            NextResponse.json(
+              { success: false, error: "Error en el servidor" },
+              { status: 500 }
+            )
+          );
+          return;
+        }
+
+        const resultados: { tipo: string; contenido: string }[] = [];
 
         const request = new Request(
-          "SELECT * FROM dbo.Informacion_institucional",
-          (err, rowCount) => {
+          "SELECT tipo, contenido FROM dbo.Informacion_institucional WHERE tipo IN ('mision', 'vision')",
+          (err, _rowCount) => {
             if (err) {
               console.error("Error al ejecutar la consulta:", err.message);
+              reject(
+                NextResponse.json(
+                  { success: false, error: "Error en el servidor" },
+                  { status: 500 }
+                )
+              );
             } else {
-              console.log(
-                "Resultados de dbo.Informacion_institucional:",
-                resultados
+              const data = {
+                mision:
+                  resultados.find((item) => item.tipo === "mision")
+                    ?.contenido || "",
+                vision:
+                  resultados.find((item) => item.tipo === "vision")
+                    ?.contenido || "",
+              };
+              resolve(
+                NextResponse.json({ success: true, data }, { status: 200 })
               );
             }
             connection.close();
           }
         );
 
-        // Handle each row as it comes in
         request.on("row", (columns) => {
-          const row: any = {};
-          columns.forEach((column: any) => {
+          const row: { [key: string]: any } = {};
+          columns.forEach((column) => {
             row[column.metadata.colName] = column.value;
           });
-          resultados.push(row);
+          resultados.push(row as { tipo: string; contenido: string });
         });
 
         connection.execSql(request);
-      }
+      });
+
+      connection.connect();
     });
-
-    connection.connect();
-
-    return NextResponse.json({ success: true, data }, { status: 200 });
   } catch (error) {
     console.error("Error al obtener misión y visión:", error);
     return NextResponse.json(
@@ -89,23 +73,71 @@ export async function GET() {
 }
 
 // PUT: Actualizar misión y visión
-export async function PUT(req: NextRequest) {
+export async function PUT(req: NextRequest): Promise<NextResponse> {
   try {
     const { mision, vision } = await req.json();
 
-    // Actualizar misión
-    const stmtMision = db.prepare(
-      "UPDATE informacion_institucional SET contenido = ? WHERE tipo = ?"
-    );
-    stmtMision.run(mision, "mision");
+    const connection = new Connection(config);
 
-    // Actualizar visión
-    const stmtVision = db.prepare(
-      "UPDATE informacion_institucional SET contenido = ? WHERE tipo = ?"
-    );
-    stmtVision.run(vision, "vision");
+    return new Promise<NextResponse>((resolve, reject) => {
+      connection.on("connect", (err) => {
+        if (err) {
+          console.error("Error al conectar a la base de datos:", err.message);
+          reject(
+            NextResponse.json(
+              { success: false, error: "Error en el servidor" },
+              { status: 500 }
+            )
+          );
+          return;
+        }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+        const updateMisionRequest = new Request(
+          "UPDATE dbo.Informacion_institucional SET contenido = @mision WHERE tipo = 'mision'",
+          (err, _rowCount) => {
+            if (err) {
+              console.error("Error al actualizar la misión:", err.message);
+              reject(
+                NextResponse.json(
+                  { success: false, error: "Error en el servidor" },
+                  { status: 500 }
+                )
+              );
+              connection.close();
+              return;
+            }
+
+            const updateVisionRequest = new Request(
+              "UPDATE dbo.Informacion_institucional SET contenido = @vision WHERE tipo = 'vision'",
+              (err, _rowCount) => {
+                if (err) {
+                  console.error("Error al actualizar la visión:", err.message);
+                  reject(
+                    NextResponse.json(
+                      { success: false, error: "Error en el servidor" },
+                      { status: 500 }
+                    )
+                  );
+                } else {
+                  resolve(
+                    NextResponse.json({ success: true }, { status: 200 })
+                  );
+                }
+                connection.close();
+              }
+            );
+
+            updateVisionRequest.addParameter("vision", TYPES.NVarChar, vision);
+            connection.execSql(updateVisionRequest);
+          }
+        );
+
+        updateMisionRequest.addParameter("mision", TYPES.NVarChar, mision);
+        connection.execSql(updateMisionRequest);
+      });
+
+      connection.connect();
+    });
   } catch (error) {
     console.error("Error al actualizar misión y visión:", error);
     return NextResponse.json(
