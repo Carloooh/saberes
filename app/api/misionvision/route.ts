@@ -21,17 +21,21 @@ export async function GET() {
 
     // Nueva conexión para obtener todos los resultados de dbo.Informacion_institucional
     const config: ConnectionConfiguration = {
-      server: "192.168.46.88", // Reemplaza con la IP de tu VM
+      server: process.env.BD_HOST || "", // Reemplaza con la IP de tu VM
       authentication: {
         type: "default",
         options: {
-          userName: "saberes",
-          password: "Sab3r3s",
+          userName: process.env.BD_USER || "",
+          password: process.env.BD_PASSWORD || "",
         },
       },
       options: {
-        database: "saberes",
-        encrypt: false, // Si es necesario
+        database: process.env.BD_NAME || "",
+        encrypt: true, // Si es necesario
+        trustServerCertificate: true,
+        cryptoCredentialsDetails: {
+          minVersion: "TLSv1.2",
+        },
       },
     };
 
