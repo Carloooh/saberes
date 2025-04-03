@@ -59,3 +59,25 @@ export const sendPasswordResetNotification = async (
 
   return transporter.sendMail(message);
 };
+
+export const sendRegistrationNotification = async (
+  email: string,
+  name: string
+) => {
+  const message = {
+    from: `Saberes El Quisco <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: "Solicitud de Registro - Saberes El Quisco",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #333;">Solicitud de Registro</h2>
+        <p>Hola ${name},</p>
+        <p>Tu solicitud de registro en la plataforma Saberes El Quisco ha sido recibida correctamente.</p>
+        <p>Tu cuenta está pendiente de validación por un administrador. Recibirás una notificación cuando tu cuenta sea activada.</p>
+        <p>Saludos,<br>Equipo Saberes El Quisco</p>
+      </div>
+    `,
+  };
+
+  return transporter.sendMail(message);
+};

@@ -1,9 +1,160 @@
-import { NextResponse } from "next/server";
-import db from "@/db";
+// import { NextResponse } from "next/server";
+// import db from "@/db";
+// import bcrypt from "bcrypt";
+// import { v4 as uuidv4 } from "uuid";
+
+// export async function POST(req: Request) {
+//   try {
+//     const {
+//       rut_usuario,
+//       tipo_usuario,
+//       cursosAsignaturas = [],
+//       ...userData
+//     } = await req.json();
+
+//     const checkStmt = db.prepare(`SELECT * FROM Usuario WHERE RUT_USUARIO = ?`);
+//     const existingUser = checkStmt.get(rut_usuario);
+//     if (existingUser) {
+//       return NextResponse.json(
+//         { success: false, error: "El usuario ya existe" },
+//         { status: 400 }
+//       );
+//     }
+
+//     const hashedClave = await bcrypt.hash(userData.clave, 10);
+
+//     db.exec("BEGIN TRANSACTION");
+
+//     try {
+//       const userStmt = db.prepare(`
+//         INSERT INTO Usuario (
+//           rut_usuario, rut_tipo, email, clave, nombres, apellidos,
+//           tipo_usuario, estado, sexo, nacionalidad, talla,
+//           fecha_nacimiento, direccion, comuna, sector, codigo_temporal
+//         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+//       `);
+
+//       userStmt.run(
+//         rut_usuario,
+//         userData.rut_tipo || "",
+//         userData.email,
+//         hashedClave,
+//         userData.nombres,
+//         userData.apellidos,
+//         tipo_usuario,
+//         "Pendiente",
+//         userData.sexo || "",
+//         userData.nacionalidad || "",
+//         userData.talla || "",
+//         userData.fecha_nacimiento || "",
+//         userData.direccion || "",
+//         userData.comuna || "",
+//         userData.sector || "",
+//         userData.codigo_temporal || ""
+//       );
+
+//       if (tipo_usuario === "Docente") {
+//         const stmt = db.prepare(`
+//           INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso, id_asignatura)
+//           VALUES (?, ?, ?, ?)
+//         `);
+
+//         cursosAsignaturas.forEach(
+//           ({
+//             cursoId,
+//             asignaturas,
+//           }: {
+//             cursoId: string;
+//             asignaturas: string[];
+//           }) => {
+//             asignaturas.forEach((asignaturaId: string) => {
+//               stmt.run(uuidv4(), rut_usuario, cursoId, asignaturaId);
+//             });
+//           }
+//         );
+//       } else if (tipo_usuario === "Administrador") {
+//         const stmt = db.prepare(`
+//           INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso, id_asignatura)
+//           VALUES (?, ?, ?, ?)
+//         `);
+
+//         const allCursos = db.prepare(`SELECT id_curso FROM Curso`).all() as {
+//           id_curso: string;
+//         }[];
+//         const allAsignaturas = db
+//           .prepare(`SELECT id_asignatura FROM Asignatura`)
+//           .all() as { id_asignatura: string }[];
+
+//         allCursos.forEach((curso) => {
+//           allAsignaturas.forEach((asignatura) => {
+//             stmt.run(
+//               uuidv4(),
+//               rut_usuario,
+//               curso.id_curso,
+//               asignatura.id_asignatura
+//             );
+//           });
+//         });
+//       } else {
+//         db.exec("ROLLBACK");
+//         return NextResponse.json(
+//           { success: false, error: "Error en los datos ingresados" },
+//           { status: 500 }
+//         );
+//       }
+
+//       db.exec("COMMIT");
+//       return NextResponse.json({ success: true }, { status: 201 });
+//     } catch (error) {
+//       db.exec("ROLLBACK");
+//       throw error;
+//     }
+//   } catch (error) {
+//     console.error("Error en el registro:", error);
+//     return NextResponse.json(
+//       { success: false, error: "Error en el servidor" },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+import { NextResponse, NextRequest } from "next/server";
+import { Connection, Request, TYPES } from "tedious";
+import config from "@/app/api/dbConfig";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
+import { sendRegistrationNotification } from "@/app/api/perfil/email";
+import { randomUUID } from "crypto";
 
-export async function POST(req: Request) {
+// Función auxiliar para ejecutar una consulta SQL y obtener los resultados
+function executeSQL(
+  connection: Connection,
+  sql: string,
+  parameters: { name: string; type: any; value: any }[] = []
+): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    const results: any[] = [];
+    const request = new Request(sql, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+    parameters.forEach((param) => {
+      request.addParameter(param.name, param.type, param.value);
+    });
+    request.on("row", (columns: any[]) => {
+      const row: any = {};
+      columns.forEach((column) => {
+        row[column.metadata.colName] = column.value;
+      });
+      results.push(row);
+    });
+    connection.execSql(request);
+  });
+}
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const {
       rut_usuario,
@@ -11,104 +162,179 @@ export async function POST(req: Request) {
       cursosAsignaturas = [],
       ...userData
     } = await req.json();
+    const id_user = randomUUID();
+    // Hashear la clave
+    const hashedClave = await bcrypt.hash(userData.clave, 10);
 
-    const checkStmt = db.prepare(`SELECT * FROM Usuario WHERE RUT_USUARIO = ?`);
-    const existingUser = checkStmt.get(rut_usuario);
-    if (existingUser) {
+    // Crear y conectar la instancia de la base de datos
+    const connection = new Connection(config);
+    await new Promise<void>((resolve, reject) => {
+      connection.on("connect", (err) => {
+        if (err) {
+          console.error("Error al conectar a la BD:", err.message);
+          return reject(err);
+        }
+        resolve();
+      });
+      connection.connect();
+    });
+
+    // Iniciar la transacción
+    await new Promise<void>((resolve, reject) => {
+      connection.beginTransaction((err) => {
+        if (err) {
+          console.error("Error al iniciar la transacción:", err.message);
+          return reject(err);
+        }
+        resolve();
+      }, "Transaction");
+    });
+
+    // Verificar si el usuario ya existe
+    const existingUsers = await executeSQL(
+      connection,
+      "SELECT * FROM Usuario WHERE RUT_USUARIO = @rut",
+      [{ name: "rut", type: TYPES.NVarChar, value: rut_usuario }]
+    );
+    if (existingUsers.length > 0) {
+      await new Promise<void>((resolve) => {
+        connection.rollbackTransaction(() => resolve());
+      });
+      connection.close();
       return NextResponse.json(
         { success: false, error: "El usuario ya existe" },
         { status: 400 }
       );
     }
 
-    const hashedClave = await bcrypt.hash(userData.clave, 10);
+    // Insertar el usuario en la tabla
+    const insertUserQuery = `
+      INSERT INTO Usuario (
+        id_user, rut_usuario, rut_tipo, email, clave, nombres, apellidos, 
+        tipo_usuario, estado, sexo, nacionalidad, talla, 
+        fecha_nacimiento, direccion, comuna, sector, codigo_temporal
+      ) VALUES (
+        @id_user, @rut_usuario, @rut_tipo, @email, @clave, @nombres, @apellidos, 
+        @tipo_usuario, @estado, @sexo, @nacionalidad, @talla, 
+        @fecha_nacimiento, @direccion, @comuna, @sector, @codigo_temporal
+      )`;
+    await executeSQL(connection, insertUserQuery, [
+      { name: "id_user", type: TYPES.NVarChar, value: id_user },
+      { name: "rut_usuario", type: TYPES.NVarChar, value: rut_usuario },
+      {
+        name: "rut_tipo",
+        type: TYPES.NVarChar,
+        value: userData.rut_tipo || "",
+      },
+      { name: "email", type: TYPES.NVarChar, value: userData.email },
+      { name: "clave", type: TYPES.NVarChar, value: hashedClave },
+      { name: "nombres", type: TYPES.NVarChar, value: userData.nombres },
+      { name: "apellidos", type: TYPES.NVarChar, value: userData.apellidos },
+      { name: "tipo_usuario", type: TYPES.NVarChar, value: tipo_usuario },
+      { name: "estado", type: TYPES.NVarChar, value: "Pendiente" },
+      { name: "sexo", type: TYPES.NVarChar, value: userData.sexo || "" },
+      {
+        name: "nacionalidad",
+        type: TYPES.NVarChar,
+        value: userData.nacionalidad || "",
+      },
+      { name: "talla", type: TYPES.NVarChar, value: userData.talla || "" },
+      {
+        name: "fecha_nacimiento",
+        type: TYPES.NVarChar,
+        value: userData.fecha_nacimiento || "",
+      },
+      {
+        name: "direccion",
+        type: TYPES.NVarChar,
+        value: userData.direccion || "",
+      },
+      { name: "comuna", type: TYPES.NVarChar, value: userData.comuna || "" },
+      { name: "sector", type: TYPES.NVarChar, value: userData.sector || "" },
+      {
+        name: "codigo_temporal",
+        type: TYPES.NVarChar,
+        value: userData.codigo_temporal || "",
+      },
+    ]);
 
-    db.exec("BEGIN TRANSACTION");
+    // Dependiendo del tipo de usuario, insertar en CursosAsignaturasLink
+    if (tipo_usuario === "Docente") {
+      for (const { cursoId, asignaturas } of cursosAsignaturas) {
+        for (const asignaturaId of asignaturas) {
+          const insertLinkQuery = `
+            INSERT INTO CursosAsignaturasLink (
+              id_cursosasignaturaslink, id_user, id_curso, id_asignatura
+            ) VALUES (
+              @id, @rut, @curso, @asignatura
+            )`;
+          await executeSQL(connection, insertLinkQuery, [
+            { name: "id", type: TYPES.NVarChar, value: uuidv4() },
+            { name: "rut", type: TYPES.NVarChar, value: id_user },
+            { name: "curso", type: TYPES.NVarChar, value: cursoId },
+            { name: "asignatura", type: TYPES.NVarChar, value: asignaturaId },
+          ]);
+        }
+      }
+    } else if (tipo_usuario === "Administrador") {
+      const cursos = await executeSQL(connection, "SELECT id_curso FROM Curso");
+      const asignaturas = await executeSQL(
+        connection,
+        "SELECT id_asignatura FROM Asignatura"
+      );
+      for (const curso of cursos) {
+        for (const asignatura of asignaturas) {
+          const insertLinkQuery = `
+            INSERT INTO CursosAsignaturasLink (
+              id_cursosasignaturaslink, id_user, id_curso, id_asignatura
+            ) VALUES (
+              @id, @rut, @curso, @asignatura
+            )`;
+          await executeSQL(connection, insertLinkQuery, [
+            { name: "id", type: TYPES.NVarChar, value: uuidv4() },
+            { name: "rut", type: TYPES.NVarChar, value: id_user },
+            { name: "curso", type: TYPES.NVarChar, value: curso.id_curso },
+            {
+              name: "asignatura",
+              type: TYPES.NVarChar,
+              value: asignatura.id_asignatura,
+            },
+          ]);
+        }
+      }
+    } else {
+      await new Promise<void>((resolve) => {
+        connection.rollbackTransaction(() => resolve());
+      });
+      connection.close();
+      return NextResponse.json(
+        { success: false, error: "Error en los datos ingresados" },
+        { status: 500 }
+      );
+    }
+
+    // Confirmar la transacción
+    await new Promise<void>((resolve, reject) => {
+      connection.commitTransaction((err) => {
+        if (err) {
+          console.error("Error al confirmar la transacción:", err.message);
+          return reject(err);
+        }
+        resolve();
+      });
+    });
+    connection.close();
 
     try {
-      const userStmt = db.prepare(`
-        INSERT INTO Usuario (
-          rut_usuario, rut_tipo, email, clave, nombres, apellidos, 
-          tipo_usuario, estado, sexo, nacionalidad, talla, 
-          fecha_nacimiento, direccion, comuna, sector, codigo_temporal
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-
-      userStmt.run(
-        rut_usuario,
-        userData.rut_tipo || "",
+      await sendRegistrationNotification(
         userData.email,
-        hashedClave,
-        userData.nombres,
-        userData.apellidos,
-        tipo_usuario,
-        "Pendiente",
-        userData.sexo || "",
-        userData.nacionalidad || "",
-        userData.talla || "",
-        userData.fecha_nacimiento || "",
-        userData.direccion || "",
-        userData.comuna || "",
-        userData.sector || "",
-        userData.codigo_temporal || ""
+        `${userData.nombres} ${userData.apellidos}`
       );
-
-      if (tipo_usuario === "Docente") {
-        const stmt = db.prepare(`
-          INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso, id_asignatura)
-          VALUES (?, ?, ?, ?)
-        `);
-
-        cursosAsignaturas.forEach(
-          ({
-            cursoId,
-            asignaturas,
-          }: {
-            cursoId: string;
-            asignaturas: string[];
-          }) => {
-            asignaturas.forEach((asignaturaId: string) => {
-              stmt.run(uuidv4(), rut_usuario, cursoId, asignaturaId);
-            });
-          }
-        );
-      } else if (tipo_usuario === "Administrador") {
-        const stmt = db.prepare(`
-          INSERT INTO CursosAsignaturasLink (id_cursosasignaturaslink, rut_usuario, id_curso, id_asignatura)
-          VALUES (?, ?, ?, ?)
-        `);
-
-        const allCursos = db.prepare(`SELECT id_curso FROM Curso`).all() as {
-          id_curso: string;
-        }[];
-        const allAsignaturas = db
-          .prepare(`SELECT id_asignatura FROM Asignatura`)
-          .all() as { id_asignatura: string }[];
-
-        allCursos.forEach((curso) => {
-          allAsignaturas.forEach((asignatura) => {
-            stmt.run(
-              uuidv4(),
-              rut_usuario,
-              curso.id_curso,
-              asignatura.id_asignatura
-            );
-          });
-        });
-      } else {
-        db.exec("ROLLBACK");
-        return NextResponse.json(
-          { success: false, error: "Error en los datos ingresados" },
-          { status: 500 }
-        );
-      }
-
-      db.exec("COMMIT");
-      return NextResponse.json({ success: true }, { status: 201 });
-    } catch (error) {
-      db.exec("ROLLBACK");
-      throw error;
+    } catch (emailError) {
+      console.error("Error al enviar correo de notificación:", emailError);
     }
+
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
     console.error("Error en el registro:", error);
     return NextResponse.json(
