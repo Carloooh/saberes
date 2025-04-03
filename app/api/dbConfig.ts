@@ -10,6 +10,8 @@ const config: ConnectionConfiguration = {
     },
   },
   options: {
+    requestTimeout: 30000,
+    connectTimeout: 30000,
     database: process.env.BD_NAME || "",
     encrypt: true,
     trustServerCertificate: true,

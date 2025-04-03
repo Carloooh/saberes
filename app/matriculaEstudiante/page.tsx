@@ -301,6 +301,24 @@ const MatriculaEstudiante = () => {
     }));
   };
 
+  // useEffect(() => {
+  //   async function fetchCursos() {
+  //     try {
+  //       const response = await fetch("/api/cursos");
+  //       if (!response.ok) {
+  //         throw new Error("Error al cargar los cursos");
+  //       }
+  //       const data = await response.json();
+  //       setCursos(data);
+  //     } catch (err) {
+  //       setError((err as Error).message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+
+  //   fetchCursos();
+  // }, []);
   useEffect(() => {
     async function fetchCursos() {
       try {
@@ -308,8 +326,17 @@ const MatriculaEstudiante = () => {
         if (!response.ok) {
           throw new Error("Error al cargar los cursos");
         }
-        const data = await response.json();
-        setCursos(data);
+        const responseData = await response.json();
+
+        // Check if the response has the new format with success and data properties
+        if (responseData.success && Array.isArray(responseData.data)) {
+          setCursos(responseData.data);
+        } else if (Array.isArray(responseData)) {
+          // Handle old format for backward compatibility
+          setCursos(responseData);
+        } else {
+          throw new Error("Formato de respuesta inesperado");
+        }
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -337,102 +364,6 @@ const MatriculaEstudiante = () => {
       input.checked = false;
     });
   };
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const formElement = e.target as HTMLFormElement;
-  //   const formData = new FormData(e.target as HTMLFormElement);
-
-  //   const rut = formData.get("rut_usuario") as string;
-  //   const password = formData.get("clave") as string;
-  //   const confirmPassword = formData.get("clave2") as string;
-  //   const rut2 = formData.get("rut__apoderado1") as string;
-  //   const email = formData.get("email") as string;
-  //   const email2 = formData.get("email2") as string;
-  //   const emailApoderado = formData.get("email_apoderado1") as string;
-  //   const phoneApoderado1 = formData.get("celular_apoderado1") as string;
-  //   const phoneApoderado2 = formData.get("celular_apoderado2") as string;
-  //   const phoneContacto = formData.get("celular_contacto") as string;
-
-  //   // Validate phone format for primary guardian
-  //   if (phoneApoderado1.length !== 12 || !phoneApoderado1.startsWith("+569")) {
-  //     toast.error(
-  //       "El número de celular del apoderado principal debe tener el formato +569XXXXXXXX"
-  //     );
-  //     return;
-  //   }
-
-  //   // Validate phone format for secondary guardian if provided
-  //   if (
-  //     phoneApoderado2 &&
-  //     phoneApoderado2.length > 0 &&
-  //     (phoneApoderado2.length !== 12 || !phoneApoderado2.startsWith("+569"))
-  //   ) {
-  //     toast.error(
-  //       "El número de celular del apoderado secundario debe tener el formato +569XXXXXXXX"
-  //     );
-  //     return;
-  //   }
-
-  //   // Validate phone format for emergency contact
-  //   if (phoneContacto.length !== 12 || !phoneContacto.startsWith("+569")) {
-  //     toast.error(
-  //       "El número de celular del contacto de emergencia debe tener el formato +569XXXXXXXX"
-  //     );
-  //     return;
-  //   }
-
-  //   // Validate email format
-  //   if (!validateEmail(email)) {
-  //     toast.error("El formato del email del estudiante no es válido");
-  //     return;
-  //   }
-
-  //   // Validate email confirmation
-  //   if (email !== email2) {
-  //     toast.error("Los correos electrónicos del estudiante no coinciden");
-  //     return;
-  //   }
-
-  //   if (!validateEmail(emailApoderado)) {
-  //     toast.error("El formato del email del apoderado no es válido");
-  //     return;
-  //   }
-
-  //   // Validate RUT
-  //   if (!Fn.validaRut(rut)) {
-  //     toast.error("RUT inválido");
-  //     return;
-  //   }
-
-  //   if (!Fn.validaRut(rut2)) {
-  //     toast.error("RUT inválido");
-  //     return;
-  //   }
-
-  //   // Validate password format
-  //   if (!validatePassword(password)) {
-  //     toast.error(passwordError);
-  //     return;
-  //   }
-
-  //   // Validate password matching
-  //   if (password !== confirmPassword) {
-  //     toast.error("Las contraseñas no coinciden");
-  //     return;
-  //   }
-
-  //   const response = await fetch("/api/auth/register/matricula", {
-  //     method: "POST",
-  //     body: formData,
-  //   });
-
-  //   if (response.ok) {
-  //     toast.success("Registro exitoso");
-  //     resetForm(formElement);
-  //   } else {
-  //     toast.error("Error en el registro");
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
