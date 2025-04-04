@@ -99,13 +99,13 @@ interface EntregaDB {
   id_tarea: string;
   id_curso: string;
   id_asignatura: string;
+  rut_estudiante: string;
   id_user: string;
   fecha_entrega: string;
   comentario: string | null;
   estado: string;
   nombres: string;
   apellidos: string;
-  rut_estudiante: string; // Add this field
 }
 
 interface EntregaResponse extends EntregaDB {
@@ -161,23 +161,30 @@ export async function GET(request: NextRequest) {
 
       try {
         const { searchParams } = new URL(request.url);
-        // Fix parameter names to match request
-        const id_asignatura = searchParams.get("asignatura");
-        const id_tarea = searchParams.get("tarea");
-        const cursoId = searchParams.get("curso");
+        const id_asignatura = searchParams.get("id_asignatura");
+        const id_tarea = searchParams.get("id_tarea");
 
-        // Add curso validation
-        if (!cursoId) {
+        if (!id_asignatura) {
           connection.close();
           return resolve(
             NextResponse.json(
-              { success: false, error: "Falta el ID del curso" },
+              { success: false, error: "Falta el ID de la asignatura" },
               { status: 400 }
             )
           );
         }
 
-        // Update query to use cursoId
+        if (!id_tarea) {
+          connection.close();
+          return resolve(
+            NextResponse.json(
+              { success: false, error: "Falta el ID de la tarea" },
+              { status: 400 }
+            )
+          );
+        }
+
+        // First get all submissions
         const query = `
           SELECT 
             et.id_entrega, et.id_tarea, et.id_curso, et.id_asignatura, 
@@ -185,15 +192,12 @@ export async function GET(request: NextRequest) {
             et.comentario, et.estado, u.nombres, u.apellidos
           FROM EntregaTarea et
           JOIN Usuario u ON et.id_user = u.id_user
-          WHERE et.id_tarea = @id_tarea 
-            AND et.id_asignatura = @id_asignatura
-            AND et.id_curso = @cursoId
+          WHERE et.id_tarea = @id_tarea AND et.id_asignatura = @id_asignatura
         `;
 
         const entregas = await executeSQL(connection, query, [
           { name: "id_tarea", type: TYPES.NVarChar, value: id_tarea },
           { name: "id_asignatura", type: TYPES.NVarChar, value: id_asignatura },
-          { name: "cursoId", type: TYPES.NVarChar, value: cursoId },
         ]);
 
         // For each submission, get its files
