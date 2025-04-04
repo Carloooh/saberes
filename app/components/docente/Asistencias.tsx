@@ -234,7 +234,7 @@ export default function Asistencias({
             />
             <button
               onClick={agregarDia}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+              className="px-4 py-2 border-2 border-blue-500 text-blue-500 bg-white rounded hover:bg-blue-500 hover:text-white disabled:opacity-50 transition-colors"
               disabled={!newFecha}
             >
               +
@@ -271,7 +271,7 @@ export default function Asistencias({
             <button
               onClick={() => eliminarDia(selectedDia)}
               disabled={deletingDay}
-              className="ml-4 mt-4 md:mt-0 px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+              className="ml-4 mt-4 md:mt-0 px-3 py-2 border-2 border-red-500 text-red-500 bg-white rounded hover:bg-red-500 hover:text-white disabled:opacity-50 transition-colors"
             >
               {deletingDay ? "Eliminando..." : "Eliminar día"}
             </button>
@@ -331,8 +331,8 @@ export default function Asistencias({
                             }
                             className={`px-3 py-1 rounded transition-colors ${
                               asistencias[estudiante.rut_usuario] === 1
-                                ? "bg-green-500 text-white"
-                                : "bg-green-100 text-green-700 hover:bg-green-200"
+                                ? "bg-green-500 text-white border-2 border-green-500"
+                                : "bg-white text-green-700 border-2 border-green-500 hover:bg-green-500 hover:text-white"
                             }`}
                             disabled={
                               savingAttendance === estudiante.rut_usuario
@@ -348,8 +348,8 @@ export default function Asistencias({
                             }
                             className={`px-3 py-1 rounded transition-colors ${
                               asistencias[estudiante.rut_usuario] === 0
-                                ? "bg-red-500 text-white"
-                                : "bg-red-100 text-red-700 hover:bg-red-200"
+                                ? "bg-red-500 text-white border-2 border-red-500"
+                                : "bg-white text-red-700 border-2 border-red-500 hover:bg-red-500 hover:text-white"
                             }`}
                             disabled={
                               savingAttendance === estudiante.rut_usuario
@@ -365,8 +365,8 @@ export default function Asistencias({
                             }
                             className={`px-3 py-1 rounded transition-colors ${
                               asistencias[estudiante.rut_usuario] === 2
-                                ? "bg-yellow-500 text-white"
-                                : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+                                ? "bg-yellow-500 text-white border-2 border-yellow-500"
+                                : "bg-white text-yellow-700 border-2 border-yellow-500 hover:bg-yellow-500 hover:text-white"
                             }`}
                             disabled={
                               savingAttendance === estudiante.rut_usuario
