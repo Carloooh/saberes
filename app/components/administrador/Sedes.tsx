@@ -81,7 +81,21 @@ const Sedes: React.FC = () => {
   useEffect(() => {
     fetch("/api/cursos")
       .then((res) => res.json())
-      .then((data) => setCursos(data));
+      .then((data) => {
+        // Handle the new response format where data is wrapped in a 'data' property
+        if (data.success && Array.isArray(data.data)) {
+          setCursos(data.data);
+        } else if (Array.isArray(data)) {
+          setCursos(data);
+        } else {
+          console.error("Unexpected format for cursos data:", data);
+          setCursos([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching cursos:", error);
+        setCursos([]);
+      });
   }, []);
 
   const fetchSedes = async () => {
