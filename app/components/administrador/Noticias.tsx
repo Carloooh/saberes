@@ -88,6 +88,49 @@ const Noticias: React.FC = () => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Fecha no disponible";
+
+    try {
+      // Handle SQL Server format (e.g. "Apr 4 2025 12:40PM")
+      const match = dateString.match(/^([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/);
+      if (match) {
+        const [, monthAbbr, day, year] = match;
+        const monthNames: { [key: string]: string } = {
+          Jan: "enero",
+          Feb: "febrero",
+          Mar: "marzo",
+          Apr: "abril",
+          May: "mayo",
+          Jun: "junio",
+          Jul: "julio",
+          Aug: "agosto",
+          Sep: "septiembre",
+          Oct: "octubre",
+          Nov: "noviembre",
+          Dec: "diciembre",
+        };
+
+        return `${parseInt(day)} de ${monthNames[monthAbbr]} de ${year}`;
+      }
+
+      // Fallback to standard date parsing
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      }
+
+      return dateString;
+    } catch (error) {
+      console.error("Error formatting date:", error, dateString);
+      return "Fecha no disponible";
+    }
+  };
+
   // Función para actualizar (inline) una noticia editada
   const handleInlineUpdate = async (id: string) => {
     const form = new FormData();
@@ -527,7 +570,8 @@ const Noticias: React.FC = () => {
                               clipRule="evenodd"
                             />
                           </svg>
-                          {new Date(noticia.fecha).toLocaleDateString()}
+                          {formatDate(noticia.fecha)}
+                          {/* {new Date(noticia.fecha).toLocaleDateString()} */}
                         </p>
                       </div>
                       {noticia.destacado === 1 && (

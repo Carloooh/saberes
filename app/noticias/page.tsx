@@ -5,6 +5,7 @@ import Image from "next/image";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { format } from "path";
 
 interface Archivo {
   id_archivo: string;
@@ -48,6 +49,49 @@ const Noticias: React.FC = () => {
       }
     } catch (error) {
       console.error("Error fetching noticias:", error);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Fecha no disponible";
+
+    try {
+      // Handle SQL Server format (e.g. "Apr 4 2025 12:40PM")
+      const match = dateString.match(/^([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/);
+      if (match) {
+        const [, monthAbbr, day, year] = match;
+        const monthNames: { [key: string]: string } = {
+          Jan: "enero",
+          Feb: "febrero",
+          Mar: "marzo",
+          Apr: "abril",
+          May: "mayo",
+          Jun: "junio",
+          Jul: "julio",
+          Aug: "agosto",
+          Sep: "septiembre",
+          Oct: "octubre",
+          Nov: "noviembre",
+          Dec: "diciembre",
+        };
+
+        return `${parseInt(day)} de ${monthNames[monthAbbr]} de ${year}`;
+      }
+
+      // Fallback to standard date parsing
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString("es-ES", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      }
+
+      return dateString;
+    } catch (error) {
+      console.error("Error formatting date:", error, dateString);
+      return "Fecha no disponible";
     }
   };
 
@@ -132,7 +176,7 @@ const Noticias: React.FC = () => {
               </div>
               <h3 className="font-semibold text-lg mb-2">{noticia.titulo}</h3>
               <p className="text-sm text-gray-600 mb-2">
-                {new Date(noticia.fecha).toLocaleDateString()}
+                {formatDate(noticia.fecha)}
               </p>
               <p className="line-clamp-3">{noticia.contenido}</p>
               <button
@@ -183,7 +227,7 @@ const Noticias: React.FC = () => {
                 )}
 
               <p className="text-sm text-gray-600 mb-4">
-                {new Date(selectedNoticia.fecha).toLocaleDateString()}
+                {formatDate(selectedNoticia.fecha)}
               </p>
               <div className="prose max-w-none mb-6 overflow-x-hidden">
                 <p className="whitespace-pre-wrap break-words">
