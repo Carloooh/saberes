@@ -10,8 +10,8 @@ const config: ConnectionConfiguration = {
     },
   },
   options: {
-    requestTimeout: 30000,
-    connectTimeout: 30000,
+    requestTimeout: 60000,
+    connectTimeout: 60000,
     database: "saberes",
     encrypt: false,
     trustServerCertificate: true,

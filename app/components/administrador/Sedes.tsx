@@ -139,26 +139,66 @@ const Sedes: React.FC = () => {
     }
   };
 
+  // Add a file validation function
+  const validateFiles = (files: File[]): { valid: boolean; message: string } => {
+    for (const file of files) {
+      // Check file type
+      const fileType = file.type;
+      if (!fileType.startsWith('image/') && !fileType.startsWith('video/')) {
+        return { 
+          valid: false, 
+          message: `El archivo ${file.name} no es una imagen o video válido.` 
+        };
+      }
+      
+      // You can add more validations here if needed
+    }
+    
+    return { valid: true, message: '' };
+  };
+  
+  // Update the handleCreateSubmit function
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate files before uploading
+    const fileValidation = validateFiles(createFormData.archivos);
+    if (!fileValidation.valid) {
+      toast.error(fileValidation.message);
+      return;
+    }
+    
     const formData = new FormData();
     formData.append("nombre", createFormData.nombre);
     formData.append("direccion", createFormData.direccion);
     formData.append("url", createFormData.url);
     formData.append("url_iframe", createFormData.url_iframe);
     formData.append("cursos", JSON.stringify(createFormData.cursos));
+    
+    // Show loading toast for large uploads
+    let loadingToast: string | undefined;
+    if (createFormData.archivos.length > 0) {
+      loadingToast = toast.loading(`Subiendo ${createFormData.archivos.length} archivo(s)...`);
+    }
+    
     createFormData.archivos.forEach((file, index) => {
       formData.append(`archivo-${index}`, file);
     });
-
+  
     try {
       const response = await fetch("/api/sedes", {
         method: "POST",
         body: formData,
       });
+      
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
+      
       const result = await response.json();
 
       if (result.success) {
+        toast.success("Sede creada exitosamente");
         setCreateFormData({
           nombre: "",
           direccion: "",
@@ -175,8 +215,16 @@ const Sedes: React.FC = () => {
       toast.error(`Error al crear la sede: ${error}`);
     }
   };
-
+  
+  // Similarly update the handleEdit function
   const handleEdit = async (id: string) => {
+    // Validate files before uploading
+    const fileValidation = validateFiles(editFormData.archivosToAdd);
+    if (!fileValidation.valid) {
+      toast.error(fileValidation.message);
+      return;
+    }
+    
     const formData = new FormData();
     formData.append("id_sede", id);
     formData.append("nombre", editFormData.nombre);
@@ -184,26 +232,38 @@ const Sedes: React.FC = () => {
     formData.append("url", editFormData.url);
     formData.append("url_iframe", editFormData.url_iframe);
     formData.append("cursos", JSON.stringify(editFormData.cursos));
-
+  
     if (editFormData.archivosToDelete.length > 0) {
       formData.append(
         "archivosAEliminar",
         JSON.stringify(editFormData.archivosToDelete)
       );
     }
-
+  
+    // Show loading toast for large uploads
+    let loadingToast: string | undefined;
+    if (editFormData.archivosToAdd.length > 0) {
+      loadingToast = toast.loading(`Subiendo ${editFormData.archivosToAdd.length} archivo(s)...`);
+    }
+  
     editFormData.archivosToAdd.forEach((file, index) => {
       formData.append(`archivo-${index}`, file);
     });
-
+  
     try {
       const response = await fetch("/api/sedes", {
         method: "PUT",
         body: formData,
       });
+      
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
+      
       const result = await response.json();
 
       if (result.success) {
+        toast.success("Sede actualizada exitosamente");
         setEditId(null);
         setEditFormData({
           nombre: "",
