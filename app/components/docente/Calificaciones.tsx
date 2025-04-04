@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale/es";
+import toast from "react-hot-toast";
 
 interface Evaluacion {
   id_evaluacion: string;
@@ -85,9 +86,11 @@ export default function Calificaciones({
           fecha: new Date().toISOString().split("T")[0],
         });
         fetchData();
+        toast.success("Evaluación creada exitosamente");
       }
     } catch (error) {
       console.error("Error creating evaluation:", error);
+      toast.error("Error al crear la evaluación");
     }
   };
 
@@ -109,9 +112,11 @@ export default function Calificaciones({
 
       if (response.ok) {
         fetchData();
+        toast.success("Calificación actualizada exitosamente");
       }
     } catch (error) {
       console.error("Error updating grade:", error);
+      toast.error("Error al actualizar la calificación");
     } finally {
       setSavingGrade(null);
     }
@@ -133,9 +138,11 @@ export default function Calificaciones({
       if (response.ok) {
         setSelectedEvaluacion("");
         fetchData();
+        toast.success("Evaluación eliminada exitosamente");
       }
     } catch (error) {
       console.error("Error deleting evaluation:", error);
+      toast.error("Error al eliminar la evaluación");
     }
   };
 
@@ -162,7 +169,7 @@ export default function Calificaciones({
           <h3 className="text-lg font-semibold mb-2">Nueva Evaluación</h3>
           <button
             onClick={() => setShowModal(true)}
-            className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="w-full px-4 py-2 border-2 border-blue-500 text-blue-500 bg-white rounded hover:bg-blue-500 hover:text-white transition-colors"
           >
             Crear Evaluación
           </button>
@@ -201,7 +208,7 @@ export default function Calificaciones({
             {selectedEvaluacion && (
               <button
                 onClick={handleDeleteEvaluacion}
-                className="text-red-500 hover:text-red-700"
+                className="border-2 border-red-500 text-red-500 bg-white rounded p-1 hover:bg-red-500 hover:text-white transition-colors"
                 title="Eliminar evaluación"
               >
                 <svg
@@ -403,13 +410,13 @@ export default function Calificaciones({
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  className="px-4 py-2 border-2 border-gray-500 text-gray-500 bg-white rounded hover:bg-gray-500 hover:text-white transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  className="px-4 py-2 border-2 border-blue-500 text-blue-500 bg-white rounded hover:bg-blue-500 hover:text-white transition-colors"
                 >
                   Crear
                 </button>
