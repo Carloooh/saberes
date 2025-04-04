@@ -1,19 +1,19 @@
 import { ConnectionConfiguration } from "tedious";
 
 const config: ConnectionConfiguration = {
-  server: process.env.BD_HOST || "",
+  server: "192.168.46.88",
   authentication: {
     type: "default",
     options: {
-      userName: process.env.BD_USER || "",
-      password: process.env.BD_PASSWORD || "",
+      userName: "saberes",
+      password: "Pass.1234",
     },
   },
   options: {
     requestTimeout: 30000,
     connectTimeout: 30000,
-    database: process.env.BD_NAME || "",
-    encrypt: true,
+    database: "saberes",
+    encrypt: false,
     trustServerCertificate: true,
     cryptoCredentialsDetails: {
       minVersion: "TLSv1.2",
