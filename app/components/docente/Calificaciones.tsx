@@ -42,12 +42,30 @@ export default function Calificaciones({
   });
   const [loading, setLoading] = useState(true);
   const [savingGrade, setSavingGrade] = useState<string | null>(null);
+  // Estado para manejar los inputs de calificación de cada estudiante
+  const [gradeInputs, setGradeInputs] = useState<{ [rut: string]: string }>({});
 
   useEffect(() => {
     if (cursoId && asignaturaId) {
       fetchData();
     }
   }, [cursoId, asignaturaId]);
+
+  // Cada vez que se cambia la evaluación seleccionada o la lista de estudiantes,
+  // actualizamos los valores de los inputs de calificación.
+  useEffect(() => {
+    if (selectedEvaluacion) {
+      const newGradeInputs: { [rut: string]: string } = {};
+      estudiantes.forEach((estudiante) => {
+        const calificacion = estudiante.calificaciones.find(
+          (c) => c.id_evaluacion === selectedEvaluacion
+        );
+        newGradeInputs[estudiante.rut_usuario] =
+          calificacion?.nota.toFixed(1) || "0.0";
+      });
+      setGradeInputs(newGradeInputs);
+    }
+  }, [selectedEvaluacion, estudiantes]);
 
   const fetchData = async () => {
     try {
@@ -144,6 +162,16 @@ export default function Calificaciones({
       console.error("Error deleting evaluation:", error);
       toast.error("Error al eliminar la evaluación");
     }
+  };
+
+  // Función para transformar una cadena de dos dígitos sin separador a formato decimal
+  const formatInputValue = (value: string): string => {
+    // Si no contiene punto ni coma y tiene exactamente 2 dígitos, insertar el punto entre ellos
+    if (/^\d{2}$/.test(value)) {
+      return value[0] + "." + value[1];
+    }
+    // Si contiene coma, la transformamos a punto para parsear
+    return value.replace(",", ".");
   };
 
   if (loading) {
@@ -257,107 +285,57 @@ export default function Calificaciones({
                       </td>
                       <td className="px-4 py-2">
                         <div className="flex justify-center items-center gap-2">
-                          {/* <input
-                            type="text"
-                            className="w-20 text-center rounded border-gray-300"
-                            defaultValue={
-                              calificacion?.nota.toString().replace(".", ",") ||
-                              "0,0"
-                            }
-                            disabled={savingGrade === estudiante.rut_usuario}
-                            onChange={(e) => {
-                              let value = e.target.value;
-                              // Solo permitir números y una coma
-                              value = value.replace(/[^\d,]/g, "");
-
-                              // Asegurar que solo haya una coma
-                              const commaCount = (value.match(/,/g) || [])
-                                .length;
-                              if (commaCount > 1) {
-                                value = value.replace(/,/g, (match, index) =>
-                                  index === value.indexOf(",") ? "," : ""
-                                );
-                              }
-
-                              // Limitar a un decimal
-                              if (value.includes(",")) {
-                                const [whole, decimal] = value.split(",");
-                                if (decimal && decimal.length > 1) {
-                                  value = `${whole},${decimal[0]}`;
-                                }
-                              }
-
-                              // Actualizar el valor
-                              e.target.value = value;
-                            }}
-                            onBlur={(e) => {
-                              let value = e.target.value;
-                              if (!value.includes(",")) {
-                                value += ",0";
-                                e.target.value = value;
-                              }
-                              const nota = parseFloat(value.replace(",", "."));
-                              if (!isNaN(nota) && nota >= 0.0 && nota <= 7.0) {
-                                e.target.value = nota
-                                  .toFixed(1)
-                                  .replace(".", ",");
-                              } else {
-                                e.target.value =
-                                  calificacion?.nota
-                                    .toFixed(1)
-                                    .replace(".", ",") || "0,0";
-                              }
-                            }}
-                          />
-                          <button
-                            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-                            onClick={() => {
-                              const input = document.querySelector(
-                                `input[data-rut="${estudiante.rut_usuario}"]`
-                              ) as HTMLInputElement;
-                              const nota = parseFloat(
-                                input.value.replace(",", ".")
-                              );
-                              if (!isNaN(nota) && nota >= 0.0 && nota <= 7.0) {
-                                handleUpdateNota(estudiante.rut_usuario, nota);
-                              }
-                            }}
-                          >
-                            Guardar
-                          </button> */}
                           <input
                             type="number"
-                            min="0.0"
-                            max="7.0"
+                            min="0"
+                            max="7"
                             step="0.1"
                             className="w-20 text-center rounded border-gray-300"
-                            defaultValue={
-                              calificacion?.nota.toFixed(1) || "0.0"
+                            value={
+                              gradeInputs[estudiante.rut_usuario] ??
+                              (calificacion?.nota.toFixed(1) || "0.0")
                             }
                             disabled={savingGrade === estudiante.rut_usuario}
                             onChange={(e) => {
-                              let value = e.target.value;
-                              // Asegurar que siempre tenga un decimal
-                              if (!value.includes(".")) {
-                                value += ".0";
+                              let { value } = e.target;
+                              // Si el usuario escribe dos dígitos sin separador, se transforma
+                              if (/^\d{2}$/.test(value)) {
+                                value = value[0] + "." + value[1];
                                 e.target.value = value;
                               }
-                              // Limitar a un decimal
-                              if (
-                                value.includes(".") &&
-                                value.split(".")[1].length > 1
-                              ) {
-                                value = Number(value).toFixed(1);
-                                e.target.value = value;
-                              }
+                              setGradeInputs((prev) => ({
+                                ...prev,
+                                [estudiante.rut_usuario]: value,
+                              }));
                             }}
                             onBlur={(e) => {
-                              const nota = parseFloat(e.target.value);
-                              if (!isNaN(nota) && nota >= 0.0 && nota <= 7.0) {
-                                handleUpdateNota(estudiante.rut_usuario, nota);
+                              let { value } = e.target;
+                              // Si no contiene punto ni coma y tiene 2 dígitos, lo transformamos
+                              if (/^\d{2}$/.test(value)) {
+                                value = value[0] + "." + value[1];
+                                setGradeInputs((prev) => ({
+                                  ...prev,
+                                  [estudiante.rut_usuario]: value,
+                                }));
+                              }
+                              const formattedValue = formatInputValue(value);
+                              const nota = parseFloat(formattedValue);
+                              if (!isNaN(nota) && nota >= 0 && nota <= 7) {
+                                handleUpdateNota(
+                                  estudiante.rut_usuario,
+                                  parseFloat(nota.toFixed(1))
+                                );
                               } else {
-                                e.target.value =
-                                  calificacion?.nota.toFixed(1) || "0.0";
+                                setGradeInputs((prev) => ({
+                                  ...prev,
+                                  [estudiante.rut_usuario]:
+                                    calificacion?.nota.toFixed(1) || "0.0",
+                                }));
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.currentTarget.blur();
                               }
                             }}
                           />
