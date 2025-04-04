@@ -81,3 +81,80 @@ export const sendRegistrationNotification = async (
 
   return transporter.sendMail(message);
 };
+
+export const sendAccountStatusNotification = async (
+  email: string,
+  name: string,
+  status: string
+) => {
+  const isActive = status === "Activa";
+
+  const message = {
+    from: `Saberes El Quisco <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: `Cuenta ${
+      isActive ? "Activada" : "Desactivada"
+    } - Saberes El Quisco`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #333;">Estado de Cuenta Actualizado</h2>
+        <p>Hola ${name},</p>
+        ${
+          isActive
+            ? `<p>Nos complace informarte que tu cuenta en la plataforma Saberes El Quisco ha sido <strong>activada</strong>.</p>
+             <p>Ya puedes acceder a la plataforma con tus credenciales.</p>`
+            : `<p>Te informamos que tu cuenta en la plataforma Saberes El Quisco ha sido <strong>desactivada</strong>.</p>
+             <p>Si crees que esto es un error, por favor contacta con el administrador del sistema.</p>`
+        }
+        <p>Saludos,<br>Equipo Saberes El Quisco</p>
+      </div>
+    `,
+  };
+
+  return transporter.sendMail(message);
+};
+
+export const sendAccountDeletionNotification = async (
+  email: string,
+  name: string
+) => {
+  const message = {
+    from: `Saberes El Quisco <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: `Cuenta Eliminada - Saberes El Quisco`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #333;">Cuenta Eliminada</h2>
+        <p>Hola ${name},</p>
+        <p>Te informamos que tu cuenta en la plataforma Saberes El Quisco ha sido <strong>eliminada</strong>.</p>
+        <p>Si crees que esto es un error o necesitas más información, por favor contacta con el administrador del sistema.</p>
+        <p>Saludos,<br>Equipo Saberes El Quisco</p>
+      </div>
+    `,
+  };
+
+  return transporter.sendMail(message);
+};
+
+export const sendCourseChangeNotification = async (
+  email: string,
+  name: string,
+  courseName: string
+) => {
+  const message = {
+    from: `Saberes El Quisco <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: `Cambio de Curso - Saberes El Quisco`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #333;">Cambio de Curso</h2>
+        <p>Hola ${name},</p>
+        <p>Te informamos que has sido asignado al curso <strong>${courseName}</strong> en la plataforma Saberes El Quisco.</p>
+        <p>Si tienes alguna pregunta sobre este cambio, por favor contacta con el administrador del sistema.</p>
+        <p>Saludos,<br>Equipo Saberes El Quisco</p>
+      </div>
+    `,
+  };
+
+  return transporter.sendMail(message);
+};
