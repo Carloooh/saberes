@@ -408,7 +408,7 @@ const MatriculaEstudiante = () => {
     // Validate phone format for secondary guardian if provided
     if (
       phoneApoderado2 &&
-      phoneApoderado2.length > 0 &&
+      phoneApoderado2.trim() !== "" &&
       (phoneApoderado2.length !== 12 || !phoneApoderado2.startsWith("+569"))
     ) {
       toast.error(
