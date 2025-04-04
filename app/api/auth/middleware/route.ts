@@ -138,20 +138,38 @@ export async function GET(request: NextRequest) {
     });
 
     try {
-      if (userType === "gestor") {
+      if (userType === "Administrador" || userType === "Docente") {
         const cursoId = pathParts[1];
 
-        // Validate course exists and teacher is assigned to it
+        // First get the user's id_user from their rut
+        const userIdQuery = `
+          SELECT id_user 
+          FROM Usuario
+          WHERE rut_usuario = @rut
+        `;
+
+        const userResults = await executeSQL(connection, userIdQuery, [
+          { name: "rut", type: TYPES.NVarChar, value: userId },
+        ]);
+
+        if (userResults.length === 0) {
+          connection.close();
+          return NextResponse.json({ isValid: false });
+        }
+
+        const id_user = userResults[0].id_user;
+
+        // Validate course exists and teacher is assigned to it using id_user
         const courseQuery = `
           SELECT 1 
           FROM CursosAsignaturasLink
           WHERE id_curso = @cursoId 
-          AND rut_usuario = @userId
+          AND id_user = @id_user
         `;
 
         const courseResults = await executeSQL(connection, courseQuery, [
           { name: "cursoId", type: TYPES.NVarChar, value: cursoId },
-          { name: "userId", type: TYPES.NVarChar, value: userId },
+          { name: "id_user", type: TYPES.NVarChar, value: id_user },
         ]);
 
         if (courseResults.length === 0) {
@@ -168,7 +186,7 @@ export async function GET(request: NextRequest) {
             JOIN Asignaturas a ON a.id_curso = cal.id_curso
             WHERE cal.id_curso = @cursoId 
             AND a.id_asignatura = @asignaturaId
-            AND cal.rut_usuario = @userId
+            AND cal.id_user = @id_user
             AND cal.id_asignatura = @asignaturaId
           `;
 
@@ -182,7 +200,7 @@ export async function GET(request: NextRequest) {
                 type: TYPES.NVarChar,
                 value: asignaturaId,
               },
-              { name: "userId", type: TYPES.NVarChar, value: userId },
+              { name: "id_user", type: TYPES.NVarChar, value: id_user },
             ]
           );
 
@@ -195,12 +213,30 @@ export async function GET(request: NextRequest) {
       } else if (userType === "estudiante") {
         const asignaturaId = pathParts[1];
 
-        // Check if student's course has this asignatura
+        // First get the user's id_user from their rut
+        const userIdQuery = `
+          SELECT id_user 
+          FROM Usuario
+          WHERE rut_usuario = @rut
+        `;
+
+        const userResults = await executeSQL(connection, userIdQuery, [
+          { name: "rut", type: TYPES.NVarChar, value: userId },
+        ]);
+
+        if (userResults.length === 0) {
+          connection.close();
+          return NextResponse.json({ isValid: false });
+        }
+
+        const id_user = userResults[0].id_user;
+
+        // Check if student's course has this asignatura using id_user
         const asignaturaQuery = `
           SELECT 1 
           FROM CursosAsignaturasLink cal
           JOIN Asignaturas a ON a.id_curso = cal.id_curso
-          WHERE cal.rut_usuario = @userId
+          WHERE cal.id_user = @id_user
           AND a.id_asignatura = @asignaturaId
         `;
 
@@ -208,7 +244,7 @@ export async function GET(request: NextRequest) {
           connection,
           asignaturaQuery,
           [
-            { name: "userId", type: TYPES.NVarChar, value: userId },
+            { name: "id_user", type: TYPES.NVarChar, value: id_user },
             { name: "asignaturaId", type: TYPES.NVarChar, value: asignaturaId },
           ]
         );

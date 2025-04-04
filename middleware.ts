@@ -25,8 +25,9 @@ export async function middleware(request: NextRequest) {
     }
 
     if (pathParts.length > 1) {
+      // Pass the actual user type instead of "gestor"
       const validateResponse = await fetch(
-        `${request.nextUrl.origin}/api/auth/middleware?path=${path}&userType=gestor&userId=${userSession.rut_usuario}`
+        `${request.nextUrl.origin}/api/auth/middleware?path=${path}&userType=${userSession.tipo_usuario}&userId=${userSession.rut_usuario}`
       );
       const { isValid } = await validateResponse.json();
 
@@ -35,7 +36,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   } else if (path.startsWith("/portalAlumno")) {
-    if (!["Estudiante"].includes(userSession.tipo_usuario)) {
+    if (userSession.tipo_usuario !== "Estudiante") {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
