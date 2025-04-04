@@ -68,9 +68,19 @@ const Sedes: React.FC = () => {
     try {
       const response = await fetch("/api/cursos");
       const data = await response.json();
-      setCursos(data);
+      // Ensure cursos is always an array
+      if (Array.isArray(data)) {
+        setCursos(data);
+      } else if (data && Array.isArray(data.data)) {
+        // If the API returns { success: true, data: [...] }
+        setCursos(data.data);
+      } else {
+        console.error("Unexpected cursos data format:", data);
+        setCursos([]);
+      }
     } catch (error) {
       console.error("Error fetching cursos:", error);
+      setCursos([]);
     }
   };
 

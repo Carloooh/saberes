@@ -196,41 +196,44 @@ export async function POST(request: NextRequest) {
 
           if (files.length > 0) {
             for (const file of files) {
-              const arrayBuffer = await file.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
-              const extension = file.name.split(".").pop() || "";
-              const id_archivo = randomUUID();
+              try {
+                const arrayBuffer = await file.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
 
-              await executeSQLStatement(
-                connection,
-                `INSERT INTO Sede_archivo (id_archivo, id_sede, titulo, extension)
-                 VALUES (@id_archivo, @id_sede, @titulo, @extension)`,
-                [
-                  { name: "id_archivo", type: TYPES.NVarChar, value: id_archivo },
-                  { name: "id_sede", type: TYPES.NVarChar, value: id_sede },
-                  { name: "titulo", type: TYPES.NVarChar, value: file.name.split(".")[0] },
-                  { name: "extension", type: TYPES.NVarChar, value: extension }
-                ]
-              );
-              
-              // Insert the file content separately using a binary stream
-              await new Promise<void>((resolveUpload, rejectUpload) => {
-                const request = new Request(
-                  `UPDATE Sede_archivo SET archivo = @archivo WHERE id_archivo = @id_archivo`,
-                  (err) => {
-                    if (err) {
-                      console.error("Error uploading file:", err);
-                      return rejectUpload(err);
-                    }
-                    resolveUpload();
-                  }
+                // Skip files with no content
+                if (buffer.length === 0) {
+                  console.warn(`Skipping empty file: ${file.name}`);
+                  continue;
+                }
+
+                const extension = file.name.split(".").pop() || "";
+                const id_archivo = randomUUID();
+
+                // Insert file data
+                await executeSQLStatement(
+                  connection,
+                  `INSERT INTO Sede_archivo (id_archivo, id_sede, titulo, extension, archivo)
+                   VALUES (@id_archivo, @id_sede, @titulo, @extension, @archivo)`,
+                  [
+                    {
+                      name: "id_archivo",
+                      type: TYPES.NVarChar,
+                      value: id_archivo,
+                    },
+                    { name: "id_sede", type: TYPES.NVarChar, value: id_sede },
+                    {
+                      name: "titulo",
+                      type: TYPES.NVarChar,
+                      value: file.name.split(".")[0],
+                    },
+                    { name: "extension", type: TYPES.NVarChar, value: extension },
+                    { name: "archivo", type: TYPES.VarBinary, value: buffer },
+                  ]
                 );
-                
-                request.addParameter("id_archivo", TYPES.NVarChar, id_archivo);
-                request.addParameter("archivo", TYPES.VarBinary, buffer);
-                
-                connection.execSql(request);
-              });
+              } catch (fileError) {
+                console.error(`Error processing file ${file.name}:`, fileError);
+                throw fileError;
+              }
             }
           }
 
@@ -246,7 +249,7 @@ export async function POST(request: NextRequest) {
           });
 
           connection.close();
-          resolve(NextResponse.json({ success: true, id: id_sede }));
+          resolve(NextResponse.json({ success: true, id_sede }));
         } catch (error) {
           // Rollback transaction
           await new Promise<void>((resolveRollback) => {
@@ -261,7 +264,7 @@ export async function POST(request: NextRequest) {
         connection.close();
         resolve(
           NextResponse.json(
-            { success: false, error: "Error al crear la sede" },
+            { success: false, error: `Error al crear la sede: ${error}` },
             { status: 500 }
           )
         );
@@ -347,42 +350,44 @@ export async function PUT(request: NextRequest) {
 
           if (files.length > 0) {
             for (const file of files) {
-              const arrayBuffer = await file.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
-              const extension = file.name.split(".").pop() || "";
-              const id_archivo = randomUUID();
+              try {
+                const arrayBuffer = await file.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                
+                // Skip files with no content
+                if (buffer.length === 0) {
+                  console.warn(`Skipping empty file: ${file.name}`);
+                  continue;
+                }
+                
+                const extension = file.name.split(".").pop() || "";
+                const id_archivo = randomUUID();
 
-              // Use chunked insertion for large files
-              await executeSQLStatement(
-                connection,
-                `INSERT INTO Sede_archivo (id_archivo, id_sede, titulo, extension)
-                 VALUES (@id_archivo, @id_sede, @titulo, @extension)`,
-                [
-                  { name: "id_archivo", type: TYPES.NVarChar, value: id_archivo },
-                  { name: "id_sede", type: TYPES.NVarChar, value: id_sede },
-                  { name: "titulo", type: TYPES.NVarChar, value: file.name.split(".")[0] },
-                  { name: "extension", type: TYPES.NVarChar, value: extension }
-                ]
-              );
-              
-              // Insert the file content separately using a binary stream
-              await new Promise<void>((resolveUpload, rejectUpload) => {
-                const request = new Request(
-                  `UPDATE Sede_archivo SET archivo = @archivo WHERE id_archivo = @id_archivo`,
-                  (err) => {
-                    if (err) {
-                      console.error("Error uploading file:", err);
-                      return rejectUpload(err);
-                    }
-                    resolveUpload();
-                  }
+                // Insert file data with archivo in a single statement
+                await executeSQLStatement(
+                  connection,
+                  `INSERT INTO Sede_archivo (id_archivo, id_sede, titulo, extension, archivo)
+                   VALUES (@id_archivo, @id_sede, @titulo, @extension, @archivo)`,
+                  [
+                    {
+                      name: "id_archivo",
+                      type: TYPES.NVarChar,
+                      value: id_archivo,
+                    },
+                    { name: "id_sede", type: TYPES.NVarChar, value: id_sede },
+                    {
+                      name: "titulo",
+                      type: TYPES.NVarChar,
+                      value: file.name.split(".")[0],
+                    },
+                    { name: "extension", type: TYPES.NVarChar, value: extension },
+                    { name: "archivo", type: TYPES.VarBinary, value: buffer }
+                  ]
                 );
-                
-                request.addParameter("id_archivo", TYPES.NVarChar, id_archivo);
-                request.addParameter("archivo", TYPES.VarBinary, buffer);
-                
-                connection.execSql(request);
-              });
+              } catch (fileError) {
+                console.error(`Error processing file ${file.name}:`, fileError);
+                throw fileError;
+              }
             }
           }
 
@@ -413,7 +418,7 @@ export async function PUT(request: NextRequest) {
         connection.close();
         resolve(
           NextResponse.json(
-            { success: false, error: "Error al actualizar la sede" },
+            { success: false, error: `Error al actualizar la sede: ${error}` },
             { status: 500 }
           )
         );
