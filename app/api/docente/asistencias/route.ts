@@ -1,87 +1,3 @@
-// import { NextResponse } from "next/server";
-// import db from "@/db";
-
-// export async function GET(request: Request) {
-//   try {
-//     const { searchParams } = new URL(request.url);
-//     const diaId = searchParams.get("dia");
-
-//     if (!diaId) {
-//       return NextResponse.json(
-//         { success: false, error: "Falta el parámetro 'dia'" },
-//         { status: 400 }
-//       );
-//     }
-
-//     const query = db.prepare(`
-//       SELECT * FROM Asistencia
-//       WHERE id_dia = ?
-//     `);
-//     const asistencias = query.all(diaId);
-
-//     return NextResponse.json({ success: true, asistencias });
-//   } catch (error) {
-//     console.error("Error al obtener asistencias:", error);
-//     return NextResponse.json(
-//       { success: false, error: "Error al obtener asistencias" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-// export async function POST(request: Request) {
-//   try {
-//     const { dia, rut_usuario, asistencia, id_curso, id_asignatura } =
-//       await request.json();
-
-//     if (!dia || !rut_usuario || asistencia === undefined) {
-//       return NextResponse.json(
-//         { success: false, error: "Faltan campos requeridos" },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Verificar si ya existe un registro
-//     const checkQuery = db.prepare(`
-//       SELECT id_asistencia FROM Asistencia
-//       WHERE id_dia = ? AND rut_usuario = ?
-//     `);
-//     const existingRecord = checkQuery.get(dia, rut_usuario);
-
-//     if (existingRecord) {
-//       // Actualizar registro existente
-//       const updateQuery = db.prepare(`
-//         UPDATE Asistencia
-//         SET asistencia = ?
-//         WHERE id_dia = ? AND rut_usuario = ?
-//       `);
-//       updateQuery.run(asistencia, dia, rut_usuario);
-//     } else {
-//       // Insertar nuevo registro
-//       const insertQuery = db.prepare(`
-//         INSERT INTO Asistencia (id_asistencia, id_dia, rut_usuario, asistencia, id_curso, id_asignatura)
-//         VALUES (?, ?, ?, ?, ?, ?)
-//       `);
-//       insertQuery.run(
-//         `${dia}-${rut_usuario}`,
-//         dia,
-//         rut_usuario,
-//         asistencia,
-//         id_curso || null,
-//         id_asignatura || null
-//       );
-//     }
-
-//     return NextResponse.json({ success: true });
-//   } catch (error) {
-//     console.error("Error al guardar asistencia:", error);
-//     return NextResponse.json(
-//       { success: false, error: "Error al guardar asistencia" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
 import { NextResponse, NextRequest } from "next/server";
 import { Connection, Request, TYPES } from "tedious";
 import config from "@/app/api/dbConfig";
@@ -186,7 +102,13 @@ export async function POST(request: NextRequest) {
     const { dia, rut_usuario, asistencia, id_curso, id_asignatura } =
       await request.json();
 
-    if (!dia || !rut_usuario || asistencia === undefined || !id_curso || !id_asignatura) {
+    if (
+      !dia ||
+      !rut_usuario ||
+      asistencia === undefined ||
+      !id_curso ||
+      !id_asignatura
+    ) {
       connection.close();
       return NextResponse.json(
         { success: false, error: "Faltan campos requeridos" },
@@ -199,9 +121,9 @@ export async function POST(request: NextRequest) {
       SELECT id_user FROM Usuario
       WHERE rut_usuario = @rut_usuario
     `;
-    
+
     const users = await executeSQL(connection, userQuery, [
-      { name: "rut_usuario", type: TYPES.NVarChar, value: rut_usuario }
+      { name: "rut_usuario", type: TYPES.NVarChar, value: rut_usuario },
     ]);
 
     if (users.length === 0) {
@@ -219,10 +141,10 @@ export async function POST(request: NextRequest) {
       SELECT id_asistencia FROM Asistencia
       WHERE id_dia = @dia AND id_user = @id_user
     `;
-    
+
     const existingRecords = await executeSQL(connection, checkQuery, [
       { name: "dia", type: TYPES.NVarChar, value: dia },
-      { name: "id_user", type: TYPES.NVarChar, value: id_user }
+      { name: "id_user", type: TYPES.NVarChar, value: id_user },
     ]);
 
     if (existingRecords.length > 0) {
@@ -232,11 +154,11 @@ export async function POST(request: NextRequest) {
         SET asistencia = @asistencia
         WHERE id_dia = @dia AND id_user = @id_user
       `;
-      
+
       await executeSQL(connection, updateQuery, [
         { name: "asistencia", type: TYPES.Int, value: asistencia },
         { name: "dia", type: TYPES.NVarChar, value: dia },
-        { name: "id_user", type: TYPES.NVarChar, value: id_user }
+        { name: "id_user", type: TYPES.NVarChar, value: id_user },
       ]);
     } else {
       // Insertar nuevo registro
@@ -244,14 +166,18 @@ export async function POST(request: NextRequest) {
         INSERT INTO Asistencia (id_asistencia, id_dia, id_curso, id_asignatura, id_user, asistencia)
         VALUES (@id_asistencia, @dia, @id_curso, @id_asignatura, @id_user, @asistencia)
       `;
-      
+
       await executeSQL(connection, insertQuery, [
-        { name: "id_asistencia", type: TYPES.NVarChar, value: `${dia}-${id_user}` },
+        {
+          name: "id_asistencia",
+          type: TYPES.NVarChar,
+          value: `${dia}-${id_user}`,
+        },
         { name: "dia", type: TYPES.NVarChar, value: dia },
         { name: "id_curso", type: TYPES.NVarChar, value: id_curso },
         { name: "id_asignatura", type: TYPES.NVarChar, value: id_asignatura },
         { name: "id_user", type: TYPES.NVarChar, value: id_user },
-        { name: "asistencia", type: TYPES.Int, value: asistencia }
+        { name: "asistencia", type: TYPES.Int, value: asistencia },
       ]);
     }
 

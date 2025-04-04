@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
       if (err) {
         console.error("Error connecting to database:", err.message);
         connection.close();
-        return reject(
+        return resolve(
           NextResponse.json(
             { success: false, error: "Error al conectar a la base de datos" },
             { status: 500 }
@@ -161,8 +161,10 @@ export async function GET(request: NextRequest) {
 
       try {
         const { searchParams } = new URL(request.url);
-        const id_asignatura = searchParams.get("id_asignatura");
-        const id_tarea = searchParams.get("id_tarea");
+        // Accept both parameter formats for compatibility
+        const id_asignatura = searchParams.get("id_asignatura") || searchParams.get("asignatura");
+        const id_tarea = searchParams.get("id_tarea") || request.url.split('/').slice(-2)[0];
+        const id_curso = searchParams.get("id_curso") || searchParams.get("curso");
 
         if (!id_asignatura) {
           connection.close();
@@ -183,6 +185,18 @@ export async function GET(request: NextRequest) {
             )
           );
         }
+
+        if (!id_curso) {
+          connection.close();
+          return resolve(
+            NextResponse.json(
+              { success: false, error: "Falta el ID del curso" },
+              { status: 400 }
+            )
+          );
+        }
+
+        console.log(`Processing request for tarea: ${id_tarea}, asignatura: ${id_asignatura}, curso: ${id_curso}`);
 
         // First get all submissions
         const query = `

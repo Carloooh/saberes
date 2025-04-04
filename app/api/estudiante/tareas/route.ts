@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/db";
-import { v4 as uuidv4 } from "uuid";
+import { Connection, Request, TYPES } from "tedious";
+import config from "@/app/api/dbConfig";
+import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 
 interface TareaArchivo {
@@ -9,22 +10,13 @@ interface TareaArchivo {
   extension: string;
 }
 
-interface TareaDB {
+interface TareaProcessed {
   id_tarea: string;
   id_curso: string;
   id_asignatura: string;
   titulo: string;
   descripcion: string;
   fecha: string;
-  archivos: string;
-  id_entrega: string | null;
-  fecha_entrega: string | null;
-  estado: string | null;
-  comentario: string | null;
-  archivos_entrega: string;
-}
-
-interface TareaProcessed extends Omit<TareaDB, 'archivos' | 'archivos_entrega'> {
   archivos: TareaArchivo[];
   entrega: {
     id_entrega: string;
@@ -35,197 +27,417 @@ interface TareaProcessed extends Omit<TareaDB, 'archivos' | 'archivos_entrega'> 
   } | null;
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const asignaturaId = searchParams.get("asignaturaId");
-    const cursoId = searchParams.get("cursoId");
+// Helper function to execute SQL queries and return results
+function executeSQL(
+  connection: Connection,
+  sql: string,
+  parameters: { name: string; type: any; value: any }[] = []
+): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    const results: any[] = [];
+    const request = new Request(sql, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
 
-    // Get user session from cookies
-    const cookieStore = await cookies();
-    const userSessionCookie = cookieStore.get("userSession")?.value;
-    if (!userSessionCookie) {
-      return NextResponse.json(
-        { success: false, error: "No session found" },
-        { status: 401 }
-      );
-    }
+    parameters.forEach((param) => {
+      request.addParameter(param.name, param.type, param.value);
+    });
 
-    const userSession = JSON.parse(userSessionCookie);
-    const rutEstudiante = userSession.rut_usuario;
+    request.on("row", (columns: any[]) => {
+      const row: { [key: string]: any } = {};
+      columns.forEach((column) => {
+        row[column.metadata.colName] = column.value;
+      });
+      results.push(row);
+    });
 
-    if (!asignaturaId) {
-      return NextResponse.json(
-        { success: false, error: "Falta el ID de la asignatura" },
-        { status: 400 }
-      );
-    }
-
-    const query = db.prepare(`
-      SELECT 
-        t.*,
-        json_group_array(
-          DISTINCT CASE WHEN ta.id_archivo IS NOT NULL THEN
-            json_object(
-              'id_archivo', ta.id_archivo,
-              'titulo', ta.titulo,
-              'extension', ta.extension
-            )
-          ELSE NULL END
-        ) as archivos,
-        et.id_entrega,
-        et.fecha_entrega,
-        et.estado,
-        et.comentario,
-        json_group_array(
-          DISTINCT CASE WHEN eta.id_archivo IS NOT NULL THEN
-            json_object(
-              'id_archivo', eta.id_archivo,
-              'titulo', eta.titulo,
-              'extension', eta.extension
-            )
-          ELSE NULL END
-        ) as archivos_entrega
-      FROM Tareas t
-      LEFT JOIN Tarea_archivo ta ON t.id_tarea = ta.id_tarea
-      LEFT JOIN EntregaTarea et ON t.id_tarea = et.id_tarea 
-        AND et.rut_estudiante = ?
-      LEFT JOIN EntregaTarea_Archivo eta ON et.id_entrega = eta.id_entrega
-      WHERE t.id_asignatura = ? AND t.id_curso = ?
-      GROUP BY t.id_tarea, t.id_asignatura
-      ORDER BY t.fecha DESC
-    `);
-
-    const tareas = query.all(rutEstudiante, asignaturaId, cursoId)  as TareaDB[];
-
-    // Process the results
-    const processedTareas = tareas.map((tarea: TareaDB): TareaProcessed => ({
-      ...tarea,
-      archivos: JSON.parse(tarea.archivos).filter(Boolean),
-      entrega: tarea.id_entrega
-        ? {
-            id_entrega: tarea.id_entrega,
-            fecha_entrega: tarea.fecha_entrega!,
-            estado: tarea.estado!,
-            comentario: tarea.comentario,
-            archivos: JSON.parse(tarea.archivos_entrega).filter(Boolean),
-          }
-        : null,
-    }));
-    // const processedTareas = tareas.map((tarea) => ({
-    //   ...tarea,
-    //   archivos: JSON.parse(tarea.archivos).filter(Boolean),
-    //   entrega: tarea.id_entrega
-    //     ? {
-    //         id_entrega: tarea.id_entrega,
-    //         fecha_entrega: tarea.fecha_entrega,
-    //         estado: tarea.estado,
-    //         comentario: tarea.comentario,
-    //         archivos: JSON.parse(tarea.archivos_entrega).filter(Boolean),
-    //       }
-    //     : null,
-    // }));
-
-    return NextResponse.json({ success: true, tareas: processedTareas });
-  } catch (error) {
-    console.error("Error fetching tasks:", error);
-    return NextResponse.json(
-      { success: false, error: "Error al obtener las tareas" },
-      { status: 500 }
-    );
-  }
+    connection.execSql(request);
+  });
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData();
-    const tareaId = formData.get("tareaId") as string;
-    const asignaturaId = formData.get("asignaturaId") as string;
-    const cursoId = formData.get("cursoId") as string;
-    const comentario = formData.get("comentario") as string;
+// Helper function to execute SQL statements without returning results
+async function executeSQLStatement(
+  connection: Connection,
+  sql: string,
+  parameters: { name: string; type: any; value: any }[] = []
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = new Request(sql, (err) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve();
+    });
 
-    // Get user session
-    const cookieStore = await cookies();
-    const userSessionCookie = cookieStore.get("userSession")?.value;
-    if (!userSessionCookie) {
-      return NextResponse.json(
-        { success: false, error: "No session found" },
-        { status: 401 }
-      );
-    }
+    parameters.forEach((param) => {
+      request.addParameter(param.name, param.type, param.value);
+    });
 
-    const userSession = JSON.parse(userSessionCookie);
-    const rutEstudiante = userSession.rut_usuario;
+    connection.execSql(request);
+  });
+}
 
-    if (!tareaId || !asignaturaId) {
-      return NextResponse.json(
-        { success: false, error: "Faltan campos requeridos" },
-        { status: 400 }
-      );
-    }
+export async function GET(request: NextRequest) {
+  const connection = new Connection(config);
 
-    const id_entrega = uuidv4();
-    const fecha_entrega = new Date().toISOString().split("T")[0];
-
-    db.exec("BEGIN TRANSACTION");
-
-    try {
-      // Create task submission
-      const insertEntrega = db.prepare(`
-          INSERT INTO EntregaTarea (
-            id_entrega, id_tarea, id_curso, id_asignatura, rut_estudiante, 
-            fecha_entrega, estado, comentario
+  return new Promise<NextResponse>((resolve, reject) => {
+    connection.on("connect", async (err) => {
+      if (err) {
+        console.error("Error connecting to database:", err.message);
+        connection.close();
+        return resolve(
+          NextResponse.json(
+            { success: false, error: "Error al conectar a la base de datos" },
+            { status: 500 }
           )
-          VALUES (?, ?, ?, ?, ?, ?, 'entregada', ?)
-        `);
-
-      insertEntrega.run(
-        id_entrega,
-        tareaId,
-        cursoId,
-        asignaturaId,
-        rutEstudiante,
-        fecha_entrega,
-        comentario || null
-      );
-
-      // Process files
-      const files = formData.getAll("archivos") as File[];
-
-      for (const file of files) {
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const extension = file.name.split(".").pop() || "";
-        const id_archivo = uuidv4();
-
-        const insertArchivo = db.prepare(`
-            INSERT INTO EntregaTarea_Archivo (
-              id_archivo, id_entrega, titulo, 
-              archivo, extension
-            )
-            VALUES (?, ?, ?, ?, ?)
-          `);
-
-        insertArchivo.run(
-          id_archivo,
-          id_entrega,
-          file.name.split(".")[0],
-          buffer,
-          extension
         );
       }
 
-      db.exec("COMMIT");
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      db.exec("ROLLBACK");
-      throw error;
-    }
-  } catch (error) {
-    console.error("Error submitting task:", error);
-    return NextResponse.json(
-      { success: false, error: "Error al entregar la tarea" },
-      { status: 500 }
-    );
-  }
+      try {
+        const { searchParams } = new URL(request.url);
+        const asignaturaId = searchParams.get("asignaturaId");
+        const cursoId = searchParams.get("cursoId");
+
+        // Get user session from cookies
+        const cookieStore = await cookies();
+        const userSessionCookie = cookieStore.get("userSession")?.value;
+        if (!userSessionCookie) {
+          connection.close();
+          return resolve(
+            NextResponse.json(
+              { success: false, error: "No session found" },
+              { status: 401 }
+            )
+          );
+        }
+
+        const userSession = JSON.parse(userSessionCookie);
+        const rutEstudiante = userSession.rut_usuario;
+
+        if (!asignaturaId) {
+          connection.close();
+          return resolve(
+            NextResponse.json(
+              { success: false, error: "Falta el ID de la asignatura" },
+              { status: 400 }
+            )
+          );
+        }
+
+        // First get the user ID from the rut_usuario
+        const getUserIdQuery = `
+          SELECT id_user
+          FROM Usuario
+          WHERE rut_usuario = @rutUsuario
+        `;
+
+        const userResults = await executeSQL(connection, getUserIdQuery, [
+          { name: "rutUsuario", type: TYPES.NVarChar, value: rutEstudiante },
+        ]);
+
+        if (userResults.length === 0) {
+          connection.close();
+          return resolve(
+            NextResponse.json(
+              { success: false, error: "Usuario no encontrado" },
+              { status: 404 }
+            )
+          );
+        }
+
+        const userId = userResults[0].id_user;
+
+        // Get all tasks for the subject and course
+        const tasksQuery = `
+          SELECT 
+            t.id_tarea, t.id_curso, t.id_asignatura, t.titulo, t.descripcion, t.fecha
+          FROM Tareas t
+          WHERE t.id_asignatura = @asignaturaId AND t.id_curso = @cursoId
+          ORDER BY t.fecha DESC
+        `;
+
+        const tasks = await executeSQL(connection, tasksQuery, [
+          { name: "asignaturaId", type: TYPES.NVarChar, value: asignaturaId },
+          { name: "cursoId", type: TYPES.NVarChar, value: cursoId },
+        ]);
+
+        // Process each task to get its files and submission info
+        const processedTareas: TareaProcessed[] = [];
+
+        for (const task of tasks) {
+          // Get task files
+          const filesQuery = `
+            SELECT id_archivo, titulo, extension
+            FROM Tarea_archivo
+            WHERE id_tarea = @tareaId
+          `;
+
+          const files = await executeSQL(connection, filesQuery, [
+            { name: "tareaId", type: TYPES.NVarChar, value: task.id_tarea },
+          ]);
+
+          // Get submission info if exists
+          const submissionQuery = `
+            SELECT id_entrega, fecha_entrega, estado, comentario
+            FROM EntregaTarea
+            WHERE id_tarea = @tareaId AND id_user = @userId
+          `;
+
+          const submissions = await executeSQL(connection, submissionQuery, [
+            { name: "tareaId", type: TYPES.NVarChar, value: task.id_tarea },
+            { name: "userId", type: TYPES.NVarChar, value: userId },
+          ]);
+
+          let entrega = null;
+
+          if (submissions.length > 0) {
+            const submission = submissions[0];
+
+            // Get submission files
+            const submissionFilesQuery = `
+              SELECT id_archivo, titulo, extension
+              FROM EntregaTarea_Archivo
+              WHERE id_entrega = @entregaId
+            `;
+
+            const submissionFiles = await executeSQL(
+              connection,
+              submissionFilesQuery,
+              [
+                {
+                  name: "entregaId",
+                  type: TYPES.NVarChar,
+                  value: submission.id_entrega,
+                },
+              ]
+            );
+
+            entrega = {
+              id_entrega: submission.id_entrega,
+              fecha_entrega: submission.fecha_entrega,
+              estado: submission.estado,
+              comentario: submission.comentario,
+              archivos: submissionFiles,
+            };
+          }
+
+          processedTareas.push({
+            id_tarea: task.id_tarea,
+            id_curso: task.id_curso,
+            id_asignatura: task.id_asignatura,
+            titulo: task.titulo,
+            descripcion: task.descripcion,
+            fecha: task.fecha,
+            archivos: files,
+            entrega,
+          });
+        }
+
+        connection.close();
+        return resolve(
+          NextResponse.json({ success: true, tareas: processedTareas })
+        );
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+        connection.close();
+        return resolve(
+          NextResponse.json(
+            { success: false, error: "Error al obtener las tareas" },
+            { status: 500 }
+          )
+        );
+      }
+    });
+
+    connection.connect();
+  });
+}
+
+export async function POST(request: NextRequest) {
+  const connection = new Connection(config);
+
+  return new Promise<NextResponse>((resolve, reject) => {
+    connection.on("connect", async (err) => {
+      if (err) {
+        console.error("Error connecting to database:", err.message);
+        connection.close();
+        return resolve(
+          NextResponse.json(
+            { success: false, error: "Error al conectar a la base de datos" },
+            { status: 500 }
+          )
+        );
+      }
+
+      try {
+        const formData = await request.formData();
+        const tareaId = formData.get("tareaId") as string;
+        const asignaturaId = formData.get("asignaturaId") as string;
+        const cursoId = formData.get("cursoId") as string;
+        const comentario = formData.get("comentario") as string;
+
+        // Get user session
+        const cookieStore = await cookies();
+        const userSessionCookie = cookieStore.get("userSession")?.value;
+        if (!userSessionCookie) {
+          connection.close();
+          return resolve(
+            NextResponse.json(
+              { success: false, error: "No session found" },
+              { status: 401 }
+            )
+          );
+        }
+
+        const userSession = JSON.parse(userSessionCookie);
+        const rutEstudiante = userSession.rut_usuario;
+
+        if (!tareaId || !asignaturaId) {
+          connection.close();
+          return resolve(
+            NextResponse.json(
+              { success: false, error: "Faltan campos requeridos" },
+              { status: 400 }
+            )
+          );
+        }
+
+        // First get the user ID from the rut_usuario
+        const getUserIdQuery = `
+          SELECT id_user
+          FROM Usuario
+          WHERE rut_usuario = @rutUsuario
+        `;
+
+        const userResults = await executeSQL(connection, getUserIdQuery, [
+          { name: "rutUsuario", type: TYPES.NVarChar, value: rutEstudiante },
+        ]);
+
+        if (userResults.length === 0) {
+          connection.close();
+          return resolve(
+            NextResponse.json(
+              { success: false, error: "Usuario no encontrado" },
+              { status: 404 }
+            )
+          );
+        }
+
+        const userId = userResults[0].id_user;
+        const id_entrega = randomUUID();
+        const fecha_entrega = new Date().toISOString().split("T")[0];
+
+        // Begin transaction
+        await new Promise<void>((resolveTransaction, rejectTransaction) => {
+          connection.beginTransaction((err) => {
+            if (err) {
+              console.error("Error starting transaction:", err.message);
+              return rejectTransaction(err);
+            }
+            resolveTransaction();
+          });
+        });
+
+        try {
+          // Create task submission
+          await executeSQLStatement(
+            connection,
+            `INSERT INTO EntregaTarea (
+              id_entrega, id_tarea, id_curso, id_asignatura, id_user, 
+              fecha_entrega, estado, comentario
+            )
+            VALUES (@id_entrega, @tareaId, @cursoId, @asignaturaId, @userId, 
+              @fecha_entrega, 'entregada', @comentario)`,
+            [
+              { name: "id_entrega", type: TYPES.NVarChar, value: id_entrega },
+              { name: "tareaId", type: TYPES.NVarChar, value: tareaId },
+              { name: "cursoId", type: TYPES.NVarChar, value: cursoId },
+              {
+                name: "asignaturaId",
+                type: TYPES.NVarChar,
+                value: asignaturaId,
+              },
+              { name: "userId", type: TYPES.NVarChar, value: userId },
+              {
+                name: "fecha_entrega",
+                type: TYPES.NVarChar,
+                value: fecha_entrega,
+              },
+              {
+                name: "comentario",
+                type: TYPES.NVarChar,
+                value: comentario || null,
+              },
+            ]
+          );
+
+          // Process files
+          const files = formData.getAll("archivos") as File[];
+
+          for (const file of files) {
+            const arrayBuffer = await file.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const extension = file.name.split(".").pop() || "";
+            const id_archivo = randomUUID();
+
+            await executeSQLStatement(
+              connection,
+              `INSERT INTO EntregaTarea_Archivo (
+                id_archivo, id_entrega, titulo, 
+                archivo, extension
+              )
+              VALUES (@id_archivo, @id_entrega, @titulo, @archivo, @extension)`,
+              [
+                { name: "id_archivo", type: TYPES.NVarChar, value: id_archivo },
+                { name: "id_entrega", type: TYPES.NVarChar, value: id_entrega },
+                {
+                  name: "titulo",
+                  type: TYPES.NVarChar,
+                  value: file.name.split(".")[0],
+                },
+                { name: "archivo", type: TYPES.VarBinary, value: buffer },
+                { name: "extension", type: TYPES.NVarChar, value: extension },
+              ]
+            );
+          }
+
+          // Commit transaction
+          await new Promise<void>((resolveCommit, rejectCommit) => {
+            connection.commitTransaction((err) => {
+              if (err) {
+                console.error("Error committing transaction:", err.message);
+                return rejectCommit(err);
+              }
+              resolveCommit();
+            });
+          });
+
+          connection.close();
+          return resolve(NextResponse.json({ success: true }));
+        } catch (error) {
+          // Rollback transaction
+          await new Promise<void>((resolveRollback) => {
+            connection.rollbackTransaction(() => {
+              resolveRollback();
+            });
+          });
+          throw error;
+        }
+      } catch (error) {
+        console.error("Error submitting task:", error);
+        connection.close();
+        return resolve(
+          NextResponse.json(
+            { success: false, error: "Error al entregar la tarea" },
+            { status: 500 }
+          )
+        );
+      }
+    });
+
+    connection.connect();
+  });
 }
