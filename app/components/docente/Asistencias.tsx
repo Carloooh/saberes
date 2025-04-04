@@ -142,16 +142,19 @@ export default function Asistencias({
           rut_usuario: rutEstudiante,
           asistencia: estado,
           id_curso: cursoId,
-          id_asignatura: asignaturaId,
+          id_asignatura: asignaturaId
         }),
       });
-
+  
       if (response.ok) {
+        // Actualizar el estado local
         setAsistencias((prev) => ({
           ...prev,
           [rutEstudiante]: estado,
         }));
         toast.success("Asistencia guardada");
+      } else {
+        toast.error("Error al guardar asistencia");
       }
     } catch (error) {
       console.error("Error al guardar asistencia:", error);
