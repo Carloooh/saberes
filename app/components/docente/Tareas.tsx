@@ -100,15 +100,44 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
   // Llama al endpoint específico para obtener las entregas de una tarea
   const fetchEntregas = async (id_tarea: string, id_asignatura: string) => {
     try {
+      // Try with a different parameter format
       const response = await fetch(
-        `/api/docente/tareas/${id_tarea}/entregas?id_asignatura=${id_asignatura}&cursoId=${cursoId}`
+        `/api/docente/tareas/${id_tarea}/entregas?asignatura=${id_asignatura}&curso=${cursoId}`
       );
+
+      // For debugging
+      console.log(
+        `Fetching entregas for tarea: ${id_tarea}, asignatura: ${id_asignatura}, curso: ${cursoId}`
+      );
+
+      // Handle 500 errors gracefully
+      if (response.status === 500) {
+        console.error("Server error (500) when fetching entregas");
+        // Set empty array for this tarea to prevent UI errors
+        setEntregas((prev) => ({ ...prev, [id_tarea]: [] }));
+        return;
+      }
+
+      if (!response.ok) {
+        console.error(
+          `Error response: ${response.status} ${response.statusText}`
+        );
+        // Set empty array for this tarea to prevent UI errors
+        setEntregas((prev) => ({ ...prev, [id_tarea]: [] }));
+        return;
+      }
+
       const data = await response.json();
       if (data.success) {
-        setEntregas((prev) => ({ ...prev, [id_tarea]: data.entregas }));
+        setEntregas((prev) => ({ ...prev, [id_tarea]: data.entregas || [] }));
+      } else {
+        console.error("Error in API response:", data.error || "Unknown error");
+        setEntregas((prev) => ({ ...prev, [id_tarea]: [] }));
       }
     } catch (error) {
       console.error("Error fetching entregas:", error);
+      // Initialize with empty array to prevent further errors
+      setEntregas((prev) => ({ ...prev, [id_tarea]: [] }));
     }
   };
 
