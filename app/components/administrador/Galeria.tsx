@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 interface Archivo {
   id_archivo: string;
   extension: string;
+  titulo?: string; // Add titulo to the interface
 }
 
 const Galeria: React.FC = () => {
@@ -121,14 +122,14 @@ const Galeria: React.FC = () => {
   };
 
   // Descargar un archivo
-  const handleDownload = async (id: string, extension: string) => {
+  const handleDownload = async (id: string, extension: string, titulo: string) => {
     try {
       const response = await fetch(`/api/galeria/download?id=${id}`);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${id}.${extension}`;
+      link.download = `${titulo || id}.${extension}`;
       link.click();
       window.URL.revokeObjectURL(url);
       toast.success("Descarga iniciada");
@@ -339,7 +340,7 @@ const Galeria: React.FC = () => {
                       ) : (
                         <Image
                           src={`/api/galeria/download?id=${archivo.id_archivo}`}
-                          alt={archivo.id_archivo}
+                          alt={archivo.titulo || archivo.id_archivo}
                           width={64}
                           height={64}
                           className="h-full w-full object-cover"
@@ -348,8 +349,9 @@ const Galeria: React.FC = () => {
                       )}
                     </div>
                     <div>
+                      {/* Display titulo instead of id_archivo */}
                       <p className="font-medium text-gray-900">
-                        {archivo.id_archivo}
+                        {archivo.titulo || archivo.id_archivo}
                       </p>
                       <p className="text-sm text-gray-500">
                         .{archivo.extension}
@@ -379,7 +381,7 @@ const Galeria: React.FC = () => {
                     </button>
                     <button
                       onClick={() =>
-                        handleDownload(archivo.id_archivo, archivo.extension)
+                        handleDownload(archivo.id_archivo, archivo.extension, archivo.titulo || archivo.id_archivo)
                       }
                       className="border border-green-500 text-green-500 bg-white px-3 py-1.5 rounded-md hover:bg-green-500 hover:text-white transition-colors text-sm flex items-center"
                     >
