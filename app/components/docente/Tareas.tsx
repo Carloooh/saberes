@@ -254,7 +254,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
         <h2 className="text-xl font-bold">Tareas</h2>
         <button
           onClick={() => setShowNewTareaForm(!showNewTareaForm)}
-          className="bg-white text-blue-500 border border-blue-500 px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           {showNewTareaForm ? "Cancelar" : "Nueva Tarea"}
         </button>
@@ -322,7 +322,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="bg-white text-blue-500 border border-blue-500 px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
               Crear Tarea
             </button>
@@ -537,7 +537,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
                                                     tarea.id_asignatura
                                                   )
                                                 }
-                                                className="mt-2 bg-white text-green-500 border border-green-500 px-3 py-1 rounded hover:bg-green-500 hover:text-white transition-colors"
+                                                className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                                               >
                                                 Marcar como revisada
                                               </button>
@@ -566,3 +566,4 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
       </div>
     </div>
   );
+}
