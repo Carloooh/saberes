@@ -24,12 +24,40 @@ const config = {
 };
 
 // Cargar el archivo Excel y seleccionar la hoja correspondiente
+// const workbook = xlsx.readFile(
+//   "C:/Users/cazocar/Documents/proyectos/saberes_venv/saberes/db/MATRICULAS2025.xlsx"
+// );
 const workbook = xlsx.readFile(
-  "C:/Users/cazocar/Documents/proyectos/saberes_venv/saberes/db/MATRICULAS2025.xlsx"
+  "C:/Users/cazocar/Documents/proyectos/saberes_venv/saberes/db/MATRICULAS.xlsx"
 );
-const sheetName = workbook.SheetNames[11];
+const sheetName = workbook.SheetNames[12];
 const worksheet = workbook.Sheets[sheetName];
 const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
+// Cargar la hoja de estudiantes retirados (hoja 11)
+const retiradosSheetName = workbook.SheetNames[11];
+const retiradosWorksheet = workbook.Sheets[retiradosSheetName];
+const retiradosData = xlsx.utils.sheet_to_json(retiradosWorksheet, {
+  header: 1,
+});
+
+// Crear un conjunto de RUTs de estudiantes retirados
+const rutsRetirados = new Set();
+for (let i = 1; i < retiradosData.length; i++) {
+  const row = retiradosData[i];
+  if (row && row[10]) {
+    // Columna 10 (índice 9) contiene el RUT
+    const rutOriginal = String(row[10]).toUpperCase();
+    const numeros = rutOriginal.replace(/[^0-9K]/g, "");
+    if (numeros.length > 1) {
+      const rutFormateado = numeros.slice(0, -1) + "-" + numeros.slice(-1);
+      rutsRetirados.add(rutFormateado);
+    }
+  }
+}
+console.log(
+  `Se encontraron ${rutsRetirados.size} estudiantes retirados en la hoja 11`
+);
 
 // Función para conectarse a SQL Server
 function connectDB() {
@@ -126,19 +154,16 @@ async function run() {
       await execQuery(connection, `DELETE FROM Info_apoderado`);
       await execQuery(connection, `DELETE FROM CursosAsignaturasLink`);
       await execQuery(connection, `DELETE FROM Matricula`);
-      await execQuery(connection, `DELETE FROM Usuario`);
+      await execQuery(
+        connection,
+        `DELETE FROM Usuario WHERE tipo_usuario = 'Estudiante'`
+      );
       console.log("Tablas limpiadas correctamente.");
     }
 
     // Recorremos las filas desde la 2 hasta la 205 o hasta el final de los datos
-    for (let i = 2; i < 205 && i < data.length; i++) {
+    for (let i = 1; i < 206 && i < data.length; i++) {
       const row = data[i];
-
-      // Verificar que existan datos básicos de nombres y apellidos
-      if (!row[6] || !row[7] || !row[8]) {
-        console.log(`Fila ${i} incompleta en nombres/apellidos, saltando...`);
-        continue;
-      }
 
       console.log(`Procesando fila ${i}...`);
 
@@ -163,6 +188,21 @@ async function run() {
         rut = (nombres + apellidos).toLowerCase().replace(/\s+/g, "");
       }
 
+      // Verificar si el RUT ya existe en la base de datos
+      if (rut.includes("-")) {
+        const checkRutQuery = `SELECT COUNT(*) as count FROM Usuario WHERE rut_usuario = @rut`;
+        const rutExists = await querySingle(connection, checkRutQuery, [
+          { name: "rut", type: TYPES.NVarChar, value: rut },
+        ]);
+
+        if (rutExists && rutExists.count > 0) {
+          console.log(
+            `El RUT ${rut} ya existe en la base de datos, saltando...`
+          );
+          continue;
+        }
+      }
+
       const rut_tipo = "";
       const email =
         row[51] === undefined ||
@@ -176,7 +216,7 @@ async function run() {
       const clave = randomUUID().replace(/-/g, "").slice(0, 10);
       const hashedClave = await bcrypt.hash(clave, 10);
       const tipo_usuario = "Estudiante";
-      const estado = "Activa";
+      const estado = rutsRetirados.has(rut) ? "Inactiva" : "Activa";
       const sexo = row[10] || "";
       const nacionalidad = row[15] || "";
       const talla = row[13] ? String(row[13]) : "";
