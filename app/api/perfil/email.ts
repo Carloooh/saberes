@@ -408,3 +408,38 @@ export const sendWelcomeEmail = async (
     throw error;
   }
 };
+
+export const sendGeneralMessage = async (
+  email: string,
+  name: string,
+  subject: string,
+  message: string
+) => {
+  const mailOptions = {
+    from: `Saberes El Quisco <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: subject,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+        <h2 style="color: #333; text-align: center;">${subject}</h2>
+        <p>Hola ${name},</p>
+        <div style="margin: 20px 0;">
+          ${message}
+        </div>
+        <p>Saludos,<br>Equipo Saberes El Quisco</p>
+        <p style="margin-top: 30px; font-size: 12px; color: #777; text-align: center;">
+          Este es un correo automático, por favor no respondas a este mensaje.
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Mensaje general enviado a ${email}`);
+    return true;
+  } catch (error) {
+    console.error("Error al enviar el correo:", error);
+    throw error;
+  }
+};
