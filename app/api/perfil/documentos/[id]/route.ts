@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { Connection, Request, TYPES } from "tedious";
 import config from "@/app/api/dbConfig";
 
@@ -41,7 +41,7 @@ function executeSQL(
 }
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const connection = new Connection(config);
