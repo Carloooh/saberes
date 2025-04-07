@@ -121,10 +121,11 @@ function executeSQL(
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   const connection = new Connection(config);
   const { id } = params;
-  return new Promise<NextResponse>((resolve, reject) => {
+  
+  return new Promise<NextResponse>((resolve) => {
     connection.on("connect", async (err) => {
       if (err) {
         console.error("Error connecting to database:", err.message);
