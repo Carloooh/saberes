@@ -48,6 +48,41 @@ const AccionesGenerales = () => {
     }
   };
 
+  const handleEnviarBienvenidaDocentes = async () => {
+    if (
+      !confirm(
+        "¿Estás seguro de enviar mensajes de bienvenida a todos los docentes activos? Esto generará nuevas contraseñas para todos ellos."
+      )
+    ) {
+      return;
+    }
+
+    setLoading("bienvenidaDocentes");
+    try {
+      const response = await fetch(
+        "/api/administrador/acciones-generales/bienvenida-docentes",
+        {
+          method: "POST",
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(
+          `Se enviaron ${data.enviados} mensajes de bienvenida a docentes correctamente.`
+        );
+      } else {
+        toast.error(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error al enviar mensajes de bienvenida a docentes:", error);
+      toast.error("Ocurrió un error al enviar los mensajes de bienvenida a docentes.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
   const handleEnviarMensajeGeneral = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -163,6 +198,30 @@ const AccionesGenerales = () => {
               }`}
           >
             {loading === "bienvenida" ? "Enviando..." : "Enviar mensajes"}
+          </button>
+        </div>
+
+        {/* Tarjeta de Bienvenida a Docentes */}
+        <div className="border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+          <h3 className="text-xl font-semibold text-gray-800">
+            Bienvenida a los docentes
+          </h3>
+          <p className="text-gray-600 mt-2 mb-4">
+            Envío de mensaje de bienvenida a todos los docentes y sus
+            credenciales de inicio de sesión, a quienes tengan una cuenta activa
+            y un email registrado.
+          </p>
+          <button
+            onClick={handleEnviarBienvenidaDocentes}
+            disabled={loading === "bienvenidaDocentes"}
+            className={`border border-blue-600 text-blue-600 bg-white px-4 py-2 rounded-md transition-colors
+              ${
+                loading === "bienvenidaDocentes"
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-blue-600 hover:text-white"
+              }`}
+          >
+            {loading === "bienvenidaDocentes" ? "Enviando..." : "Enviar mensajes"}
           </button>
         </div>
 
