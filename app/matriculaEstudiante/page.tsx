@@ -1242,6 +1242,7 @@ const MatriculaEstudiante = () => {
                     placeholder="Ejemplo: 1, 2, 3, etc..."
                     className="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     min={0}
+                    defaultValue={0}
                     required
                   />
                 </div>

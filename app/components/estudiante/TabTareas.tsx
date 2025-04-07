@@ -294,11 +294,11 @@ const TabTareas = ({ asignaturaId, cursoId }: TabTareasProps) => {
                   <button
                     type="submit"
                     disabled={submitting === tarea.id_tarea}
-                    className={`w-full bg-blue-600 text-white px-4 py-2 rounded-md 
+                    className={`w-full border border-blue-600 text-blue-600 bg-white px-4 py-2 rounded-md transition-colors
       ${
         submitting === tarea.id_tarea
           ? "opacity-50 cursor-not-allowed"
-          : "hover:bg-blue-700"
+          : "hover:bg-blue-600 hover:text-white"
       }`}
                   >
                     {submitting === tarea.id_tarea

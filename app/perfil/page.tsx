@@ -466,7 +466,7 @@ const Perfil: React.FC = () => {
                       {userData.apoderado.rut_tipo_apoderado1}
                     </p>
                     <p>
-                      <span className="font-medium">Contacto:</span>{" "}
+                      <span className="font-medium">Contacto:</span> +
                       {userData.apoderado.celular_apoderado1}
                     </p>
                     <p>
@@ -474,7 +474,7 @@ const Perfil: React.FC = () => {
                       {userData.apoderado.email_apoderado1}
                     </p>
                     <p>
-                      <span className="font-medium">Vinculo:</span>
+                      <span className="font-medium">Vinculo:</span>{" "}
                       {userData.apoderado.vinculo_apoderado1}
                     </p>
                     <p>
@@ -496,7 +496,7 @@ const Perfil: React.FC = () => {
                       {userData.apoderado.apellidos_apoderado2}
                     </p>
                     <p>
-                      <span className="font-medium">Celular:</span>{" "}
+                      <span className="font-medium">Celular:</span> +
                       {userData.apoderado.celular_apoderado2}
                     </p>
                   </div>
@@ -514,7 +514,7 @@ const Perfil: React.FC = () => {
                       {userData.contactoEmergencia?.apellidos}
                     </p>
                     <p>
-                      <span className="font-medium">Celular:</span>{" "}
+                      <span className="font-medium">Celular:</span> +
                       {userData.contactoEmergencia?.celular}
                     </p>
                     <p>

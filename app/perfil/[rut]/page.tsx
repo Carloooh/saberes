@@ -809,7 +809,7 @@ const PerfilUsuario: React.FC = () => {
                         "No especificado"}
                     </p>
                     <p>
-                      <span className="font-medium">Teléfono:</span>{" "}
+                      <span className="font-medium">Teléfono:</span> +
                       {userData.apoderado?.celular_apoderado1 ||
                         "No especificado"}
                     </p>
@@ -844,7 +844,7 @@ const PerfilUsuario: React.FC = () => {
                       {userData.apoderado?.apellidos_apoderado2}
                     </p>
                     <p>
-                      <span className="font-medium">Teléfono:</span>{" "}
+                      <span className="font-medium">Teléfono:</span> +
                       {userData.apoderado?.celular_apoderado2 ||
                         "No especificado"}
                     </p>
@@ -862,7 +862,7 @@ const PerfilUsuario: React.FC = () => {
                     {userData.contactoEmergencia?.apellidos}
                   </p>
                   <p>
-                    <span className="font-medium">Teléfono:</span>{" "}
+                    <span className="font-medium">Teléfono:</span> +
                     {userData.contactoEmergencia?.celular || "No especificado"}
                   </p>
                   <p>
