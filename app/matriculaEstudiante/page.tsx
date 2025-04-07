@@ -30,7 +30,6 @@ const MatriculaEstudiante = () => {
   });
   const [phoneError, setPhoneError] = useState({
     celular_apoderado1: "",
-    celular_apoderado2: "",
     celular_contacto: "",
   });
 
@@ -378,7 +377,6 @@ const MatriculaEstudiante = () => {
     const email2 = formData.get("email2") as string | null;
     const emailApoderado = formData.get("email_apoderado1") as string | null;
     const phoneApoderado1 = formData.get("celular_apoderado1") as string | null;
-    const phoneApoderado2 = formData.get("celular_apoderado2") as string | null;
     const phoneContacto = formData.get("celular_contacto") as string | null;
 
     // Check if required fields are present
@@ -401,18 +399,6 @@ const MatriculaEstudiante = () => {
     if (phoneApoderado1.length !== 12 || !phoneApoderado1.startsWith("+569")) {
       toast.error(
         "El número de celular del apoderado principal debe tener el formato +569XXXXXXXX"
-      );
-      return;
-    }
-
-    // Validate phone format for secondary guardian if provided
-    if (
-      phoneApoderado2 &&
-      phoneApoderado2.trim() !== "" &&
-      (phoneApoderado2.length !== 12 || !phoneApoderado2.startsWith("+569"))
-    ) {
-      toast.error(
-        "El número de celular del apoderado secundario debe tener el formato +569XXXXXXXX"
       );
       return;
     }
@@ -1312,11 +1298,6 @@ const MatriculaEstudiante = () => {
                     onChange={handlePhoneFormat}
                     maxLength={12}
                   />
-                  {phoneError.celular_apoderado2 && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {phoneError.celular_apoderado2}
-                    </p>
-                  )}
                 </div>
               </div>
 
