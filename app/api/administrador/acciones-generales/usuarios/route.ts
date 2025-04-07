@@ -56,7 +56,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           FROM Usuario
           WHERE email IS NOT NULL
           AND email <> ''
-          ORDER BY nombres, apellidos
+          ORDER BY apellidos
         `;
 
         const users = await executeSQL(connection, usersQuery);

@@ -68,6 +68,7 @@ export async function GET(request: NextRequest) {
           FROM Usuario u
           JOIN CursosAsignaturasLink cal ON u.id_user = cal.id_user
           WHERE u.tipo_usuario = 'Estudiante' AND u.estado = 'Activa' AND cal.id_curso = @cursoId
+          ORDER BY u.apellidos
         `;
 
         const estudiantes = await executeSQL(connection, query, [
