@@ -66,12 +66,14 @@ const AdminPanel: React.FC = () => {
 
   return (
     <ProtectedRoute allowedRoles={["Administrador"]}>
-      <div className="min-h-screen w-full container mx-auto px-4 py-8">
+      <div className="min-h-screen w-full container mx-auto px-4 py-8 relative">
         <header className="top-0 w-full border-b bg-white shadow-sm">
           <div className="flex h-14 items-center justify-between px-4">
             <h1 className="text-lg font-semibold text-gray-900">
               Panel de Administración
             </h1>
+            
+            {/* Rest of the header remains the same */}
             <div className="relative">
               <button
                 id="menuButton"
