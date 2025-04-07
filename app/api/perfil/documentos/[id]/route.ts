@@ -149,7 +149,7 @@ function executeSQL(
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const connection = new Connection(config);
 
