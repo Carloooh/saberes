@@ -362,3 +362,49 @@ export const sendPasswordResetConfirmation = async (
     throw error;
   }
 };
+
+export const sendWelcomeEmail = async (
+  email: string,
+  name: string,
+  rut: string,
+  password: string
+) => {
+  const message = {
+    from: `Saberes El Quisco <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: "Bienvenido a Saberes El Quisco - Credenciales de acceso",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+        <h2 style="color: #333; text-align: center;">Bienvenido a Saberes El Quisco</h2>
+        <p>Hola ${name},</p>
+        <p>Bienvenido a la nueva plataforma Web del programa Saberes.</p>
+        <p>Puedes acceder mediante <a href="https://saberes.elquisco.cl">saberes.elquisco.cl</a> desde una red de internet local o desde <a href="https://saberes.elquisco.cl:8081">saberes.elquisco.cl:8081</a> desde una red de internet externa.</p>
+        
+        <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
+          <p style="margin: 0; font-weight: bold;">Tus credenciales para acceder son:</p>
+          <p style="margin: 10px 0 0 0;"><strong>RUT:</strong> ${rut}</p>
+          <p style="margin: 5px 0 0 0;"><strong>Contraseña:</strong> ${password}</p>
+        </div>
+        
+        <p><strong>Importante:</strong> La contraseña fue generada de forma automática, no olvides cambiarla por una que puedas recordar fácilmente.</p>
+        
+        <p>Si tienes alguna duda o problema para acceder, por favor contacta al administrador del sistema.</p>
+        
+        <p>Saludos,<br>Equipo Saberes El Quisco</p>
+        
+        <p style="margin-top: 30px; font-size: 12px; color: #777; text-align: center;">
+          Este es un correo automático, por favor no respondas a este mensaje.
+        </p>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(message);
+    console.log(`Correo de bienvenida enviado a ${email}`);
+    return true;
+  } catch (error) {
+    console.error("Error al enviar el correo de bienvenida:", error);
+    throw error;
+  }
+};

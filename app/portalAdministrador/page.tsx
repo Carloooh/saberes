@@ -11,6 +11,7 @@ import MisionVision from "@/app/components/administrador/MisionVision";
 import Faq from "@/app/components/administrador/Faq";
 import Cursos from "../components/administrador/Cursos";
 import Asignaturas from "../components/administrador/Asignaturas";
+import AccionesGenerales from "../components/administrador/AccionesGenerales";
 
 const adminOptions = [
   { id: "usuarios", label: "Usuarios", icon: "usuarios.svg" },
@@ -22,6 +23,11 @@ const adminOptions = [
   { id: "galeria", label: "Galería", icon: "galeria.svg" },
   { id: "mision-vision", label: "Misión/Visión", icon: "misionvision.svg" },
   { id: "faq", label: "Preguntas Frecuentes", icon: "faq.svg" },
+  {
+    id: "acciones-generales",
+    label: "Acciones Generales",
+    icon: "acciones.svg",
+  },
 ];
 
 const AdminPanel: React.FC = () => {
@@ -137,7 +143,9 @@ const AdminPanel: React.FC = () => {
                 >
                   <Image
                     src={`/icons/${option.icon}`}
-                    className={activeSection === option.id ? "text-indigo-600" : ""}
+                    className={
+                      activeSection === option.id ? "text-indigo-600" : ""
+                    }
                     alt=""
                     width={24}
                     height={24}
@@ -159,6 +167,7 @@ const AdminPanel: React.FC = () => {
               {activeSection === "galeria" && <Galeria />}
               {activeSection === "mision-vision" && <MisionVision />}
               {activeSection === "faq" && <Faq />}
+              {activeSection === "acciones-generales" && <AccionesGenerales />}
             </div>
           </main>
         </div>
