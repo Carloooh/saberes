@@ -114,7 +114,7 @@ export async function GET(): Promise<NextResponse> {
           }
         );
 
-        request.on("row", (columns) => {
+        request.on("row", (columns: any[]) => {
           const row: { [key: string]: any } = {};
           columns.forEach((column) => {
             row[column.metadata.colName] = column.value;
