@@ -120,10 +120,10 @@ function executeSQL(
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const connection = new Connection(config);
-  const { id } = context.params;
+  const { id } = await context.params;
 
   return new Promise<NextResponse>((resolve) => {
     connection.on("connect", async (err) => {
