@@ -142,10 +142,10 @@ export default function Asistencias({
           rut_usuario: rutEstudiante,
           asistencia: estado,
           id_curso: cursoId,
-          id_asignatura: asignaturaId
+          id_asignatura: asignaturaId,
         }),
       });
-  
+
       if (response.ok) {
         // Actualizar el estado local
         setAsistencias((prev) => ({

@@ -254,7 +254,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
         <h2 className="text-xl font-bold">Tareas</h2>
         <button
           onClick={() => setShowNewTareaForm(!showNewTareaForm)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="border border-blue-500 text-blue-500 bg-white px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors"
         >
           {showNewTareaForm ? "Cancelar" : "Nueva Tarea"}
         </button>
