@@ -119,6 +119,25 @@ const PerfilUsuario: React.FC = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [newRut, setNewRut] = useState("");
+  const [rutError, setRutError] = useState("");
+
+  const validateRutField = (rut: string) => {
+    if (rut.trim() === "") {
+      setRutError("");
+      return true;
+    }
+
+    // Basic RUT validation (can be enhanced)
+    const rutRegex = /^[0-9]{1,9}-[0-9kK]{1}$/;
+    if (!rutRegex.test(rut)) {
+      setRutError("Formato de RUT inválido (ej: 12345678-9)");
+      return false;
+    } else {
+      setRutError("");
+      return true;
+    }
+  };
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -332,10 +351,12 @@ const PerfilUsuario: React.FC = () => {
     const isPasswordValid = validatePasswordField(newPassword);
     const isConfirmPasswordValid =
       validateConfirmPasswordField(confirmPassword);
+    const isRutValid = validateRutField(newRut);
 
     if (
       !isEmailValid ||
-      (newPassword && (!isPasswordValid || !isConfirmPasswordValid))
+      (newPassword && (!isPasswordValid || !isConfirmPasswordValid)) ||
+      (newRut && !isRutValid)
     ) {
       toast.error("Por favor corrija los errores del formulario");
       return;
@@ -352,6 +373,7 @@ const PerfilUsuario: React.FC = () => {
           targetRut: userData?.rut_usuario,
           email: newEmail !== userData?.email ? newEmail : undefined,
           password: newPassword || undefined,
+          newRut: newRut || undefined,
         }),
       });
 
@@ -365,6 +387,7 @@ const PerfilUsuario: React.FC = () => {
         setNewPassword("");
         setConfirmPassword("");
         setVerificationCode("");
+        setNewRut("");
         // Refresh user data
         fetchUserData();
       } else {
@@ -891,6 +914,25 @@ const PerfilUsuario: React.FC = () => {
                 />
                 {emailError && (
                   <p className="mt-1 text-sm text-red-600">{emailError}</p>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">
+                  Nuevo RUT (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={newRut}
+                  onChange={(e) => {
+                    setNewRut(e.target.value);
+                    validateRutField(e.target.value);
+                  }}
+                  placeholder="12345678-9"
+                  className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {rutError && (
+                  <p className="text-red-500 text-sm mt-1">{rutError}</p>
                 )}
               </div>
 
