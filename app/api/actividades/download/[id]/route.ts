@@ -123,7 +123,7 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   const connection = new Connection(config);
-  const { id } = await context.params;
+  const { id } = context.params;
   return new Promise<NextResponse>((resolve, reject) => {
     connection.on("connect", async (err) => {
       if (err) {
