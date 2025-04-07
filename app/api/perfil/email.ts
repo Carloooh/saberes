@@ -377,7 +377,7 @@ export const sendWelcomeEmail = async (
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
         <h2 style="color: #333; text-align: center;">Bienvenido a Saberes El Quisco</h2>
         <p>Hola ${name},</p>
-        <p>Bienvenido a la nueva plataforma Web del programa Saberes.</p>
+        <p>Bienvenid@ a la nueva plataforma Web del programa Saberes.</p>
         <p>Puedes acceder mediante <a href="https://saberes.elquisco.cl">saberes.elquisco.cl</a> desde una red de internet local o desde <a href="https://saberes.elquisco.cl:8081">saberes.elquisco.cl:8081</a> desde una red de internet externa.</p>
         
         <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
