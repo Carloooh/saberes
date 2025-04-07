@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale/es";
+import toast from "react-hot-toast";
 
 interface Archivo {
   id_archivo: string;
@@ -158,14 +159,6 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
       }));
     }
   };
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (e.target.files) {
-  //     setNewTarea((prev) => ({
-  //       ...prev,
-  //       archivos: Array.from(e.target.files),
-  //     }));
-  //   }
-  // };
 
   const handleUpdateStatus = async (
     id_entrega: string,
@@ -216,6 +209,14 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
   };
 
   const handleDeleteTarea = async (id_tarea: string, id_asignatura: string) => {
+    if (
+      !confirm(
+        "¿Estás seguro de eliminar esta tarea? Esta acción eliminará también todas las entregas asociadas y no se puede deshacer."
+      )
+    ) {
+      return;
+    }
+
     try {
       const response = await fetch("/api/docente/tareas", {
         method: "DELETE",
@@ -224,9 +225,11 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
       });
       if (response.ok) {
         fetchTareas();
+        toast.success("Tarea eliminada con éxito");
       }
     } catch (error) {
       console.error("Error deleting tarea:", error);
+      toast.error(`Error al eliminar la tarea: ${error}`);
     }
   };
 
@@ -244,6 +247,49 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
   const getEntregaForStudent = (id_tarea: string, rutEstudiante: string) => {
     const lista = entregas[id_tarea] || [];
     return lista.find((e) => e.rut_estudiante === rutEstudiante);
+  };
+
+  // Add this new function to handle deletion of a submission
+  const handleDeleteEntrega = async (
+    id_entrega: string,
+    id_tarea: string,
+    id_asignatura: string
+  ) => {
+    if (
+      !confirm(
+        "¿Estás seguro de eliminar esta entrega? Esta acción no se puede deshacer."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/docente/tareas/entregas`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id_entrega,
+          id_tarea,
+          id_asignatura,
+          cursoId,
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the submissions for this task
+        fetchEntregas(id_tarea, id_asignatura);
+        toast.success("Entrega eliminada con éxito");
+      } else {
+        const data = await response.json();
+        console.error("Error deleting submission:", data.error);
+        toast.error(`Error al eliminar la entrega ${data.error}`);
+      }
+    } catch (error) {
+      console.error("Error deleting submission:", error);
+      toast.error(`Error al eliminar la entrega ${error}`);
+    }
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -526,8 +572,8 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
                                               </div>
                                             </div>
                                           )}
-                                          {entrega &&
-                                            entrega.estado == "entregada" && (
+                                          <div className="mt-2 flex space-x-2">
+                                            {entrega.estado === "entregada" && (
                                               <button
                                                 onClick={() =>
                                                   handleUpdateStatus(
@@ -537,11 +583,24 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
                                                     tarea.id_asignatura
                                                   )
                                                 }
-                                                className="mt-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                                                className="border border-green-500 text-green-500 bg-white px-3 py-1 rounded hover:bg-green-500 hover:text-white transition-colors"
                                               >
                                                 Marcar como revisada
                                               </button>
                                             )}
+                                            <button
+                                              onClick={() =>
+                                                handleDeleteEntrega(
+                                                  entrega.id_entrega,
+                                                  tarea.id_tarea,
+                                                  tarea.id_asignatura
+                                                )
+                                              }
+                                              className="border border-red-500 text-red-500 bg-white px-3 py-1 rounded hover:bg-red-500 hover:text-white transition-colors"
+                                            >
+                                              Eliminar entrega
+                                            </button>
+                                          </div>
                                         </>
                                       ) : (
                                         <p className="text-sm text-gray-500">

@@ -72,8 +72,7 @@ const AdminPanel: React.FC = () => {
             <h1 className="text-lg font-semibold text-gray-900">
               Panel de Administración
             </h1>
-            
-            {/* Rest of the header remains the same */}
+
             <div className="relative">
               <button
                 id="menuButton"
