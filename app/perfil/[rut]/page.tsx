@@ -1081,6 +1081,7 @@ const PerfilUsuario: React.FC = () => {
       )}
 
       {userData &&
+        userData.tipo_usuario === "Estudiante" &&
         userSession?.tipo_usuario === "Administrador" &&
         renderDocumentSection()}
 
