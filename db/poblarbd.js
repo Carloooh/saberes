@@ -5,16 +5,16 @@ import bcrypt from "bcrypt";
 
 // Configuración de conexión a SQL Server
 const config = {
-  server: process.env.BD_HOST || "SRV-BDAPP.elquisco.cl",
+  server: process.env.BD_HOST || "",
   authentication: {
     type: "default",
     options: {
-      userName: process.env.BD_USER || "5ab3res_w3b_app",
-      password: process.env.BD_PASSWORD || "sab3re5_e1_-4948-ad76_Qu1sc0_w3b",
+      userName: process.env.BD_USER || "",
+      password: process.env.BD_PASSWORD || "",
     },
   },
   options: {
-    database: process.env.BD_NAME || "Saberes",
+    database: process.env.BD_NAME || "",
     encrypt: true,
     trustServerCertificate: true,
     cryptoCredentialsDetails: {
