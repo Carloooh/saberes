@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
 interface UserSession {
   rut_usuario: string;
@@ -89,6 +90,7 @@ interface UserProfile {
     titulo: string;
     extension: string;
     downloadUrl: string;
+    tipo: string;
   }>;
   // Campos específicos para docentes/administradores
   cursos?: Curso[];
@@ -98,6 +100,196 @@ const Perfil: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const [userData, setUserData] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isRequestingCode, setIsRequestingCode] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    newPassword: false,
+    confirmPassword: false,
+  });
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateEmailField = (email: string) => {
+    if (!email || !validateEmail(email)) {
+      setEmailError("Formato de correo inválido");
+      return false;
+    } else {
+      setEmailError("");
+      return true;
+    }
+  };
+
+  const validatePasswordField = (password: string) => {
+    if (password.trim() === "") {
+      setPasswordError("");
+      return true;
+    }
+
+    const errors = [];
+    if (password.length < 8) errors.push("mínimo 8 caracteres");
+    if (!/[A-Z]/.test(password)) errors.push("una mayúscula");
+    if (!/\d/.test(password)) errors.push("un número");
+    if (!/[!@#$%^&*()_+=[\]{};':"\\|,.<>/?-]/.test(password)) {
+      errors.push("un carácter especial");
+    }
+
+    if (errors.length > 0) {
+      setPasswordError(`La contraseña debe tener ${errors.join(", ")}`);
+      return false;
+    } else {
+      setPasswordError("");
+      return true;
+    }
+  };
+
+  const validateConfirmPassword = () => {
+    if (newPassword !== confirmPassword) {
+      setConfirmPasswordError("Las contraseñas no coinciden");
+      return false;
+    } else {
+      setConfirmPasswordError("");
+      return true;
+    }
+  };
+
+  // Add functions for email/password change
+  const handleEditClick = () => {
+    if (userData) {
+      setNewEmail(userData.email);
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowEditModal(true);
+    }
+  };
+
+  const handleRequestVerificationCode = async () => {
+    // Validate fields
+    const isEmailValid = validateEmailField(newEmail);
+    const isPasswordValid = validatePasswordField(newPassword);
+    const isConfirmPasswordValid = validateConfirmPassword();
+
+    if (
+      !isEmailValid ||
+      !isPasswordValid ||
+      (newPassword && !isConfirmPasswordValid)
+    ) {
+      return;
+    }
+
+    setIsRequestingCode(true);
+
+    try {
+      const response = await fetch("/api/perfil/request-verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: newEmail,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Código de verificación enviado a tu correo");
+        setShowVerificationModal(true);
+        setShowEditModal(false);
+      } else {
+        toast.error(data.error || "Error al solicitar el código");
+      }
+    } catch (error) {
+      console.error("Error al solicitar código:", error);
+      toast.error("Error al solicitar el código de verificación");
+    } finally {
+      setIsRequestingCode(false);
+    }
+  };
+
+  const handleVerifyAndUpdate = async () => {
+    if (!verificationCode.trim()) {
+      toast.error("Por favor ingresa el código de verificación");
+      return;
+    }
+
+    setIsVerifying(true);
+
+    try {
+      const response = await fetch("/api/perfil/update-self", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: newEmail,
+          password: newPassword || undefined,
+          verificationCode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Información actualizada correctamente");
+        setShowVerificationModal(false);
+
+        // Update local storage if email changed
+        if (newEmail !== userData?.email) {
+          const storedSession = localStorage.getItem("userSession");
+          if (storedSession) {
+            const parsedSession = JSON.parse(storedSession);
+            parsedSession.email = newEmail;
+            localStorage.setItem("userSession", JSON.stringify(parsedSession));
+          }
+        }
+
+        // Refresh user data
+        fetchUserData();
+      } else {
+        toast.error(data.error || "Error al verificar el código");
+      }
+    } catch (error) {
+      console.error("Error al verificar código:", error);
+      toast.error("Error al verificar el código");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  // Add function to refresh user data
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch("/api/perfil", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al obtener el perfil del usuario");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setUserData(data.data);
+      } else {
+        console.error(data.error);
+      }
+    } catch (error) {
+      console.error("Error al cargar el perfil:", error);
+    }
+  };
 
   useEffect(() => {
     const storedSession = localStorage.getItem("userSession");
@@ -114,25 +306,28 @@ const Perfil: React.FC = () => {
 
   const calculateAge = (dateString: string): number => {
     if (!dateString) return 0;
-    
+
     // Parse the date string properly (assuming format DD-MM-YYYY)
-    const parts = dateString.split('-');
+    const parts = dateString.split("-");
     if (parts.length !== 3) return 0;
-    
+
     const day = parseInt(parts[0], 10);
     const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed in JS
     const year = parseInt(parts[2], 10);
-    
+
     const birthDate = new Date(year, month, day);
     const today = new Date();
-    
+
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDifference = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   };
 
@@ -179,7 +374,14 @@ const Perfil: React.FC = () => {
     <div className="container mx-auto px-4 py-8 w-full">
       <div className="mx-auto bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold mb-6">Perfil de Usuario</h1>
-
+        {userData && (
+          <button
+            onClick={handleEditClick}
+            className="px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors"
+          >
+            Editar Credenciales
+          </button>
+        )}
         {userData ? (
           <div className="space-y-6">
             {/* Información básica para todos los usuarios */}
@@ -565,6 +767,241 @@ const Perfil: React.FC = () => {
           </p>
         )}
       </div>
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Editar Credenciales</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleRequestVerificationCode();
+              }}
+            >
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">
+                  Correo Electrónico
+                </label>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => {
+                    setNewEmail(e.target.value);
+                    validateEmailField(e.target.value);
+                  }}
+                  className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    emailError ? "border-red-500" : ""
+                  }`}
+                  required
+                />
+                {emailError && (
+                  <p className="text-red-500 text-sm mt-1">{emailError}</p>
+                )}
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2">
+                  Nueva Contraseña (opcional)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPasswords.newPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      validatePasswordField(e.target.value);
+                    }}
+                    className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      passwordError ? "border-red-500" : ""
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        newPassword: !showPasswords.newPassword,
+                      })
+                    }
+                  >
+                    {showPasswords.newPassword ? (
+                      <svg
+                        className="h-5 w-5 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        className="h-5 w-5 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                )}
+              </div>
+
+              {newPassword && (
+                <div className="mb-6">
+                  <label className="block text-gray-700 mb-2">
+                    Confirmar Contraseña
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPasswords.confirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        validateConfirmPassword();
+                      }}
+                      className={`w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        confirmPasswordError ? "border-red-500" : ""
+                      }`}
+                      required={!!newPassword}
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() =>
+                        setShowPasswords({
+                          ...showPasswords,
+                          confirmPassword: !showPasswords.confirmPassword,
+                        })
+                      }
+                    >
+                      {showPasswords.confirmPassword ? (
+                        <svg
+                          className="h-5 w-5 text-gray-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="h-5 w-5 text-gray-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {confirmPasswordError && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {confirmPasswordError}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-300 hover:text-white transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isRequestingCode}
+                  className="px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors disabled:bg-white disabled:text-gray-400 disabled:border-gray-400"
+                >
+                  {isRequestingCode ? "Enviando..." : "Enviar Código"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Verification Code Modal */}
+      {showVerificationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Verificar Código</h2>
+            <p className="mb-4 text-gray-600">
+              Se ha enviado un código de verificación a tu correo electrónico.
+              Por favor, ingrésalo a continuación para confirmar los cambios.
+            </p>
+            <div className="mb-6">
+              <label className="block text-gray-700 mb-2">
+                Código de Verificación
+              </label>
+              <input
+                type="text"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ingresa el código de 6 dígitos"
+                required
+              />
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowVerificationModal(false)}
+                className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded hover:bg-gray-300 hover:text-white transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleVerifyAndUpdate}
+                disabled={isVerifying}
+                className="px-4 py-2 bg-white text-blue-600 border border-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors disabled:bg-white disabled:text-gray-400 disabled:border-gray-400"
+              >
+                {isVerifying ? "Verificando..." : "Verificar y Actualizar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

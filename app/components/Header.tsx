@@ -402,7 +402,7 @@ export default function Header() {
                   </div>
                   <div className="text-right">
                     <a
-                      href="#"
+                      href="/restablecer"
                       className="text-sm text-[#2196F3] hover:text-[#1976D2]"
                     >
                       ¿Olvidaste tu contraseña?
