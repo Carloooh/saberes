@@ -99,10 +99,34 @@ export async function GET() {
               }
             });
 
-            // Convertir el mapa a un array y ordenar los cursos por id
-            const formatted = Array.from(cursosMap.values()).sort(
-              (a, b) => a.id_curso - b.id_curso
-            );
+            // Ordenar cursos
+            const formatted = Array.from(cursosMap.values()).sort((a, b) => {
+              // Usar la misma lógica de ordenamiento que en cursos/route.ts
+              const getCourseInfo = (name: string) => {
+                const isBasico = name.toLowerCase().includes('básico');
+                const isMedio = name.toLowerCase().includes('medio');
+                const match = name.match(/(\d+)/);
+                return {
+                  type: isBasico ? 0 : isMedio ? 1 : 2,
+                  number: match ? parseInt(match[1]) : 0,
+                  name: name.toLowerCase()
+                };
+              };
+
+              const aInfo = getCourseInfo(a.nombre_curso);
+              const bInfo = getCourseInfo(b.nombre_curso);
+
+              if (aInfo.type !== bInfo.type) return aInfo.type - bInfo.type;
+              if (aInfo.number !== bInfo.number) return aInfo.number - bInfo.number;
+              return aInfo.name.localeCompare(bInfo.name);
+            });
+
+            // Ordenar asignaturas alfabéticamente
+            formatted.forEach(curso => {
+              curso.asignaturas.sort((a, b) => 
+                a.nombre_asignatura.localeCompare(b.nombre_asignatura)
+              );
+            });
 
             resolve(NextResponse.json(formatted));
           }

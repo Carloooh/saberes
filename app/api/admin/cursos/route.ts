@@ -85,6 +85,30 @@ export async function GET() {
 
         const cursos = await executeSQL(connection, coursesQuery);
 
+        // Enhanced sorting logic
+        cursos.sort((a, b) => {
+          const cleanName = (name: string) => name.trim().toLowerCase();
+          
+          // Determine course type priority
+          const typePriority = (name: string) => 
+            name.includes('básico') ? 0 : name.includes('medio') ? 1 : 2;
+
+          // Extract numeric value from course name
+          const extractNumber = (name: string) => {
+            const match = name.match(/(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+          };
+
+          const aType = typePriority(cleanName(a.nombre_curso));
+          const bType = typePriority(cleanName(b.nombre_curso));
+          
+          // First sort by type (básico before medio)
+          if (aType !== bType) return aType - bType;
+          
+          // Then sort by extracted number within the same type
+          return extractNumber(a.nombre_curso) - extractNumber(b.nombre_curso);
+        });
+
         // For each course, get its subjects
         const result = [];
         for (const curso of cursos) {

@@ -1,16 +1,3 @@
-// import { NextResponse } from 'next/server';
-// import db from '@/db';
-
-// export async function GET() {
-//   try {
-//     const cursos = db.prepare('SELECT * FROM Curso').all();
-//     return NextResponse.json(cursos);
-//   } catch (error) {
-//     console.error('Error al obtener cursos:', error);
-//     return NextResponse.json({ success: false, error: 'Error en el servidor' }, { status: 500 });
-//   }
-// }
-
 import { NextResponse } from "next/server";
 import { Connection, Request } from "tedious";
 import config from "@/app/api/dbConfig";
@@ -43,6 +30,33 @@ export async function GET() {
               )
             );
           } else {
+            // Sort courses manually
+            cursos.sort((a, b) => {
+              // Extract course type and number
+              const getCourseInfo = (name: string) => {
+                const isBasico = name.toLowerCase().includes('básico');
+                const isMedio = name.toLowerCase().includes('medio');
+                const match = name.match(/(\d+)/);
+                return {
+                  type: isBasico ? 0 : isMedio ? 1 : 2,
+                  number: match ? parseInt(match[1]) : 0,
+                  name: name.toLowerCase()
+                };
+              };
+
+              const aInfo = getCourseInfo(a.nombre_curso);
+              const bInfo = getCourseInfo(b.nombre_curso);
+
+              // First sort by type (básico > medio > others)
+              if (aInfo.type !== bInfo.type) return aInfo.type - bInfo.type;
+              
+              // Then sort by number
+              if (aInfo.number !== bInfo.number) return aInfo.number - bInfo.number;
+              
+              // Finally sort by full name
+              return aInfo.name.localeCompare(bInfo.name);
+            });
+
             resolve(
               NextResponse.json(
                 { success: true, data: cursos },

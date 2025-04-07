@@ -73,7 +73,7 @@ export async function GET() {
       }
 
       try {
-        const query = "SELECT * FROM Asignatura ORDER BY id_asignatura";
+        const query = "SELECT * FROM Asignatura ORDER BY nombre_asignatura";
         const asignaturas = await executeSQL(connection, query);
 
         connection.close();
