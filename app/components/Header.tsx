@@ -19,15 +19,6 @@ export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const res = await fetch("/api/auth/check-session");
-      const data = await res.json();
-      setIsAuthenticated(data.authenticated);
-    };
-    checkAuth();
-  }, []);
-
   const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords((prev) => ({
       ...prev,
@@ -55,7 +46,11 @@ export default function Header() {
         setUserSession(data.user);
         localStorage.setItem("userSession", JSON.stringify(data.user));
         setShowLoginModal(false);
-        router.push("/");
+        
+        // Refresh authentication state
+        await checkAuth();
+        
+        router.refresh(); // Force Next.js to revalidate the current route
         toast.success("Sesión iniciada correctamente");
       } else {
         toast.error(data.error);
@@ -74,6 +69,8 @@ export default function Header() {
       localStorage.removeItem("userSession");
       // Reset menu state
       setShowMenu(false);
+      
+      router.refresh(); // Force Next.js to revalidate the current route
       toast.success("Sesión cerrada correctamente");
       router.push("/");
     } catch (error) {
@@ -81,6 +78,35 @@ export default function Header() {
       toast.error("Error al cerrar sesión");
     }
   };
+
+  // Improve the checkAuth function to be more robust
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("/api/auth/check-session", {
+        cache: "no-store", // Ensure we don't get cached responses
+        headers: {
+          "Cache-Control": "no-cache"
+        }
+      });
+      const data = await res.json();
+      setIsAuthenticated(data.authenticated);
+      
+      // If authenticated, also fetch the user data
+      if (data.authenticated) {
+        const userFromStorage = JSON.parse(localStorage.getItem("userSession") || "null");
+        if (userFromStorage) {
+          setUserSession(userFromStorage);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+      setIsAuthenticated(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const [userSession, setUserSession] = useState<null | {
     tipo_usuario: string;

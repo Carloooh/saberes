@@ -13,7 +13,17 @@ export async function middleware(request: NextRequest) {
     userSession = JSON.parse(userSessionCookie);
   } catch (error) {
     console.error("Error al parsear la sesión del usuario:", error);
-    return NextResponse.redirect(new URL("/", request.url));
+    // Clear the invalid cookie
+    const response = NextResponse.redirect(new URL("/", request.url));
+    response.cookies.delete("userSession");
+    return response;
+  }
+
+  // Ensure the session has the required fields
+  if (!userSession || !userSession.tipo_usuario || !userSession.rut_usuario) {
+    const response = NextResponse.redirect(new URL("/", request.url));
+    response.cookies.delete("userSession");
+    return response;
   }
 
   const path = request.nextUrl.pathname;
