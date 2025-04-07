@@ -120,17 +120,17 @@ function executeSQL(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ): Promise<NextResponse> {
   const connection = new Connection(config);
-  const { id } = params;
-  
+  const { id } = context.params;
+
   return new Promise<NextResponse>((resolve) => {
     connection.on("connect", async (err) => {
       if (err) {
         console.error("Error connecting to database:", err.message);
         connection.close();
-        return reject(
+        return resolve(
           NextResponse.json(
             { success: false, error: "Error al conectar a la base de datos" },
             { status: 500 }
