@@ -92,6 +92,7 @@ interface UserProfile {
     titulo: string;
     extension: string;
     downloadUrl: string;
+    tipo: string;
   }>;
   cursos?: Curso[];
 }
@@ -121,6 +122,198 @@ const PerfilUsuario: React.FC = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [newRut, setNewRut] = useState("");
   const [rutError, setRutError] = useState("");
+  const [showFileModal, setShowFileModal] = useState(false);
+  const [selectedFileType, setSelectedFileType] = useState("");
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
+  const [customFileName, setCustomFileName] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+
+  const fileTypes = [
+    { id: "cert_nacimiento", name: "Certificado de Nacimiento" },
+    { id: "cert_carnet", name: "Fotocopia Carnet" },
+    { id: "cert_estudios", name: "Certificado de Estudios" },
+    { id: "cert_rsh", name: "Registro Social de Hogares" },
+    { id: "cert_diagnostico", name: "Certificado de Diagnóstico" },
+  ];
+
+  const getFileByType = (type: string) => {
+    return userData?.archivos?.find((doc) => doc.tipo === type);
+  };
+
+  // Function to handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFileToUpload(e.target.files[0]);
+      // Set default custom name based on file name without extension
+      const fileName = e.target.files[0].name.split(".")[0];
+      setCustomFileName(fileName);
+    }
+  };
+
+  const openFileModal = (fileType: string) => {
+    setSelectedFileType(fileType);
+    setCustomFileName("");
+    setFileToUpload(null);
+    setShowFileModal(true);
+  };
+
+  const handleFileUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!fileToUpload) {
+      toast.error("Por favor seleccione un archivo");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", fileToUpload);
+      formData.append("fileType", selectedFileType);
+      formData.append("customFileName", customFileName);
+      formData.append("targetRut", userData?.rut_usuario || "");
+
+      const response = await fetch("/api/perfil/upload-document", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Archivo subido correctamente");
+        setShowFileModal(false);
+        // Refresh user data to show the new file
+        fetchUserData();
+      } else {
+        toast.error(data.error || "Error al subir el archivo");
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("Error al subir el archivo");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileDownload = (documentId: string) => {
+    window.open(`/api/perfil/documentos/${documentId}`, "_blank");
+  };
+
+  const renderDocumentSection = () => {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-xl font-bold mb-4">Documentos</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {fileTypes.map((fileType) => {
+            const file = getFileByType(fileType.id);
+            return (
+              <div key={fileType.id} className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-2">{fileType.name}</h3>
+                {file ? (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Nombre: {file.titulo}.{file.extension}
+                    </p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleFileDownload(file.id_documento)}
+                        className="px-3 py-1 bg-white text-blue-600 border border-blue-600 text-sm rounded hover:bg-blue-600 hover:text-white transition-colors"
+                      >
+                        Descargar
+                      </button>
+                      <button
+                        onClick={() => openFileModal(fileType.id)}
+                        className="px-3 py-1 bg-white text-yellow-600 border border-yellow-600 text-sm rounded hover:bg-yellow-600 hover:text-white transition-colors"
+                      >
+                        Reemplazar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      No hay archivo subido
+                    </p>
+                    <button
+                      onClick={() => openFileModal(fileType.id)}
+                      className="px-3 py-1 bg-white text-green-600 border border-green-600 text-sm rounded hover:bg-green-600 hover:text-white transition-colors"
+                    >
+                      Subir Archivo
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Add this modal for file upload/replacement
+  const renderFileModal = () => {
+    const selectedType = fileTypes.find((type) => type.id === selectedFileType);
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <h2 className="text-xl font-bold mb-4">
+            {getFileByType(selectedFileType)
+              ? `Reemplazar ${selectedType?.name}`
+              : `Subir ${selectedType?.name}`}
+          </h2>
+          <form onSubmit={handleFileUpload}>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">
+                Seleccionar Archivo
+              </label>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-gray-700 mb-2">
+                Nombre Personalizado (opcional)
+              </label>
+              <input
+                type="text"
+                value={customFileName}
+                onChange={(e) => setCustomFileName(e.target.value)}
+                placeholder="Nombre del archivo"
+                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-sm text-gray-500 mt-1">
+                Si se deja vacío, se usará el nombre original del archivo
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowFileModal(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isUploading || !fileToUpload}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
+              >
+                {isUploading ? "Subiendo..." : "Subir"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
 
   const validateRutField = (rut: string) => {
     if (rut.trim() === "") {
@@ -887,6 +1080,10 @@ const PerfilUsuario: React.FC = () => {
         </div>
       )}
 
+      {userData &&
+        userSession?.tipo_usuario === "Administrador" &&
+        renderDocumentSection()}
+
       {/* Edit User Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -1096,6 +1293,8 @@ const PerfilUsuario: React.FC = () => {
           </div>
         </div>
       )}
+
+      {showFileModal && renderFileModal()}
     </div>
   );
 };

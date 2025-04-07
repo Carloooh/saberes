@@ -167,7 +167,7 @@ export async function GET(
       }
 
       try {
-        const { id } = context.params;
+        const { id } = await context.params;
         if (!id) {
           connection.close();
           return resolve(

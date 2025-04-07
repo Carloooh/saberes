@@ -425,6 +425,7 @@ export async function GET(request: NextRequest) {
             id_documento: archivo.id_documento,
             titulo: archivo.titulo,
             extension: archivo.extension,
+            tipo: archivo.tipo,
             downloadUrl: `/api/perfil/documentos/${archivo.id_documento}`,
           }));
 
@@ -475,7 +476,11 @@ export async function GET(request: NextRequest) {
                   type: TYPES.NVarChar,
                   value: curso.id_curso,
                 },
-                { name: "userId", type: TYPES.NVarChar, value: usuario.id_user },
+                {
+                  name: "userId",
+                  type: TYPES.NVarChar,
+                  value: usuario.id_user,
+                },
               ]
             );
 
