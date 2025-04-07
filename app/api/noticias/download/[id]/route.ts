@@ -126,7 +126,7 @@ function executeSQL(
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const connection = new Connection(config);
   const { id } = await context.params;
