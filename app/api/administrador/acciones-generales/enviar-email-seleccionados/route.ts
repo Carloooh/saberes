@@ -59,7 +59,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             NextResponse.json(
               {
                 success: false,
-                error: "Faltan datos requeridos (asunto, mensaje o usuarios seleccionados)",
+                error:
+                  "Faltan datos requeridos (asunto, mensaje o usuarios seleccionados)",
               },
               { status: 400 }
             )
@@ -67,7 +68,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         }
 
         // Get user details for the selected IDs
-        const placeholders = userIds.map((_, i) => `@id${i}`).join(", ");
+        const placeholders = userIds
+          .map((_: string, i: number) => `@id${i}`)
+          .join(", ");
         const query = `
           SELECT id_user, nombres, apellidos, email
           FROM Usuario
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         `;
 
         // Create parameters for the query
-        const parameters = userIds.map((id, index) => ({
+        const parameters = userIds.map((id: string, index: number) => ({
           name: `id${index}`,
           type: TYPES.NVarChar,
           value: id,
@@ -91,7 +94,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             NextResponse.json(
               {
                 success: false,
-                error: "No se encontraron usuarios válidos entre los seleccionados",
+                error:
+                  "No se encontraron usuarios válidos entre los seleccionados",
               },
               { status: 404 }
             )
