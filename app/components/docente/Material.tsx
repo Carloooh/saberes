@@ -143,7 +143,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
             setCurrentMaterial({});
             setShowModal(true);
           }}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="border-2 border-blue-500 text-blue-500 bg-white px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors"
         >
           Agregar Material
         </button>
@@ -404,13 +404,13 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+                  className="border-2 border-gray-500 text-gray-500 bg-white px-4 py-2 rounded mr-2 hover:bg-gray-500 hover:text-white transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                  className="border-2 border-blue-500 text-blue-500 bg-white px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors"
                 >
                   {isEditing ? "Actualizar" : "Guardar"}
                 </button>
