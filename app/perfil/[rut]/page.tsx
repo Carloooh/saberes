@@ -618,14 +618,14 @@ const PerfilUsuario: React.FC = () => {
       <div className="mx-auto bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Perfil de Usuario</h1>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <button
               onClick={() => router.back()}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
             >
               Volver
             </button>
-          </div>
+          </div> */}
         </div>
 
         {userData && (
