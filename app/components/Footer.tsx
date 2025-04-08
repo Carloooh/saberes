@@ -1,12 +1,61 @@
 "use client";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { useState, useEffect } from "react";
 
 export default function Footer() {
+  const [isClipboardAvailable, setIsClipboardAvailable] = useState(true);
+
+  useEffect(() => {
+    // Check if clipboard API is available
+    setIsClipboardAvailable(
+      typeof navigator !== "undefined" &&
+        navigator.clipboard !== undefined &&
+        typeof navigator.clipboard.writeText === "function"
+    );
+  }, []);
+
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+    if (isClipboardAvailable) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          toast.success(`Copiado al portapapeles: ${text}`);
+        })
+        .catch((err) => {
+          console.error("Error al copiar:", err);
+          toast.error("No se pudo copiar al portapapeles");
+          // Fallback method
+          fallbackCopyToClipboard(text);
+        });
+    } else {
+      // Use fallback method
+      fallbackCopyToClipboard(text);
       toast.success(`Copiado al portapapeles: ${text}`);
-    });
+    }
+  };
+
+  const fallbackCopyToClipboard = (text: string) => {
+    try {
+      // Create temporary textarea element
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+
+      // Make it invisible but part of the document
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+
+      // Select and copy
+      textArea.select();
+      document.execCommand("copy");
+
+      // Clean up
+      document.body.removeChild(textArea);
+    } catch (err) {
+      console.error("Fallback copy method failed:", err);
+      toast.error("No se pudo copiar al portapapeles");
+    }
   };
 
   return (
