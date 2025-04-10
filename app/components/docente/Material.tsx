@@ -160,127 +160,19 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
             key={material.id_material}
             className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
           >
-            <div className="flex flex-col md:flex-row justify-between items-start">
-              <div className="flex-grow w-full md:w-auto">
-                <h3 className="text-lg font-semibold mb-2">
-                  {material.titulo}
-                </h3>
-                <p className="text-gray-600 mb-2">{material.descripcion}</p>
-                <p className="text-sm text-gray-500 mb-2">
-                  {material.fecha
-                    ? format(
-                        new Date(material.fecha + "T00:00:00"),
-                        "d 'de' MMMM 'de' yyyy",
-                        {
-                          locale: es,
-                        }
-                      )
-                    : ""}
-                </p>
-                <div className="flex flex-col gap-2 mt-3">
-                  {material.enlace && (
-                    <a
-                      href={material.enlace}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:text-blue-700 inline-flex items-center break-all"
-                    >
-                      <svg
-                        className="w-4 h-4 mr-1 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002 2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                      </svg>
-                      <span>Ver enlace</span>
-                    </a>
-                  )}
-                  {material.archivos && material.archivos.length > 0 && (
-                    <div className="border-t pt-2 w-full">
-                      <h4 className="text-sm font-semibold mb-2">
-                        Archivos adjuntos:
-                      </h4>
-                      <div className="grid gap-2">
-                        {material.archivos.map((archivo) => (
-                          <div
-                            key={archivo.id_material_archivo}
-                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-50 p-2 rounded"
-                          >
-                            <span className="text-sm truncate max-w-full sm:max-w-[200px] mb-2 sm:mb-0">
-                              {archivo.titulo}.{archivo.extension}
-                            </span>
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() =>
-                                  handleFileView(archivo.id_material_archivo)
-                                }
-                                className="text-blue-500 hover:text-blue-700 inline-flex items-center text-sm"
-                              >
-                                <svg
-                                  className="w-4 h-4 mr-1"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                  />
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                  />
-                                </svg>
-                                Ver
-                              </button>
-                              <button
-                                onClick={() =>
-                                  handleFileDownload(
-                                    archivo.id_material_archivo
-                                  )
-                                }
-                                className="text-green-500 hover:text-green-700 inline-flex items-center text-sm"
-                              >
-                                <svg
-                                  className="w-4 h-4 mr-1"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                  />
-                                </svg>
-                                Descargar
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex space-x-2 mt-4 md:mt-0 md:ml-4">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-lg font-semibold mr-2">
+                {material.titulo}
+              </h3>
+              <div className="flex space-x-2">
                 <button
                   onClick={() => handleEdit(material)}
-                  className="text-blue-500 hover:text-blue-700 inline-flex items-center"
+                  className="text-blue-500 hover:text-blue-700"
+                  aria-label="Editar"
+                  title="Editar"
                 >
                   <svg
-                    className="w-4 h-4 mr-1"
+                    className="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -292,14 +184,15 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                     />
                   </svg>
-                  <span>Editar</span>
                 </button>
                 <button
                   onClick={() => handleDelete(material.id_material)}
-                  className="text-red-500 hover:text-red-700 inline-flex items-center"
+                  className="text-red-500 hover:text-red-700"
+                  aria-label="Eliminar"
+                  title="Eliminar"
                 >
                   <svg
-                    className="w-4 h-4 mr-1"
+                    className="w-4 h-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -311,9 +204,116 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                     />
                   </svg>
-                  <span>Eliminar</span>
                 </button>
               </div>
+            </div>
+            <p className="text-gray-600 mb-2">{material.descripcion}</p>
+            <p className="text-sm text-gray-500 mb-2">
+              {material.fecha
+                ? format(
+                    new Date(material.fecha + "T00:00:00"),
+                    "d 'de' MMMM 'de' yyyy",
+                    {
+                      locale: es,
+                    }
+                  )
+                : ""}
+            </p>
+            <div className="flex flex-col gap-2 mt-3">
+              {material.enlace && (
+                <a
+                  href={material.enlace}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:text-blue-700 inline-flex items-center break-all"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002 2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                  <span>Ver enlace</span>
+                </a>
+              )}
+              {material.archivos && material.archivos.length > 0 && (
+                <div className="border-t pt-2 w-full">
+                  <h4 className="text-sm font-semibold mb-2">
+                    Archivos adjuntos:
+                  </h4>
+                  <div className="grid gap-2">
+                    {material.archivos.map((archivo) => (
+                      <div
+                        key={archivo.id_material_archivo}
+                        className="flex items-center bg-gray-50 p-2 rounded"
+                      >
+                        <span className="text-sm truncate flex-shrink min-w-0 max-w-[120px] sm:max-w-[200px]">
+                          {archivo.titulo}.{archivo.extension}
+                        </span>
+                        <div className="flex ml-auto space-x-2">
+                          <button
+                            onClick={() =>
+                              handleFileView(archivo.id_material_archivo)
+                            }
+                            className="text-blue-500 hover:text-blue-700 inline-flex items-center text-xs sm:text-sm"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                            Ver
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleFileDownload(
+                                archivo.id_material_archivo
+                              )
+                            }
+                            className="text-green-500 hover:text-green-700 inline-flex items-center text-xs sm:text-sm"
+                          >
+                            <svg
+                              className="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                              />
+                            </svg>
+                            Descargar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}
