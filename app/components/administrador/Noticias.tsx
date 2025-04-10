@@ -441,23 +441,23 @@ const Noticias: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="mb-4">
+                  <div className="mb-4 z-0">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Archivos Existentes
                     </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 z-0">
                       {noticia.archivos && noticia.archivos.length > 0 ? (
                         noticia.archivos.map((archivo) => (
                           <div
                             key={archivo.id_archivo}
                             className="relative group"
                           >
-                            <div className="relative h-32 rounded-md overflow-hidden">
+                            <div className="relative h-32 rounded-md overflow-hidden z-0">
                               <Image
                                 src={`/api/noticias/download/${archivo.id_archivo}`}
                                 alt={archivo.titulo}
                                 fill
-                                className="object-cover"
+                                className="object-cover z-0"
                                 style={{
                                   opacity:
                                     editingFormData.archivosToDelete.includes(
@@ -594,15 +594,15 @@ const Noticias: React.FC = () => {
                     </div>
 
                     {noticia.archivos && noticia.archivos.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 z-0">
                         {noticia.archivos.map((archivo) => (
                           <div key={archivo.id_archivo} className="group">
-                            <div className="relative h-32 rounded-md overflow-hidden">
+                            <div className="relative h-32 rounded-md overflow-hidden z-0">
                               <Image
                                 src={`/api/noticias/download/${archivo.id_archivo}`}
                                 alt={archivo.titulo}
                                 fill
-                                className="object-cover"
+                                className="object-cover z-0"
                                 unoptimized
                               />
                             </div>
