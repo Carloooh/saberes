@@ -115,6 +115,9 @@ export default function GaleriaPage() {
               <video
                 src={`/api/galeria/download?id=${video.id_archivo}`}
                 className="w-full h-40 object-cover rounded"
+                autoPlay
+                loop
+                playsInline
               />
             </div>
           ))}

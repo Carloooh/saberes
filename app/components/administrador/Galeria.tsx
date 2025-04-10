@@ -122,7 +122,11 @@ const Galeria: React.FC = () => {
   };
 
   // Descargar un archivo
-  const handleDownload = async (id: string, extension: string, titulo: string) => {
+  const handleDownload = async (
+    id: string,
+    extension: string,
+    titulo: string
+  ) => {
     try {
       const response = await fetch(`/api/galeria/download?id=${id}`);
       const blob = await response.blob();
@@ -336,6 +340,10 @@ const Galeria: React.FC = () => {
                           src={`/api/galeria/download?id=${archivo.id_archivo}`}
                           className="h-full w-full object-cover"
                           controls={false}
+                          muted
+                          autoPlay
+                          loop
+                          playsInline
                         />
                       ) : (
                         <Image
@@ -381,7 +389,11 @@ const Galeria: React.FC = () => {
                     </button>
                     <button
                       onClick={() =>
-                        handleDownload(archivo.id_archivo, archivo.extension, archivo.titulo || archivo.id_archivo)
+                        handleDownload(
+                          archivo.id_archivo,
+                          archivo.extension,
+                          archivo.titulo || archivo.id_archivo
+                        )
                       }
                       className="border border-green-500 text-green-500 bg-white px-3 py-1.5 rounded-md hover:bg-green-500 hover:text-white transition-colors text-sm flex items-center"
                     >
@@ -439,7 +451,7 @@ const Galeria: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Nuevo nombre
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="text"
                         placeholder="Nuevo nombre"
@@ -447,21 +459,23 @@ const Galeria: React.FC = () => {
                         onChange={(e) => setNuevoNombre(e.target.value)}
                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                       />
-                      <button
-                        onClick={() => handleRename(archivo.id_archivo)}
-                        className="border border-green-600 text-green-600 bg-white px-4 py-2 rounded-md hover:bg-green-600 hover:text-white transition-colors"
-                      >
-                        Guardar
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditId(null);
-                          setNuevoNombre("");
-                        }}
-                        className="border border-gray-500 text-gray-500 bg-white px-4 py-2 rounded-md hover:bg-gray-500 hover:text-white transition-colors"
-                      >
-                        Cancelar
-                      </button>
+                      <div className="flex gap-2 mt-2 sm:mt-0">
+                        <button
+                          onClick={() => handleRename(archivo.id_archivo)}
+                          className="flex-1 sm:flex-none border border-green-600 text-green-600 bg-white px-4 py-2 rounded-md hover:bg-green-600 hover:text-white transition-colors"
+                        >
+                          Guardar
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditId(null);
+                            setNuevoNombre("");
+                          }}
+                          className="flex-1 sm:flex-none border border-gray-500 text-gray-500 bg-white px-4 py-2 rounded-md hover:bg-gray-500 hover:text-white transition-colors"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
