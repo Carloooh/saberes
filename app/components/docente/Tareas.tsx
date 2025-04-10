@@ -378,7 +378,7 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
 
       <div className="space-y-4">
         {tareas.map((tarea) => (
-          <div key={tarea.id_tarea} className="bg-white rounded shadow">
+          <div key={tarea.id_tarea} className="bg-white rounded shadow-md hover:shadow-lg transition-shadow border border-gray-200">
             <div className="p-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">{tarea.titulo}</h3>

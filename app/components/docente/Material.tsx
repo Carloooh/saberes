@@ -164,7 +164,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
         {materiales.map((material) => (
           <div
             key={material.id_material}
-            className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+            className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200"
           >
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-lg font-semibold mr-2">
