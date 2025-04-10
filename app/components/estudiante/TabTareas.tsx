@@ -135,7 +135,7 @@ const TabTareas = ({ asignaturaId, cursoId }: TabTareasProps) => {
       {tareas.map((tarea) => (
         <div
           key={tarea.id_tarea}
-          className="bg-white rounded-lg shadow overflow-hidden"
+          className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 overflow-hidden"
         >
           <div className="p-6">
             <div className="flex justify-between items-start mb-4">

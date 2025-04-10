@@ -66,7 +66,7 @@ const TabMaterial = ({ asignaturaId, cursoId }: TabMaterialProps) => {
         materiales.map((material) => (
           <div
             key={material.id_material}
-            className="bg-white p-6 rounded-lg shadow"
+            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200"
           >
             <h3 className="text-lg font-semibold mb-2">{material.titulo}</h3>
             <p className="text-gray-600 mb-4">{material.descripcion}</p>
