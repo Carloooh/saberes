@@ -46,9 +46,6 @@ const Usuarios: React.FC = () => {
   >([]);
   const [selectedTeacherCourses, setSelectedTeacherCourses] =
     useState<TeacherCourses>({});
-  // const [openMenus, setOpenMenus] = useState<{
-  //   [rut: string]: "status" | "courses" | null;
-  // }>({});
   const [openMenus, setOpenMenus] = useState<{
     [rut: string]: "status" | "courses" | "student-course" | null;
   }>({});
@@ -479,9 +476,9 @@ const Usuarios: React.FC = () => {
 
               {openMenus[user.rut_usuario] === "student-course" && (
                 <div className="mt-2 border-t pt-2">
-                  <div className="flex space-x-2">
+                  <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                     <select
-                      className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm"
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm"
                       value={selectedCourse}
                       onChange={(e) => setSelectedCourse(e.target.value)}
                     >
@@ -492,24 +489,26 @@ const Usuarios: React.FC = () => {
                         </option>
                       ))}
                     </select>
-                    <button
-                      onClick={() => handleChangeCourse(user.rut_usuario)}
-                      className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                    >
-                      Guardar
-                    </button>
-                    <button
-                      onClick={() => {
-                        setOpenMenus((prev) => ({
-                          ...prev,
-                          [user.rut_usuario]: null,
-                        }));
-                        setSelectedCourse("");
-                      }}
-                      className="px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50"
-                    >
-                      Cancelar
-                    </button>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleChangeCourse(user.rut_usuario)}
+                        className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        onClick={() => {
+                          setOpenMenus((prev) => ({
+                            ...prev,
+                            [user.rut_usuario]: null,
+                          }));
+                          setSelectedCourse("");
+                        }}
+                        className="px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
