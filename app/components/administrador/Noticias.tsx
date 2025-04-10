@@ -445,7 +445,7 @@ const Noticias: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Archivos Existentes
                     </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 z-0">
+                    {/* <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 z-0">
                       {noticia.archivos && noticia.archivos.length > 0 ? (
                         noticia.archivos.map((archivo) => (
                           <div
@@ -468,6 +468,91 @@ const Noticias: React.FC = () => {
                                 }}
                                 unoptimized
                               />
+                            </div>
+                            <button
+                              onClick={() =>
+                                setEditingFormData((prev) => ({
+                                  ...prev,
+                                  archivosToDelete:
+                                    prev.archivosToDelete.includes(
+                                      archivo.id_archivo
+                                    )
+                                      ? prev.archivosToDelete.filter(
+                                          (id) => id !== archivo.id_archivo
+                                        )
+                                      : [
+                                          ...prev.archivosToDelete,
+                                          archivo.id_archivo,
+                                        ],
+                                }))
+                              }
+                              className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500 col-span-full">
+                          No hay archivos
+                        </p>
+                      )}
+                    </div> */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 z-0">
+                      {noticia.archivos && noticia.archivos.length > 0 ? (
+                        noticia.archivos.map((archivo) => (
+                          <div
+                            key={archivo.id_archivo}
+                            className="relative group"
+                          >
+                            <div className="relative h-32 rounded-md overflow-hidden z-0">
+                              {archivo.extension &&
+                              ["mp4", "webm", "ogg", "mov"].includes(
+                                archivo.extension.toLowerCase()
+                              ) ? (
+                                <video
+                                  src={`/api/noticias/download/${archivo.id_archivo}`}
+                                  className="object-cover w-full h-full"
+                                  style={{
+                                    opacity:
+                                      editingFormData.archivosToDelete.includes(
+                                        archivo.id_archivo
+                                      )
+                                        ? 0.5
+                                        : 1,
+                                  }}
+                                  controls
+                                  muted
+                                  preload="metadata"
+                                />
+                              ) : (
+                                <Image
+                                  src={`/api/noticias/download/${archivo.id_archivo}`}
+                                  alt={archivo.titulo}
+                                  fill
+                                  className="object-cover z-0"
+                                  style={{
+                                    opacity:
+                                      editingFormData.archivosToDelete.includes(
+                                        archivo.id_archivo
+                                      )
+                                        ? 0.5
+                                        : 1,
+                                  }}
+                                  unoptimized
+                                />
+                              )}
                             </div>
                             <button
                               onClick={() =>
@@ -593,7 +678,7 @@ const Noticias: React.FC = () => {
                       <p className="text-gray-700">{noticia.contenido}</p>
                     </div>
 
-                    {noticia.archivos && noticia.archivos.length > 0 && (
+                    {/* {noticia.archivos && noticia.archivos.length > 0 && (
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 z-0">
                         {noticia.archivos.map((archivo) => (
                           <div key={archivo.id_archivo} className="group">
@@ -605,6 +690,36 @@ const Noticias: React.FC = () => {
                                 className="object-cover z-0"
                                 unoptimized
                               />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )} */}
+                    {noticia.archivos && noticia.archivos.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 z-0">
+                        {noticia.archivos.map((archivo) => (
+                          <div key={archivo.id_archivo} className="group">
+                            <div className="relative h-32 rounded-md overflow-hidden z-0">
+                              {archivo.extension &&
+                              ["mp4", "webm", "ogg", "mov"].includes(
+                                archivo.extension.toLowerCase()
+                              ) ? (
+                                <video
+                                  src={`/api/noticias/download/${archivo.id_archivo}`}
+                                  className="object-cover w-full h-full"
+                                  controls
+                                  muted
+                                  preload="metadata"
+                                />
+                              ) : (
+                                <Image
+                                  src={`/api/noticias/download/${archivo.id_archivo}`}
+                                  alt={archivo.titulo}
+                                  fill
+                                  className="object-cover z-0"
+                                  unoptimized
+                                />
+                              )}
                             </div>
                           </div>
                         ))}
