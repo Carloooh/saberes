@@ -303,7 +303,7 @@ const Noticias: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Archivos
+                  Agregar archivos multimedia
                 </label>
                 <input
                   type="file"
@@ -537,7 +537,7 @@ const Noticias: React.FC = () => {
 
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Agregar nuevos archivos
+                      Agregar nuevos contenido multimedia
                     </label>
                     <input
                       type="file"
