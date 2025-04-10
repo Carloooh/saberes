@@ -202,31 +202,37 @@ const Noticias: React.FC = () => {
               {selectedNoticia.archivos &&
                 selectedNoticia.archivos.length > 0 && (
                   <div className="mb-6 aspect-[16/9] relative w-full">
-                    {getMediaType(selectedNoticia.archivos[0].extension) ===
-                    "video" ? (
-                      <video
-                        className="w-full h-full object-cover rounded-lg"
-                        controls
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                      >
-                        <source
-                          src={`/api/noticias/download/${selectedNoticia.archivos[0].id_archivo}`}
-                          type={`video/${selectedNoticia.archivos[0].extension}`}
-                        />
-                        Tu navegador no soporta el elemento de video.
-                      </video>
-                    ) : (
-                      <Image
-                        src={`/api/noticias/download/${selectedNoticia.archivos[0].id_archivo}`}
-                        alt={selectedNoticia.titulo}
-                        fill
-                        className="object-cover rounded-lg"
-                        unoptimized
-                      />
-                    )}
+                    <Slider {...sliderSettings}>
+                      {selectedNoticia.archivos.map((archivo) => (
+                        <div key={archivo.id_archivo}>
+                          <div className="relative aspect-[16/9]">
+                            {getMediaType(archivo.extension) === "video" ? (
+                              <video
+                                className="w-full h-full object-cover rounded-lg"
+                                controls
+                                autoPlay
+                                loop
+                                playsInline
+                              >
+                                <source
+                                  src={`/api/noticias/download/${archivo.id_archivo}`}
+                                  type={`video/${archivo.extension}`}
+                                />
+                                Tu navegador no soporta el elemento de video.
+                              </video>
+                            ) : (
+                              <Image
+                                src={`/api/noticias/download/${archivo.id_archivo}`}
+                                alt={selectedNoticia.titulo}
+                                fill
+                                className="object-cover rounded-lg"
+                                unoptimized
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </Slider>
                   </div>
                 )}
 
