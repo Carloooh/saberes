@@ -198,24 +198,24 @@ export default function Asistencias({
 
   return (
     <div className="container mx-auto px-4">
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Total Estudiantes</h3>
-          <p className="text-3xl font-bold text-blue-600">
+      <div className="mb-4 sm:mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <h3 className="text-sm sm:text-base font-semibold mb-1">Total Estudiantes</h3>
+          <p className="text-xl sm:text-2xl font-bold text-blue-600">
             {estudiantes.length}
           </p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Días Registrados</h3>
-          <p className="text-3xl font-bold text-blue-600">{dias.length}</p>
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <h3 className="text-sm sm:text-base font-semibold mb-1">Días Registrados</h3>
+          <p className="text-xl sm:text-2xl font-bold text-blue-600">{dias.length}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Último Registro</h3>
-          <p className="text-lg text-blue-600">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <h3 className="text-sm sm:text-base font-semibold mb-1">Último Registro</h3>
+          <p className="text-sm sm:text-base text-blue-600 truncate">
             {dias.length > 0
               ? format(
                   new Date(dias[0].fecha + "T00:00:00"),
-                  "d 'de' MMMM 'de' yyyy",
+                  "d MMM yyyy",
                   {
                     locale: es,
                   }
@@ -223,18 +223,18 @@ export default function Asistencias({
               : "Sin registros"}
           </p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-2">Agregar Día</h3>
-          <div className="flex gap-2">
+        <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+          <h3 className="text-sm sm:text-base font-semibold mb-1">Agregar Día</h3>
+          <div className="flex gap-1 sm:gap-2">
             <input
               type="date"
               value={newFecha}
               onChange={(e) => setNewFecha(e.target.value)}
-              className="border rounded px-3 py-2 flex-1"
+              className="border rounded px-2 py-1 text-sm flex-1"
             />
             <button
               onClick={agregarDia}
-              className="px-4 py-2 border-2 border-blue-500 text-blue-500 bg-white rounded hover:bg-blue-500 hover:text-white disabled:opacity-50 transition-colors"
+              className="px-2 py-1 sm:px-3 sm:py-2 border-2 border-blue-500 text-blue-500 bg-white rounded hover:bg-blue-500 hover:text-white disabled:opacity-50 transition-colors"
               disabled={!newFecha}
             >
               +
@@ -243,7 +243,7 @@ export default function Asistencias({
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+      <div className="bg-white rounded-lg shadow p-3 sm:p-6">
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Seleccionar día para tomar asistencia
