@@ -130,27 +130,28 @@ const Sedes: React.FC = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <main className="container mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {sedes.map((sede) => (
             <div
               key={sede.id_sede}
-              className="rounded-lg shadow-lg overflow-hidden bg-white"
+              className="rounded-lg shadow-md overflow-hidden bg-white border border-gray-200 hover:shadow-lg transition-shadow max-w-xs mx-auto w-full"
             >
               {sede.archivos && sede.archivos.length > 0 ? (
-                <div className="relative aspect-[16/9]">
-                  <Slider {...sliderSettings}>
+                <div className="relative h-40 w-full">
+                  <Slider {...sliderSettings} className="sede-slider">
                     {sede.archivos.map((archivo) => (
                       <div key={archivo.id_archivo}>
-                        <div className="relative aspect-[16/9]">
+                        <div className="relative h-40">
                           {getMediaType(archivo.extension) === "video" ? (
                             <video
                               className="w-full h-full object-cover"
                               controls
-                              autoPlay
                               muted
-                              loop
                               playsInline
+                              autoPlay
+                              loop
+                              preload="metadata"
                             >
                               <source
                                 src={`/api/sedes/download/${archivo.id_archivo}`}
@@ -173,7 +174,7 @@ const Sedes: React.FC = () => {
                   </Slider>
                 </div>
               ) : (
-                <div className="relative aspect-[16/9]">
+                <div className="relative h-40">
                   <Image
                     src="/noimage.webp"
                     alt={sede.nombre}
@@ -183,21 +184,21 @@ const Sedes: React.FC = () => {
                 </div>
               )}
 
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-1">
                   {sede.nombre}
                 </h3>
-                <p className="text-gray-600 mb-4">{sede.direccion}</p>
+                <p className="text-gray-600 text-sm mb-2">{sede.direccion}</p>
                 <a
                   href={sede.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 font-medium block mb-4"
+                  className="text-blue-600 hover:text-blue-800 font-medium text-sm block mb-2"
                 >
                   Ver en mapa
                 </a>
                 {sede.url_iframe && (
-                  <div className="mt-4 aspect-[16/9] relative">
+                  <div className="mt-2 aspect-[16/9] h-32 relative">
                     <iframe
                       src={sede.url_iframe}
                       width="100%"
@@ -210,11 +211,11 @@ const Sedes: React.FC = () => {
                   </div>
                 )}
                 {sede.cursos && sede.cursos.length > 0 && (
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                  <div className="mt-2">
+                    <h4 className="text-xs font-medium text-gray-700 mb-1">
                       Cursos asociados:
                     </h4>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1">
                       {sede.cursos.map((cursoId) => {
                         const curso = cursos.find(
                           (c) => c.id_curso === cursoId
@@ -222,7 +223,7 @@ const Sedes: React.FC = () => {
                         return curso ? (
                           <span
                             key={cursoId}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                           >
                             {curso.nombre_curso}
                           </span>
