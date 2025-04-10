@@ -143,8 +143,10 @@ const Noticias: React.FC = () => {
                             <video
                               className="w-full h-full object-cover rounded-lg"
                               controls
+                              autoPlay
                               muted
                               loop
+                              playsInline
                             >
                               <source
                                 src={`/api/noticias/download/${archivo.id_archivo}`}
@@ -205,8 +207,10 @@ const Noticias: React.FC = () => {
                       <video
                         className="w-full h-full object-cover rounded-lg"
                         controls
+                        autoPlay
                         muted
                         loop
+                        playsInline
                       >
                         <source
                           src={`/api/noticias/download/${selectedNoticia.archivos[0].id_archivo}`}
