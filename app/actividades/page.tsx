@@ -99,8 +99,10 @@ const ActividadesPage: React.FC = () => {
                               <video
                                 className="w-full h-full object-cover rounded-lg"
                                 controls
+                                autoPlay
                                 muted
                                 loop
+                                playsInline
                               >
                                 <source
                                   src={`/api/actividades/download/${archivo.id_archivo}`}
@@ -178,8 +180,10 @@ const ActividadesPage: React.FC = () => {
                                 <video
                                   className="w-full h-full object-cover rounded-lg"
                                   controls
+                                  autoPlay
                                   muted
                                   loop
+                                  playsInline
                                 >
                                   <source
                                     src={`/api/actividades/download/${archivo.id_archivo}`}

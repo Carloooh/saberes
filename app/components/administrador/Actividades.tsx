@@ -178,11 +178,20 @@ const Actividades: React.FC = () => {
     });
   };
 
+  // First, let's update the isImageFile function to add a new function for detecting video files
   const isImageFile = (extension: string) => {
     const imageExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
     return imageExtensions.includes(extension.toLowerCase());
   };
 
+  // Add this new function to detect video files
+  const isVideoFile = (extension: string) => {
+    const videoExtensions = ["mp4", "webm", "ogg", "mov"];
+    return videoExtensions.includes(extension.toLowerCase());
+  };
+
+  // Update the file input accept attributes to include videos
+  // In the create form:
   return (
     <div className="bg-white shadow sm:rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
@@ -304,7 +313,7 @@ const Actividades: React.FC = () => {
                     file:text-sm file:font-medium
                     file:bg-indigo-50 file:text-indigo-600
                     hover:file:bg-indigo-100"
-                  accept="image/*"
+                  accept="image/*,video/*"
                 />
               </div>
               <div>
@@ -426,7 +435,7 @@ const Actividades: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Archivos Existentes
                     </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {/* <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {actividad.archivos && actividad.archivos.length > 0 ? (
                         actividad.archivos.map((archivo) => (
                           <div
@@ -449,6 +458,25 @@ const Actividades: React.FC = () => {
                                         : 1,
                                   }}
                                   unoptimized
+                                />
+                              </div>
+                            ) : isVideoFile(archivo.extension) ? (
+                              <div className="relative h-32 rounded-md overflow-hidden">
+                                <video
+                                  src={`/api/actividades/download/${archivo.id_archivo}`}
+                                  className="w-full h-full object-cover"
+                                  autoPlay
+                                  muted
+                                  loop
+                                  playsInline
+                                  style={{
+                                    opacity:
+                                      editingFormData.archivosToDelete.includes(
+                                        archivo.id_archivo
+                                      )
+                                        ? 0.5
+                                        : 1,
+                                  }}
                                 />
                               </div>
                             ) : (
@@ -497,7 +525,52 @@ const Actividades: React.FC = () => {
                           No hay archivos
                         </p>
                       )}
-                    </div>
+                    </div> */}
+                    {actividad.archivos && actividad.archivos.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {actividad.archivos.map((archivo) => (
+                          <div key={archivo.id_archivo} className="group">
+                            {isImageFile(archivo.extension) ? (
+                              <div className="relative h-32 rounded-md overflow-hidden">
+                                <Image
+                                  src={`/api/actividades/download/${archivo.id_archivo}`}
+                                  alt={archivo.titulo}
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                              </div>
+                            ) : isVideoFile(archivo.extension) ? (
+                              <div className="relative h-32 rounded-md overflow-hidden">
+                                <video
+                                  src={`/api/actividades/download/${archivo.id_archivo}`}
+                                  className="w-full h-full object-cover"
+                                  autoPlay
+                                  muted
+                                  loop
+                                  playsInline
+                                  controls={false}
+                                />
+                              </div>
+                            ) : (
+                              <a
+                                href={`/api/actividades/download/${archivo.id_archivo}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center h-32 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                              >
+                                <div className="text-center">
+                                  <div className="text-3xl mb-1">📄</div>
+                                  <span className="text-xs text-gray-600">
+                                    {archivo.extension.toUpperCase()}
+                                  </span>
+                                </div>
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -522,7 +595,7 @@ const Actividades: React.FC = () => {
                           file:text-sm file:font-medium
                           file:bg-indigo-50 file:text-indigo-600
                           hover:file:bg-indigo-100"
-                        accept="image/*"
+                        accept="image/*,video/*"
                       />
                     </div>
                     <div>
@@ -607,6 +680,18 @@ const Actividades: React.FC = () => {
                                   fill
                                   className="object-cover"
                                   unoptimized
+                                />
+                              </div>
+                            ) : isVideoFile(archivo.extension) ? (
+                              <div className="relative h-32 rounded-md overflow-hidden">
+                                <video
+                                  src={`/api/actividades/download/${archivo.id_archivo}`}
+                                  className="w-full h-full object-cover"
+                                  autoPlay
+                                  muted
+                                  loop
+                                  playsInline
+                                  controls={false}
                                 />
                               </div>
                             ) : (
