@@ -254,10 +254,10 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                         key={archivo.id_material_archivo}
                         className="flex items-center bg-gray-50 p-2 rounded"
                       >
-                        <span className="text-sm truncate flex-shrink min-w-0 max-w-[120px] sm:max-w-[200px]">
+                        <span className="text-sm truncate flex-shrink min-w-0 max-w-[120px] sm:max-w-[200px] md:max-w-[300px]">
                           {archivo.titulo}.{archivo.extension}
                         </span>
-                        <div className="flex ml-auto space-x-2">
+                        <div className="flex ml-auto space-x-2 md:ml-4">
                           <button
                             onClick={() =>
                               handleFileView(archivo.id_material_archivo)
