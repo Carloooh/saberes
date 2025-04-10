@@ -448,174 +448,187 @@ export default function Tareas({ cursoId, asignaturaId }: TareasProps) {
                   <h4 className="font-medium text-gray-900 mb-4">
                     Entregas de estudiantes
                   </h4>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Estudiante
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Estado
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Fecha Entrega
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Acciones
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {estudiantes.map((estudiante) => {
-                          const entrega = getEntregaForStudent(
-                            tarea.id_tarea,
-                            estudiante.rut_usuario
-                          );
-                          return (
-                            <React.Fragment key={estudiante.rut_usuario}>
-                              <tr className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {estudiante.nombres} {estudiante.apellidos}
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span
-                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                      entrega?.estado === "entregada"
-                                        ? "bg-green-100 text-green-800"
-                                        : entrega?.estado === "revisada"
-                                        ? "bg-blue-100 text-blue-800"
-                                        : "bg-yellow-100 text-yellow-800"
-                                    }`}
-                                  >
-                                    {entrega?.estado || "pendiente"}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {entrega?.fecha_entrega
-                                    ? formatDate(entrega.fecha_entrega)
-                                    : "-"}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                  <button
-                                    onClick={() =>
-                                      setSelectedEntrega(
-                                        selectedEntrega ===
-                                          estudiante.rut_usuario
-                                          ? null
-                                          : estudiante.rut_usuario
-                                      )
-                                    }
-                                    className="text-blue-600 hover:text-blue-900"
-                                  >
-                                    {selectedEntrega === estudiante.rut_usuario
-                                      ? "Ocultar detalles"
-                                      : "Ver detalles"}
-                                  </button>
-                                </td>
-                              </tr>
-                              {selectedEntrega === estudiante.rut_usuario && (
-                                <tr>
-                                  <td
-                                    colSpan={4}
-                                    className="px-6 py-4 bg-gray-50"
-                                  >
-                                    <div className="space-y-4">
-                                      {entrega ? (
-                                        <>
-                                          {entrega.comentario && (
-                                            <div>
-                                              <h6 className="text-sm font-medium text-gray-700">
-                                                Comentario del estudiante:
-                                              </h6>
-                                              <p className="mt-1 text-sm text-gray-600">
-                                                {entrega.comentario}
-                                              </p>
-                                            </div>
-                                          )}
-                                          {entrega.archivos_entrega?.length >
-                                            0 && (
-                                            <div>
-                                              <h6 className="text-sm font-medium text-gray-700">
-                                                Archivos entregados:
-                                              </h6>
-                                              <div className="mt-2 flex flex-wrap gap-2">
-                                                {entrega.archivos_entrega.map(
-                                                  (archivo) => (
-                                                    <a
-                                                      key={archivo.id_archivo}
-                                                      href={`/api/docente/tareas/download?id=${archivo.id_archivo}&tipo=entrega`}
-                                                      target="_blank"
-                                                      rel="noopener noreferrer"
-                                                      className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-gray-200"
-                                                    >
-                                                      <svg
-                                                        className="w-4 h-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                      >
-                                                        <path
-                                                          strokeLinecap="round"
-                                                          strokeLinejoin="round"
-                                                          strokeWidth={2}
-                                                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                        />
-                                                      </svg>
-                                                      {archivo.titulo}.
-                                                      {archivo.extension}
-                                                    </a>
-                                                  )
-                                                )}
-                                              </div>
-                                            </div>
-                                          )}
-                                          <div className="mt-2 flex space-x-2">
-                                            {entrega.estado === "entregada" && (
-                                              <button
-                                                onClick={() =>
-                                                  handleUpdateStatus(
-                                                    entrega.id_entrega,
-                                                    "revisada",
-                                                    tarea.id_tarea,
-                                                    tarea.id_asignatura
-                                                  )
-                                                }
-                                                className="border border-green-500 text-green-500 bg-white px-3 py-1 rounded hover:bg-green-500 hover:text-white transition-colors"
-                                              >
-                                                Marcar como revisada
-                                              </button>
-                                            )}
-                                            <button
-                                              onClick={() =>
-                                                handleDeleteEntrega(
-                                                  entrega.id_entrega,
-                                                  tarea.id_tarea,
-                                                  tarea.id_asignatura
-                                                )
-                                              }
-                                              className="border border-red-500 text-red-500 bg-white px-3 py-1 rounded hover:bg-red-500 hover:text-white transition-colors"
-                                            >
-                                              Eliminar entrega
-                                            </button>
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <div className="inline-block min-w-full align-middle">
+                      <div className="overflow-hidden border border-gray-200 sm:rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Estudiante
+                              </th>
+                              <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Estado
+                              </th>
+                              <th className="hidden sm:table-cell px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Fecha Entrega
+                              </th>
+                              <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Acciones
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {estudiantes.map((estudiante) => {
+                              const entrega = getEntregaForStudent(
+                                tarea.id_tarea,
+                                estudiante.rut_usuario
+                              );
+                              return (
+                                <React.Fragment key={estudiante.rut_usuario}>
+                                  <tr className="hover:bg-gray-50">
+                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-normal sm:whitespace-nowrap">
+                                      <div className="text-xs sm:text-sm font-medium text-gray-900">
+                                        {estudiante.nombres} {estudiante.apellidos}
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                                      <span
+                                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                          entrega?.estado === "entregada"
+                                            ? "bg-green-100 text-green-800"
+                                            : entrega?.estado === "revisada"
+                                            ? "bg-blue-100 text-blue-800"
+                                            : "bg-yellow-100 text-yellow-800"
+                                        }`}
+                                      >
+                                        {entrega?.estado || "pendiente"}
+                                      </span>
+                                    </td>
+                                    <td className="hidden sm:table-cell px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                                      {entrega?.fecha_entrega
+                                        ? formatDate(entrega.fecha_entrega)
+                                        : "-"}
+                                    </td>
+                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
+                                      <button
+                                        onClick={() =>
+                                          setSelectedEntrega(
+                                            selectedEntrega === estudiante.rut_usuario
+                                              ? null
+                                              : estudiante.rut_usuario
+                                          )
+                                        }
+                                        className="text-blue-600 hover:text-blue-900"
+                                      >
+                                        {selectedEntrega === estudiante.rut_usuario
+                                          ? "Ocultar"
+                                          : "Ver detalles"}
+                                      </button>
+                                    </td>
+                                  </tr>
+                                  {selectedEntrega === estudiante.rut_usuario && (
+                                    <tr>
+                                      <td
+                                        colSpan={4}
+                                        className="px-3 py-2 sm:px-6 sm:py-4 bg-gray-50"
+                                      >
+                                        <div className="space-y-3">
+                                          {/* Mobile-only date display */}
+                                          <div className="sm:hidden text-xs font-medium">
+                                            <span className="text-gray-700">Fecha: </span>
+                                            <span className="text-gray-600">
+                                              {entrega?.fecha_entrega
+                                                ? formatDate(entrega.fecha_entrega)
+                                                : "-"}
+                                            </span>
                                           </div>
-                                        </>
-                                      ) : (
-                                        <p className="text-sm text-gray-500">
-                                          No hay entrega registrada
-                                        </p>
-                                      )}
-                                    </div>
-                                  </td>
-                                </tr>
-                              )}
-                            </React.Fragment>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                                          
+                                          {entrega ? (
+                                            <>
+                                              {entrega.comentario && (
+                                                <div>
+                                                  <h6 className="text-xs sm:text-sm font-medium text-gray-700">
+                                                    Comentario del estudiante:
+                                                  </h6>
+                                                  <p className="mt-1 text-xs sm:text-sm text-gray-600">
+                                                    {entrega.comentario}
+                                                  </p>
+                                                </div>
+                                              )}
+                                              {entrega.archivos_entrega?.length > 0 && (
+                                                <div>
+                                                  <h6 className="text-xs sm:text-sm font-medium text-gray-700">
+                                                    Archivos entregados:
+                                                  </h6>
+                                                  <div className="mt-2 flex flex-wrap gap-2">
+                                                    {entrega.archivos_entrega.map(
+                                                      (archivo) => (
+                                                        <a
+                                                          key={archivo.id_archivo}
+                                                          href={`/api/docente/tareas/download?id=${archivo.id_archivo}&tipo=entrega`}
+                                                          target="_blank"
+                                                          rel="noopener noreferrer"
+                                                          className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs sm:text-sm hover:bg-gray-200"
+                                                        >
+                                                          <svg
+                                                            className="w-3 h-3 sm:w-4 sm:h-4"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                          >
+                                                            <path
+                                                              strokeLinecap="round"
+                                                              strokeLinejoin="round"
+                                                              strokeWidth={2}
+                                                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                            />
+                                                          </svg>
+                                                          <span className="truncate max-w-[100px] sm:max-w-none">
+                                                            {archivo.titulo}.{archivo.extension}
+                                                          </span>
+                                                        </a>
+                                                      )
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              )}
+                                              <div className="mt-2 flex flex-wrap gap-2">
+                                                {entrega.estado === "entregada" && (
+                                                  <button
+                                                    onClick={() =>
+                                                      handleUpdateStatus(
+                                                        entrega.id_entrega,
+                                                        "revisada",
+                                                        tarea.id_tarea,
+                                                        tarea.id_asignatura
+                                                      )
+                                                    }
+                                                    className="border border-green-500 text-green-500 bg-white px-2 py-1 text-xs sm:text-sm rounded hover:bg-green-500 hover:text-white transition-colors"
+                                                  >
+                                                    Marcar revisada
+                                                  </button>
+                                                )}
+                                                <button
+                                                  onClick={() =>
+                                                    handleDeleteEntrega(
+                                                      entrega.id_entrega,
+                                                      tarea.id_tarea,
+                                                      tarea.id_asignatura
+                                                    )
+                                                  }
+                                                  className="border border-red-500 text-red-500 bg-white px-2 py-1 text-xs sm:text-sm rounded hover:bg-red-500 hover:text-white transition-colors"
+                                                >
+                                                  Eliminar
+                                                </button>
+                                              </div>
+                                            </>
+                                          ) : (
+                                            <p className="text-xs sm:text-sm text-gray-500">
+                                              No hay entrega registrada
+                                            </p>
+                                          )}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  )}
+                                </React.Fragment>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
