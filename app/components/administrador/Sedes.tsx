@@ -657,50 +657,34 @@ const Sedes: React.FC = () => {
                       />
                     </div>
                     {sede.archivos && sede.archivos.length > 0 && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Archivos actuales
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          {sede.archivos.map((archivo) => (
-                            <div key={archivo.id_archivo} className="relative">
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        {sede.archivos.map((archivo) => (
+                          <div
+                            key={archivo.id_archivo}
+                            className="rounded-md overflow-hidden"
+                          >
+                            {archivo.extension && 
+                             ['mp4', 'webm', 'ogg', 'mov'].includes(archivo.extension.toLowerCase()) ? (
+                              <video
+                                src={`/api/sedes/download/${archivo.id_archivo}`}
+                                className="w-full h-24 object-cover"
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                              />
+                            ) : (
                               <Image
                                 src={`/api/sedes/download/${archivo.id_archivo}`}
                                 alt={archivo.titulo}
                                 width={100}
                                 height={100}
-                                className="w-full h-24 object-cover rounded"
+                                className="w-full h-24 object-cover"
                                 unoptimized
                               />
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setEditFormData({
-                                    ...editFormData,
-                                    archivosToDelete: [
-                                      ...editFormData.archivosToDelete,
-                                      archivo.id_archivo,
-                                    ],
-                                  })
-                                }
-                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-4 w-4"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          ))}
-                        </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -815,14 +799,26 @@ const Sedes: React.FC = () => {
                             key={archivo.id_archivo}
                             className="rounded-md overflow-hidden"
                           >
-                            <Image
-                              src={`/api/sedes/download/${archivo.id_archivo}`}
-                              alt={archivo.titulo}
-                              width={100}
-                              height={100}
-                              className="w-full h-24 object-cover"
-                              unoptimized
-                            />
+                            {archivo.extension && 
+                             ['mp4', 'webm', 'ogg', 'mov'].includes(archivo.extension.toLowerCase()) ? (
+                              <video
+                                src={`/api/sedes/download/${archivo.id_archivo}`}
+                                className="w-full h-24 object-cover"
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                              />
+                            ) : (
+                              <Image
+                                src={`/api/sedes/download/${archivo.id_archivo}`}
+                                alt={archivo.titulo}
+                                width={100}
+                                height={100}
+                                className="w-full h-24 object-cover"
+                                unoptimized
+                              />
+                            )}
                           </div>
                         ))}
                       </div>

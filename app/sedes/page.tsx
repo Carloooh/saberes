@@ -147,9 +147,10 @@ const Sedes: React.FC = () => {
                             <video
                               className="w-full h-full object-cover"
                               controls
-                              autoPlay={false}
+                              autoPlay
                               muted
                               loop
+                              playsInline
                             >
                               <source
                                 src={`/api/sedes/download/${archivo.id_archivo}`}
