@@ -197,8 +197,8 @@ export default function Asistencias({
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="mb-4 sm:mb-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="container mx-auto px-4 max-w-6xl">
+      <div className="mb-4 sm:mb-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
           <h3 className="text-sm sm:text-base font-semibold mb-1">Total Estudiantes</h3>
           <p className="text-xl sm:text-2xl font-bold text-blue-600">
@@ -244,7 +244,7 @@ export default function Asistencias({
       </div>
 
       <div className="bg-white rounded-lg shadow p-3 sm:p-6">
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Seleccionar día para tomar asistencia
           </label>
@@ -288,13 +288,13 @@ export default function Asistencias({
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Estudiante
                         </th>
-                        <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Estado
                         </th>
-                        <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Acciones
                         </th>
                       </tr>
@@ -305,12 +305,12 @@ export default function Asistencias({
                           key={estudiante.rut_usuario}
                           className="hover:bg-gray-50"
                         >
-                          <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-normal sm:whitespace-nowrap">
+                          <td className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 whitespace-normal sm:whitespace-nowrap">
                             <div className="text-xs sm:text-sm font-medium text-gray-900">
                               {estudiante.nombres} {estudiante.apellidos}
                             </div>
                           </td>
-                          <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                          <td className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 whitespace-nowrap">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                 asistencias[estudiante.rut_usuario] === 1
@@ -327,7 +327,7 @@ export default function Asistencias({
                                 : "Ausente"}
                             </span>
                           </td>
-                          <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
+                          <td className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 whitespace-nowrap text-xs sm:text-sm font-medium">
                             <div className="flex gap-1 sm:gap-2">
                               <button
                                 onClick={() =>
@@ -395,7 +395,7 @@ export default function Asistencias({
             </div>
           )
         ) : (
-          <div className="w-full text-center py-8 text-gray-500 bg-gray-50 rounded">
+          <div className="w-full text-center py-6 text-gray-500 bg-gray-50 rounded">
             Seleccione un día para tomar asistencia
           </div>
         )}
