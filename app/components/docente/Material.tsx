@@ -134,8 +134,8 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
   };
 
   return (
-    <div className="container mx-auto px-4">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto px-4 max-w-full overflow-x-hidden">
+      <div className="flex flex-wrap justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Materiales Educativos</h2>
         <button
           onClick={() => {
@@ -143,7 +143,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
             setCurrentMaterial({});
             setShowModal(true);
           }}
-          className="border-2 border-blue-500 text-blue-500 bg-white px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors"
+          className="border-2 border-blue-500 text-blue-500 bg-white px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors mt-2 sm:mt-0"
         >
           Agregar Material
         </button>
@@ -155,8 +155,8 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
             key={material.id_material}
             className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
           >
-            <div className="flex justify-between items-start">
-              <div className="flex-grow">
+            <div className="flex flex-col md:flex-row justify-between items-start">
+              <div className="flex-grow w-full md:w-auto">
                 <h3 className="text-lg font-semibold mb-2">
                   {material.titulo}
                 </h3>
@@ -178,10 +178,10 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                       href={material.enlace}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-500 hover:text-blue-700 inline-flex items-center"
+                      className="text-blue-500 hover:text-blue-700 inline-flex items-center break-all"
                     >
                       <svg
-                        className="w-4 h-4 mr-1"
+                        className="w-4 h-4 mr-1 flex-shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -197,7 +197,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                     </a>
                   )}
                   {material.archivos && material.archivos.length > 0 && (
-                    <div className="border-t pt-2">
+                    <div className="border-t pt-2 w-full">
                       <h4 className="text-sm font-semibold mb-2">
                         Archivos adjuntos:
                       </h4>
@@ -205,9 +205,9 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                         {material.archivos.map((archivo) => (
                           <div
                             key={archivo.id_material_archivo}
-                            className="flex items-center justify-between bg-gray-50 p-2 rounded"
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-50 p-2 rounded"
                           >
-                            <span className="text-sm">
+                            <span className="text-sm truncate max-w-full sm:max-w-[200px] mb-2 sm:mb-0">
                               {archivo.titulo}.{archivo.extension}
                             </span>
                             <div className="flex space-x-2">
@@ -269,7 +269,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                   )}
                 </div>
               </div>
-              <div className="flex space-x-2 ml-4">
+              <div className="flex space-x-2 mt-4 md:mt-0 md:ml-4">
                 <button
                   onClick={() => handleEdit(material)}
                   className="text-blue-500 hover:text-blue-700 inline-flex items-center"
