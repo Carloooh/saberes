@@ -62,14 +62,20 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
 
     Object.entries(currentMaterial).forEach(([key, value]) => {
       if (value !== undefined && key !== "archivos") {
-        // For enlace field, only append if it has a value
-        if (key === "enlace" && value === "") {
-          // Skip empty enlace
+        // For enlace field, handle it properly
+        if (key === "enlace") {
+          // Append empty string or the actual value
+          formData.append(key, value === null ? "" : value.toString());
         } else {
           formData.append(key, value.toString());
         }
       }
     });
+
+    // Make sure enlace is always included in the form data
+    if (!currentMaterial.hasOwnProperty('enlace')) {
+      formData.append('enlace', '');
+    }
 
     if (files) {
       Array.from(files).forEach((file, index) => {
