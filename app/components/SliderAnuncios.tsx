@@ -67,6 +67,13 @@ const SliderComponent = () => {
     }
   };
 
+  // Add this function after formatDate
+  const getMediaType = (extension: string): "image" | "video" => {
+    const ext = extension.toLowerCase();
+    if (["mp4", "webm", "ogg", "mov"].includes(ext)) return "video";
+    return "image";
+  };
+
   useEffect(() => {
     const fetchNoticiasDestacadas = async () => {
       try {
@@ -165,13 +172,25 @@ const SliderComponent = () => {
                     >
                       <div className="aspect-[16/9] relative">
                         {noticia.archivos && noticia.archivos.length > 0 ? (
-                          <Image
-                            src={`/api/noticias/download/${noticia.archivos[0].id_archivo}`}
-                            alt={noticia.titulo}
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
+                          noticia.archivos[0].extension && 
+                          ['mp4', 'webm', 'ogg', 'mov'].includes(noticia.archivos[0].extension.toLowerCase()) ? (
+                            <video
+                              src={`/api/noticias/download/${noticia.archivos[0].id_archivo}`}
+                              className="object-cover w-full h-full"
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                            />
+                          ) : (
+                            <Image
+                              src={`/api/noticias/download/${noticia.archivos[0].id_archivo}`}
+                              alt={noticia.titulo}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          )
                         ) : (
                           <Image
                             src="/noimage.webp"
