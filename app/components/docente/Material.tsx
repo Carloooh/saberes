@@ -62,7 +62,12 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
 
     Object.entries(currentMaterial).forEach(([key, value]) => {
       if (value !== undefined && key !== "archivos") {
-        formData.append(key, value.toString());
+        // For enlace field, only append if it has a value
+        if (key === "enlace" && value === "") {
+          // Skip empty enlace
+        } else {
+          formData.append(key, value.toString());
+        }
       }
     });
 
@@ -143,7 +148,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
             setCurrentMaterial({});
             setShowModal(true);
           }}
-          className="border-2 border-blue-500 text-blue-500 bg-white px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors mt-2 sm:mt-0"
+          className="border-2 bordlow-x-e-500 text-blue-500 bg-white px-4 py-2 rounded hover:bg-blue-500 hover:text-white transition-colors mt-2 sm:mt-0"
         >
           Agregar Material
         </button>
@@ -190,7 +195,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002 2v-4M14 4h6m0 0v6m0-6L10 14"
                         />
                       </svg>
                       <span>Ver enlace</span>
@@ -368,6 +373,7 @@ export default function Material({ cursoId, asignaturaId }: MaterialProps) {
                     })
                   }
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
+                  placeholder="https://ejemplo.com"
                 />
               </div>
               <div className="mb-4">
