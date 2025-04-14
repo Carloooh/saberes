@@ -378,7 +378,7 @@ export const sendWelcomeEmail = async (
         <h2 style="color: #333; text-align: center;">Bienvenido a Saberes El Quisco</h2>
         <p>Hola ${name},</p>
         <p>Bienvenid@ a la nueva plataforma Web del programa Saberes.</p>
-        <p>Puedes acceder mediante <a href="https://saberes.elquisco.cl">saberes.elquisco.cl</a> desde una red de internet local o desde <a href="https://saberes.elquisco.cl:8081">saberes.elquisco.cl:8081</a> desde una red de internet externa.</p>
+        <p>Puedes acceder mediante <a href="https://saberes.elquisco.cl">saberes.elquisco.cl</a> desde cualquier dispositivo con conexión a internet.</p>
         
         <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
           <p style="margin: 0; font-weight: bold;">Tus credenciales para acceder son:</p>
@@ -425,7 +425,7 @@ export const sendWelcomeEmailTeacher = async (
         <h2 style="color: #333; text-align: center;">Bienvenido a Saberes El Quisco</h2>
         <p>Hola ${name},</p>
         <p>Bienvenid@ a la nueva plataforma Web del programa Saberes como Docente.</p>
-        <p>Puedes acceder mediante <a href="https://saberes.elquisco.cl">saberes.elquisco.cl</a> desde una red de internet local o desde <a href="https://saberes.elquisco.cl:8081">saberes.elquisco.cl:8081</a> desde una red de internet externa.</p>
+        <p>Puedes acceder mediante <a href="https://saberes.elquisco.cl">saberes.elquisco.cl</a> desde cualquier dispositivo con conexión a internet.</p>
         
         <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
           <p style="margin: 0; font-weight: bold;">Tus credenciales para acceder son:</p>
