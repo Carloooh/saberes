@@ -99,6 +99,18 @@ const MatriculaEstudiante = () => {
     const { name, value } = e.target;
     let newValue = value;
 
+    if (
+      name === "celular_apoderado2" &&
+      (newValue === "" || newValue === "+569")
+    ) {
+      e.target.value = newValue;
+      setPhoneError((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+      return;
+    }
+
     // If the input doesn't start with +569, add it
     if (!newValue.startsWith("+569")) {
       newValue = "+569" + newValue.replace(/\D/g, "");
@@ -378,6 +390,7 @@ const MatriculaEstudiante = () => {
     const email2 = formData.get("email2") as string | null;
     const emailApoderado = formData.get("email_apoderado1") as string | null;
     const phoneApoderado1 = formData.get("celular_apoderado1") as string | null;
+    const phoneApoderado2 = formData.get("celular_apoderado2") as string | null;
     const phoneContacto = formData.get("celular_contacto") as string | null;
 
     // Check if required fields are present
@@ -402,6 +415,30 @@ const MatriculaEstudiante = () => {
         "El número de celular del apoderado principal debe tener el formato +569XXXXXXXX"
       );
       return;
+    }
+
+    if (
+      phoneApoderado2 &&
+      phoneApoderado2 !== "+569" &&
+      phoneApoderado2.trim() !== ""
+    ) {
+      if (
+        phoneApoderado2.length !== 12 ||
+        !phoneApoderado2.startsWith("+569")
+      ) {
+        toast.error(
+          "El número de celular del apoderado secundario debe tener el formato +569XXXXXXXX"
+        );
+        return;
+      }
+    }
+
+    if (
+      !phoneApoderado2 ||
+      phoneApoderado2 === "+569" ||
+      phoneApoderado2.trim() === ""
+    ) {
+      formData.delete("celular_apoderado2");
     }
 
     // Validate phone format for emergency contact
