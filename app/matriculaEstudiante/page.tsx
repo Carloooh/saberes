@@ -30,6 +30,7 @@ const MatriculaEstudiante = () => {
   });
   const [phoneError, setPhoneError] = useState({
     celular_apoderado1: "",
+    celular_apoderado2: "",
     celular_contacto: "",
   });
 
@@ -1299,6 +1300,11 @@ const MatriculaEstudiante = () => {
                     onChange={handlePhoneFormat}
                     maxLength={12}
                   />
+                  {phoneError.celular_apoderado2 && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {phoneError.celular_apoderado2}
+                    </p>
+                  )}
                 </div>
               </div>
 

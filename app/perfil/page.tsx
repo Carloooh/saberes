@@ -32,6 +32,7 @@ interface UserProfile {
   comuna: string;
   sector: string;
   sexo: string;
+  estado: string;
 
   cursoAlumno?: {
     nombre_curso: string;
@@ -399,41 +400,58 @@ const Perfil: React.FC = () => {
               <p>
                 <span className="font-medium">RUT:</span> {userData.rut_usuario}
               </p>
+              {userData.tipo_usuario === "Estudiante" && (
+                <p>
+                  <span className="font-medium">Tipo de RUT:</span>{" "}
+                  {userData.rut_tipo}
+                </p>
+              )}
               <p>
-                <span className="font-medium">Tipo:</span> {userData.rut_tipo}
+                <span className="font-medium">Tipo de Usuario:</span>{" "}
+                {userData.tipo_usuario}
               </p>
               <p>
-                <span className="font-medium">Sexo:</span> {userData.sexo}
+                <span className="font-medium">Estado de la cuenta:</span>{" "}
+                {userData.estado}
               </p>
-              <p>
-                <span className="font-medium">Fecha de nacimiento:</span>{" "}
-                {userData.fecha_nacimiento}
-              </p>
-              <p>
-                <span className="font-medium">Edad:</span>{" "}
-                {userData?.fecha_nacimiento
-                  ? `${calculateAge(userData.fecha_nacimiento)} años`
-                  : "No disponible"}
-              </p>
-              <p>
-                <span className="font-medium">Nacionalidad:</span>{" "}
-                {userData.nacionalidad}
-              </p>
-              <p>
-                <span className="font-medium">Talla:</span>{" "}
-                {userData.talla ? userData.talla : "No disponible"}
-              </p>
+              {userData.tipo_usuario === "Estudiante" && (
+                <>
+                  <p>
+                    <span className="font-medium">Sexo:</span> {userData.sexo}
+                  </p>
+                  <p>
+                    <span className="font-medium">Fecha de nacimiento:</span>{" "}
+                    {userData.fecha_nacimiento}
+                  </p>
+                  <p>
+                    <span className="font-medium">Edad:</span>{" "}
+                    {userData?.fecha_nacimiento
+                      ? `${calculateAge(userData.fecha_nacimiento)} años`
+                      : "No disponible"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Nacionalidad:</span>{" "}
+                    {userData.nacionalidad}
+                  </p>
+                  <p>
+                    <span className="font-medium">Talla:</span>{" "}
+                    {userData.talla ? userData.talla : "No disponible"}
+                  </p>
 
-              <p>
-                <span className="font-medium">Dirección:</span>{" "}
-                {userData.direccion}
-              </p>
-              <p>
-                <span className="font-medium">Comuna:</span> {userData.comuna}
-              </p>
-              <p>
-                <span className="font-medium">Sector:</span> {userData.sector}
-              </p>
+                  <p>
+                    <span className="font-medium">Dirección:</span>{" "}
+                    {userData.direccion}
+                  </p>
+                  <p>
+                    <span className="font-medium">Comuna:</span>{" "}
+                    {userData.comuna}
+                  </p>
+                  <p>
+                    <span className="font-medium">Sector:</span>{" "}
+                    {userData.sector}
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Información específica para estudiantes */}

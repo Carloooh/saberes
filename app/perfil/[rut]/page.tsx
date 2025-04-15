@@ -650,44 +650,47 @@ const PerfilUsuario: React.FC = () => {
                 <span className="font-medium">Email:</span> {userData.email}
               </p>
               <p>
-                <span className="font-medium">Estado de la cuenta:</span>{" "}
-                {userData.estado}
-              </p>
-              <p>
-                <span className="font-medium">Fecha de Nacimiento:</span>{" "}
-                {userData.fecha_nacimiento}
-              </p>
-              {userData.fecha_nacimiento && (
-                <p>
-                  <span className="font-medium">Edad:</span>{" "}
-                  {calculateAge(userData.fecha_nacimiento)} años
-                </p>
-              )}
-              <p>
-                <span className="font-medium">Nacionalidad:</span>{" "}
-                {userData.nacionalidad || "No especificada"}
-              </p>
-              <p>
-                <span className="font-medium">Talla:</span>{" "}
-                {userData.talla || "No especificada"}
-              </p>
-              <p>
-                <span className="font-medium">Dirección:</span>{" "}
-                {userData.direccion || "No especificada"}
-              </p>
-              <p>
-                <span className="font-medium">Comuna:</span>{" "}
-                {userData.comuna || "No especificada"}
-              </p>
-              <p>
-                <span className="font-medium">Sector:</span>{" "}
-                {userData.sector || "No especificado"}
-              </p>
-              <p>
                 <span className="font-medium">Tipo de Usuario:</span>{" "}
                 {userData.tipo_usuario}
               </p>
-
+              <p>
+                <span className="font-medium">Estado de la cuenta:</span>{" "}
+                {userData.estado}
+              </p>
+              {userData.tipo_usuario === "Estudiante" && (
+                <>
+                  <p>
+                    <span className="font-medium">Fecha de Nacimiento:</span>{" "}
+                    {userData.fecha_nacimiento}
+                  </p>
+                  {userData.fecha_nacimiento && (
+                    <p>
+                      <span className="font-medium">Edad:</span>{" "}
+                      {calculateAge(userData.fecha_nacimiento)} años
+                    </p>
+                  )}
+                  <p>
+                    <span className="font-medium">Nacionalidad:</span>{" "}
+                    {userData.nacionalidad || "No especificada"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Talla:</span>{" "}
+                    {userData.talla || "No especificada"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Dirección:</span>{" "}
+                    {userData.direccion || "No especificada"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Comuna:</span>{" "}
+                    {userData.comuna || "No especificada"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Sector:</span>{" "}
+                    {userData.sector || "No especificado"}
+                  </p>
+                </>
+              )}
               {/* Admin Edit Button */}
               {userSession?.tipo_usuario === "Administrador" && (
                 <div className="mt-4">
