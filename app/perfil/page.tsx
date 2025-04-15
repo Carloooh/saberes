@@ -762,15 +762,20 @@ const Perfil: React.FC = () => {
                 <h2 className="text-xl font-semibold mb-3">
                   Cursos y Asignaturas Asignadas
                 </h2>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {userData.cursos?.map((curso, index) => (
-                    <div key={index} className="border-b pb-4">
-                      <h3 className="text-lg font-medium mb-2">
+                    <div
+                      key={index}
+                      className="bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                    >
+                      <h3 className="text-lg font-medium mb-2 text-black border-b pb-2">
                         {curso.nombre_curso}
                       </h3>
-                      <ul className="list-disc pl-5">
+                      <ul className="list-disc pl-5 text-sm space-y-1">
                         {curso.asignaturas.map((asignatura, idx) => (
-                          <li key={idx}>{asignatura.nombre_asignatura}</li>
+                          <li key={idx} className="text-gray-700">
+                            {asignatura.nombre_asignatura}
+                          </li>
                         ))}
                       </ul>
                     </div>

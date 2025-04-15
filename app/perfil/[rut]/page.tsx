@@ -1003,30 +1003,30 @@ const PerfilUsuario: React.FC = () => {
                 <h2 className="text-xl font-semibold mb-3">
                   Cursos y Asignaturas Asignadas
                 </h2>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {userData.cursos && userData.cursos.length > 0 ? (
                     userData.cursos.map((curso) => (
                       <div
                         key={curso.id_curso}
-                        className="bg-gray-50 p-4 rounded"
+                        className="bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
                       >
-                        <h3 className="font-medium mb-2">
+                        <h3 className="text-lg font-medium mb-2 text-black border-b pb-2">
                           {curso.nombre_curso}
                         </h3>
-                        <div className="grid grid-cols-2 gap-2">
+                        <ul className="list-disc pl-5 text-sm space-y-1">
                           {curso.asignaturas.map((asignatura) => (
-                            <div
+                            <li
                               key={asignatura.id_asignatura}
-                              className="text-gray-600"
+                              className="text-gray-700"
                             >
-                              • {asignatura.nombre_asignatura}
-                            </div>
+                              {asignatura.nombre_asignatura}
+                            </li>
                           ))}
-                        </div>
+                        </ul>
                       </div>
                     ))
                   ) : (
-                    <p>No hay cursos asignados</p>
+                    <p className="col-span-full">No hay cursos asignados</p>
                   )}
                 </div>
               </div>
