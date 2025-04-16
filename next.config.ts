@@ -51,6 +51,8 @@ const nextConfig = {
   },
   // Ensure cookies work properly behind proxies
   poweredByHeader: false,
+  // Add this to ensure proper hostname handling in Docker
+  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://saberes.elquisco.cl' : undefined,
 };
 
 module.exports = nextConfig;
