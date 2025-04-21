@@ -237,13 +237,26 @@ export async function POST(request: NextRequest) {
             ]
           );
 
-          // Process files
+          // Process files - modified to work in Node.js environment
           for (const file of archivos) {
-            if (file instanceof File) {
-              const arrayBuffer = await file.arrayBuffer();
+            // Check if the file is a Blob-like object with arrayBuffer method
+            if (file && typeof file === "object" && "arrayBuffer" in file) {
+              const arrayBuffer = await (file as any).arrayBuffer();
               const buffer = Buffer.from(arrayBuffer);
-              const fileName = file.name.split(".")[0];
-              const extension = file.name.split(".").pop() || "";
+
+              // Get filename and extension safely
+              let fileName = "archivo";
+              let extension = "";
+
+              if ("name" in file) {
+                const nameParts = (file as any).name.split(".");
+                fileName =
+                  nameParts.length > 1
+                    ? nameParts.slice(0, -1).join(".")
+                    : nameParts[0];
+                extension = nameParts.length > 1 ? nameParts.pop() || "" : "";
+              }
+
               const id_archivo = randomUUID();
 
               await executeSQLStatement(
