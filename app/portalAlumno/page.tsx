@@ -177,17 +177,17 @@ const PortalAlumno = () => {
 
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Resumen Académico</h2>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Asignatura
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Promedio Calificaciones
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Porcentaje Asistencia
                   </th>
                 </tr>
@@ -195,12 +195,12 @@ const PortalAlumno = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {resumenAsignaturas.map((asignatura) => (
                   <tr key={asignatura.id_asignatura}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {asignatura.nombre_asignatura}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-center">
                       {asignatura.tiene_evaluaciones ? (
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
@@ -219,7 +219,7 @@ const PortalAlumno = () => {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-center">
                       {asignatura.tiene_asistencia ? (
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
@@ -244,12 +244,12 @@ const PortalAlumno = () => {
                   </tr>
                 ))}
                 <tr className="bg-gray-50 font-semibold">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 sm:px-6 py-3 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       PROMEDIO GENERAL
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-center">
                     {promedioGeneral !== null ? (
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-bold ${
@@ -264,7 +264,7 @@ const PortalAlumno = () => {
                       <span className="text-sm text-gray-500">Sin datos</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <td className="px-4 sm:px-6 py-3 whitespace-nowrap text-center">
                     {asistenciaGeneral !== null ? (
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-bold ${
