@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { Connection, Request, TYPES } from "tedious";
 import config from "@/app/api/dbConfig";
 
-// Definir una interfaz para el tipo de curso
 interface Curso {
   id_curso: string;
   nombre_curso: string;
@@ -10,7 +9,6 @@ interface Curso {
   [key: string]: any; // Para otras propiedades que pueda tener el curso
 }
 
-// Interfaz para las columnas de la base de datos
 interface Column {
   metadata: {
     colName: string;
@@ -78,9 +76,9 @@ export async function GET(req: NextRequest) {
         request.on("row", (columns: Column[]) => {
           curso = {
             id_curso: "",
-            nombre_curso: ""
+            nombre_curso: "",
           };
-          
+
           columns.forEach((column) => {
             curso![column.metadata.colName] = column.value;
           });
@@ -93,6 +91,82 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error al obtener curso:", error);
+    return NextResponse.json(
+      { success: false, error: "Error en el servidor" },
+      { status: 500 }
+    );
+  }
+}
+
+// Función para actualizar el enlace de WhatsApp del curso
+export async function PUT(req: NextRequest) {
+  try {
+    const { id_curso, enlace_grupo_wsp } = await req.json();
+
+    if (!id_curso) {
+      return NextResponse.json(
+        { success: false, error: "ID de curso no proporcionado" },
+        { status: 400 }
+      );
+    }
+
+    const connection = new Connection(config);
+
+    return new Promise<NextResponse>((resolve, reject) => {
+      connection.on("connect", (err) => {
+        if (err) {
+          console.error("Error al conectar a la base de datos:", err.message);
+          reject(
+            NextResponse.json(
+              { success: false, error: "Error en el servidor" },
+              { status: 500 }
+            )
+          );
+          return;
+        }
+
+        const query = `UPDATE Curso SET enlace_grupo_wsp = @enlace_grupo_wsp WHERE id_curso = @id_curso`;
+
+        const request = new Request(query, (err, rowCount) => {
+          if (err) {
+            console.error("Error al ejecutar la consulta:", err.message);
+            reject(
+              NextResponse.json(
+                { success: false, error: "Error en el servidor" },
+                { status: 500 }
+              )
+            );
+          } else if (rowCount === 0) {
+            resolve(
+              NextResponse.json(
+                { success: false, error: "Curso no encontrado" },
+                { status: 404 }
+              )
+            );
+          } else {
+            resolve(
+              NextResponse.json(
+                { 
+                  success: true, 
+                  mensaje: "Enlace de WhatsApp actualizado correctamente" 
+                }, 
+                { status: 200 }
+              )
+            );
+          }
+          connection.close();
+        });
+
+        request.addParameter("id_curso", TYPES.NVarChar, id_curso);
+        request.addParameter("enlace_grupo_wsp", TYPES.NVarChar, enlace_grupo_wsp || null);
+
+        connection.execSql(request);
+      });
+
+      connection.connect();
+    });
+  } catch (error) {
+    console.error("Error al actualizar el enlace de WhatsApp:", error);
     return NextResponse.json(
       { success: false, error: "Error en el servidor" },
       { status: 500 }
