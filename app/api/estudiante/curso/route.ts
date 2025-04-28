@@ -12,6 +12,7 @@ interface CursoResponse {
   cursoAlumno: {
     id_curso: string;
     nombre_curso: string;
+    enlace_grupo_wsp: string;
   };
   asignaturas: Asignatura[];
 }
@@ -105,7 +106,8 @@ export async function GET(request: NextRequest) {
         const queryCurso = `
           SELECT 
             c.id_curso,
-            c.nombre_curso
+            c.nombre_curso,
+            c.enlace_grupo_wsp
           FROM CursosAsignaturasLink cal
           JOIN Curso c ON cal.id_curso = c.id_curso
           WHERE cal.id_user = @userId
@@ -128,6 +130,7 @@ export async function GET(request: NextRequest) {
         const cursoAlumno = {
           id_curso: cursoResults[0].id_curso,
           nombre_curso: cursoResults[0].nombre_curso,
+          enlace_grupo_wsp: cursoResults[0].enlace_grupo_wsp,
         };
 
         // Get the subjects for this course

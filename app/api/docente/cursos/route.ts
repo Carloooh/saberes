@@ -11,6 +11,7 @@ interface CursoResponse {
   id_curso: string;
   nombre_curso: string;
   asignaturas: Asignatura[];
+  enlace_grupo_wsp: string;
 }
 
 // Helper function to execute SQL queries and return results
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
 
         // Get distinct courses for the teacher
         const coursesQuery = `
-          SELECT DISTINCT c.id_curso, c.nombre_curso
+          SELECT DISTINCT c.id_curso, c.nombre_curso, c.enlace_grupo_wsp
           FROM Curso c
           INNER JOIN CursosAsignaturasLink cl ON c.id_curso = cl.id_curso
           WHERE cl.id_user = @id_user
@@ -126,6 +127,7 @@ export async function GET(request: NextRequest) {
             id_curso: course.id_curso,
             nombre_curso: course.nombre_curso,
             asignaturas: subjects,
+            enlace_grupo_wsp: course.enlace_grupo_wsp,
           });
         }
 

@@ -78,7 +78,8 @@ export async function GET() {
         const coursesQuery = `
           SELECT 
             c.id_curso,
-            c.nombre_curso
+            c.nombre_curso,
+            c.enlace_grupo_wsp
           FROM Curso c
           ORDER BY c.nombre_curso
         `;
@@ -88,10 +89,10 @@ export async function GET() {
         // Enhanced sorting logic
         cursos.sort((a, b) => {
           const cleanName = (name: string) => name.trim().toLowerCase();
-          
+
           // Determine course type priority
-          const typePriority = (name: string) => 
-            name.includes('básico') ? 0 : name.includes('medio') ? 1 : 2;
+          const typePriority = (name: string) =>
+            name.includes("básico") ? 0 : name.includes("medio") ? 1 : 2;
 
           // Extract numeric value from course name
           const extractNumber = (name: string) => {
@@ -101,10 +102,10 @@ export async function GET() {
 
           const aType = typePriority(cleanName(a.nombre_curso));
           const bType = typePriority(cleanName(b.nombre_curso));
-          
+
           // First sort by type (básico before medio)
           if (aType !== bType) return aType - bType;
-          
+
           // Then sort by extracted number within the same type
           return extractNumber(a.nombre_curso) - extractNumber(b.nombre_curso);
         });
@@ -128,6 +129,7 @@ export async function GET() {
           result.push({
             id_curso: curso.id_curso,
             nombre_curso: curso.nombre_curso,
+            enlace_grupo_wsp: curso.enlace_grupo_wsp,
             asignaturas: asignaturas,
           });
         }
@@ -184,7 +186,8 @@ export async function POST(req: NextRequest) {
       }
 
       try {
-        const { nombre_curso, asignaturas } = await req.json();
+        const { nombre_curso, asignaturas, enlace_grupo_wsp } =
+          await req.json();
 
         // Begin transaction
         await new Promise<void>((resolveTransaction, rejectTransaction) => {
@@ -210,13 +213,18 @@ export async function POST(req: NextRequest) {
           // Insert new course
           await executeSQLStatement(
             connection,
-            `INSERT INTO Curso (id_curso, nombre_curso) VALUES (@id_curso, @nombre_curso)`,
+            `INSERT INTO Curso (id_curso, nombre_curso, enlace_grupo_wsp) VALUES (@id_curso, @nombre_curso, @enlace_grupo_wsp)`,
             [
               { name: "id_curso", type: TYPES.NVarChar, value: newId },
               {
                 name: "nombre_curso",
                 type: TYPES.NVarChar,
                 value: nombre_curso,
+              },
+              {
+                name: "enlace_grupo_wsp",
+                type: TYPES.NVarChar,
+                value: enlace_grupo_wsp || null,
               },
             ]
           );
@@ -327,7 +335,8 @@ export async function PUT(req: NextRequest) {
       }
 
       try {
-        const { id_curso, nombre_curso, asignaturas } = await req.json();
+        const { id_curso, nombre_curso, asignaturas, enlace_grupo_wsp } =
+          await req.json();
 
         // Begin transaction
         await new Promise<void>((resolveTransaction, rejectTransaction) => {
@@ -344,12 +353,17 @@ export async function PUT(req: NextRequest) {
           // Update course name
           await executeSQLStatement(
             connection,
-            `UPDATE Curso SET nombre_curso = @nombre_curso WHERE id_curso = @id_curso`,
+            `UPDATE Curso SET nombre_curso = @nombre_curso, enlace_grupo_wsp = @enlace_grupo_wsp WHERE id_curso = @id_curso`,
             [
               {
                 name: "nombre_curso",
                 type: TYPES.NVarChar,
                 value: nombre_curso,
+              },
+              {
+                name: "enlace_grupo_wsp",
+                type: TYPES.NVarChar,
+                value: enlace_grupo_wsp || null,
               },
               { name: "id_curso", type: TYPES.NVarChar, value: id_curso },
             ]
