@@ -2,9 +2,18 @@ import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://saberes.elquisco.cl";
+  const currentDate = new Date();
 
-  const routes = [
-    "",
+  // Ruta principal con máxima prioridad
+  const mainRoute = {
+    url: baseUrl,
+    lastModified: currentDate,
+    changeFrequency: "daily" as const,
+    priority: 1.0,
+  };
+
+  // Rutas secundarias
+  const secondaryRoutes = [
     "/actividades",
     "/faq",
     "/galeria",
@@ -15,10 +24,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/restablecer",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: route === "" ? 1 : 0.8,
+    lastModified: currentDate,
+    changeFrequency: route === "/actividades" ? "weekly" as const : "monthly" as const,
+    priority: route === "/actividades" ? 0.7 : 0.6,
   }));
 
-  return routes;
+  return [mainRoute, ...secondaryRoutes];
 }

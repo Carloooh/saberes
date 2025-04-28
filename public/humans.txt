@@ -1,0 +1,11 @@
+/* TEAM */
+  Name: Programa Saberes
+  Site: https://saberes.elquisco.cl
+  Location: El Quisco, Chile
+
+/* SITE */
+  Standards: HTML5, TypeScript
+  Components: Next.js, React, SQL Server
+  Software: Visual Studio Code, GitHub, Trae
+  Backend: Node.js, SQL Server
+  Design: Tailwind CSS
