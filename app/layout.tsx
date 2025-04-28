@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://saberes.elquisco.cl"),
   title: "Saberes | Programa Educativo El Quisco",
   description:
     "Plataforma oficial del programa educativo Saberes en El Quisco, Región de Valparaíso. Ofrecemos cursos, talleres, actividades y recursos para estudiantes y docentes. Matrícula abierta para nuevos alumnos. Formación de calidad para todas las edades.",
