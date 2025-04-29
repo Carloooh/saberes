@@ -99,8 +99,14 @@ export async function POST(request: NextRequest) {
       connection.connect();
     });
 
-    const { dia, rut_usuario, asistencia, id_curso, id_asignatura } =
-      await request.json();
+    const {
+      dia,
+      rut_usuario,
+      asistencia,
+      id_curso,
+      id_asignatura,
+      justificacion,
+    } = await request.json();
 
     if (
       !dia ||
@@ -151,20 +157,25 @@ export async function POST(request: NextRequest) {
       // Actualizar registro existente
       const updateQuery = `
         UPDATE Asistencia
-        SET asistencia = @asistencia
+        SET asistencia = @asistencia, justificacion = @justificacion
         WHERE id_dia = @dia AND id_user = @id_user
       `;
 
       await executeSQL(connection, updateQuery, [
         { name: "asistencia", type: TYPES.Int, value: asistencia },
+        {
+          name: "justificacion",
+          type: TYPES.NVarChar,
+          value: asistencia === 2 ? justificacion : null,
+        },
         { name: "dia", type: TYPES.NVarChar, value: dia },
         { name: "id_user", type: TYPES.NVarChar, value: id_user },
       ]);
     } else {
       // Insertar nuevo registro
       const insertQuery = `
-        INSERT INTO Asistencia (id_asistencia, id_dia, id_curso, id_asignatura, id_user, asistencia)
-        VALUES (@id_asistencia, @dia, @id_curso, @id_asignatura, @id_user, @asistencia)
+        INSERT INTO Asistencia (id_asistencia, id_dia, id_curso, id_asignatura, id_user, asistencia, justificacion)
+        VALUES (@id_asistencia, @dia, @id_curso, @id_asignatura, @id_user, @asistencia, @justificacion)
       `;
 
       await executeSQL(connection, insertQuery, [
@@ -178,6 +189,11 @@ export async function POST(request: NextRequest) {
         { name: "id_asignatura", type: TYPES.NVarChar, value: id_asignatura },
         { name: "id_user", type: TYPES.NVarChar, value: id_user },
         { name: "asistencia", type: TYPES.Int, value: asistencia },
+        {
+          name: "justificacion",
+          type: TYPES.NVarChar,
+          value: asistencia === 2 ? justificacion : null,
+        },
       ]);
     }
 

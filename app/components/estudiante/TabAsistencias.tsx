@@ -8,6 +8,7 @@ interface AsistenciaDia {
   id_dia: string;
   fecha: string;
   estado: "Presente" | "Ausente" | "Justificado";
+  justificacion?: string | null;
 }
 
 interface TabAsistenciasProps {
@@ -152,6 +153,7 @@ const TabAsistencias = ({ asignaturaId, cursoId }: TabAsistenciasProps) => {
               <tr>
                 <th className="p-2 text-left">Fecha</th>
                 <th className="p-2 text-left">Estado</th>
+                <th className="p-2 text-left">Justificación</th>
               </tr>
             </thead>
             <tbody>
@@ -183,6 +185,15 @@ const TabAsistencias = ({ asignaturaId, cursoId }: TabAsistenciasProps) => {
                       >
                         {dia.estado}
                       </span>
+                    </td>
+                    <td className="p-2 border-t text-sm text-gray-600">
+                      {dia.estado === "Justificado" && dia.justificacion ? (
+                        <span className="italic">{dia.justificacion}</span>
+                      ) : dia.estado === "Justificado" ? (
+                        <span className="text-gray-400">Sin detalles</span>
+                      ) : (
+                        <span className="text-gray-400">No aplica</span>
+                      )}
                     </td>
                   </tr>
                 ))}

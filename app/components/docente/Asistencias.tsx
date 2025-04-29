@@ -15,6 +15,7 @@ interface Asistencia {
   id_asistencia: string;
   rut_usuario: string;
   asistencia: number;
+  justificacion?: string;
 }
 
 interface DiaAsistencia {
@@ -35,6 +36,9 @@ export default function Asistencias({
   const [dias, setDias] = useState<DiaAsistencia[]>([]);
   const [selectedDia, setSelectedDia] = useState<string | null>(null);
   const [asistencias, setAsistencias] = useState<Record<string, number>>({});
+  const [justificaciones, setJustificaciones] = useState<
+    Record<string, string>
+  >({});
   const [loading, setLoading] = useState(true);
   const [newFecha, setNewFecha] = useState("");
   const [savingAttendance, setSavingAttendance] = useState<string | null>(null);
@@ -119,7 +123,19 @@ export default function Asistencias({
           },
           {}
         );
+
+        const justificacionesMap = data.asistencias.reduce(
+          (acc: Record<string, string>, curr: Asistencia) => {
+            if (curr.justificacion) {
+              acc[curr.rut_usuario] = curr.justificacion;
+            }
+            return acc;
+          },
+          {}
+        );
+
         setAsistencias(asistenciasMap);
+        setJustificaciones(justificacionesMap);
       }
     } catch (error) {
       console.error("Error al obtener asistencias:", error);
@@ -129,7 +145,11 @@ export default function Asistencias({
     }
   };
 
-  const guardarAsistencia = async (rutEstudiante: string, estado: number) => {
+  const guardarAsistencia = async (
+    rutEstudiante: string,
+    estado: number,
+    justificacion?: string
+  ) => {
     try {
       setSavingAttendance(rutEstudiante);
       const response = await fetch("/api/docente/asistencias", {
@@ -143,6 +163,7 @@ export default function Asistencias({
           asistencia: estado,
           id_curso: cursoId,
           id_asignatura: asignaturaId,
+          justificacion: estado === 2 ? justificacion : null,
         }),
       });
 
@@ -152,6 +173,17 @@ export default function Asistencias({
           ...prev,
           [rutEstudiante]: estado,
         }));
+
+        setJustificaciones((prev) => {
+          const newJustificaciones = { ...prev };
+          if (estado === 2 && justificacion) {
+            newJustificaciones[rutEstudiante] = justificacion;
+          } else {
+            delete newJustificaciones[rutEstudiante];
+          }
+          return newJustificaciones;
+        });
+
         toast.success("Asistencia guardada");
       } else {
         toast.error("Error al guardar asistencia");
@@ -162,6 +194,12 @@ export default function Asistencias({
     } finally {
       setSavingAttendance(null);
     }
+  };
+
+  // Reemplazar la función handleJustificacion existente con esta:
+  const handleJustificacion = (rutEstudiante: string) => {
+    // Marcar como justificado y dejar que el usuario edite la justificación en la tabla
+    guardarAsistencia(rutEstudiante, 2, justificaciones[rutEstudiante] || "");
   };
 
   const agregarDia = async () => {
@@ -200,31 +238,37 @@ export default function Asistencias({
     <div className="container mx-auto px-4 max-w-6xl">
       <div className="mb-4 sm:mb-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
-          <h3 className="text-sm sm:text-base font-semibold mb-1">Total Estudiantes</h3>
+          <h3 className="text-sm sm:text-base font-semibold mb-1">
+            Total Estudiantes
+          </h3>
           <p className="text-xl sm:text-2xl font-bold text-blue-600">
             {estudiantes.length}
           </p>
         </div>
         <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
-          <h3 className="text-sm sm:text-base font-semibold mb-1">Días Registrados</h3>
-          <p className="text-xl sm:text-2xl font-bold text-blue-600">{dias.length}</p>
+          <h3 className="text-sm sm:text-base font-semibold mb-1">
+            Días Registrados
+          </h3>
+          <p className="text-xl sm:text-2xl font-bold text-blue-600">
+            {dias.length}
+          </p>
         </div>
         <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
-          <h3 className="text-sm sm:text-base font-semibold mb-1">Último Registro</h3>
+          <h3 className="text-sm sm:text-base font-semibold mb-1">
+            Último Registro
+          </h3>
           <p className="text-sm sm:text-base text-blue-600 truncate">
             {dias.length > 0
-              ? format(
-                  new Date(dias[0].fecha + "T00:00:00"),
-                  "d MMM yyyy",
-                  {
-                    locale: es,
-                  }
-                )
+              ? format(new Date(dias[0].fecha + "T00:00:00"), "d MMM yyyy", {
+                  locale: es,
+                })
               : "Sin registros"}
           </p>
         </div>
         <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
-          <h3 className="text-sm sm:text-base font-semibold mb-1">Agregar Día</h3>
+          <h3 className="text-sm sm:text-base font-semibold mb-1">
+            Agregar Día
+          </h3>
           <div className="flex gap-1 sm:gap-2">
             <input
               type="date"
@@ -297,6 +341,9 @@ export default function Asistencias({
                         <th className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Acciones
                         </th>
+                        <th className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Justificación
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -365,7 +412,7 @@ export default function Asistencias({
                               </button>
                               <button
                                 onClick={() =>
-                                  guardarAsistencia(estudiante.rut_usuario, 2)
+                                  handleJustificacion(estudiante.rut_usuario)
                                 }
                                 className={`px-2 sm:px-3 py-1 rounded transition-colors ${
                                   asistencias[estudiante.rut_usuario] === 2
@@ -381,6 +428,38 @@ export default function Asistencias({
                                   : "J"}
                               </button>
                             </div>
+                          </td>
+                          <td className="px-3 py-2 sm:px-4 md:px-6 sm:py-3 whitespace-normal text-xs sm:text-sm">
+                            {asistencias[estudiante.rut_usuario] === 2 ? (
+                              <div className="flex items-center">
+                                <input
+                                  type="text"
+                                  value={
+                                    justificaciones[estudiante.rut_usuario] ||
+                                    ""
+                                  }
+                                  onChange={(e) => {
+                                    const nuevaJustificacion = e.target.value;
+                                    setJustificaciones((prev) => ({
+                                      ...prev,
+                                      [estudiante.rut_usuario]:
+                                        nuevaJustificacion,
+                                    }));
+                                  }}
+                                  onBlur={(e) => {
+                                    guardarAsistencia(
+                                      estudiante.rut_usuario,
+                                      2,
+                                      e.target.value
+                                    );
+                                  }}
+                                  placeholder="Ingrese justificación"
+                                  className="w-full border rounded px-2 py-1 text-sm"
+                                />
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">No aplica</span>
+                            )}
                           </td>
                         </tr>
                       ))}
