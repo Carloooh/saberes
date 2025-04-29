@@ -405,14 +405,18 @@ const MatriculaEstudiante = () => {
       !phoneApoderado1 ||
       !phoneContacto
     ) {
-      toast.error("Por favor complete todos los campos obligatorios");
+      toast.error("Por favor complete todos los campos obligatorios", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
     // Validate phone format for primary guardian
     if (phoneApoderado1.length !== 12 || !phoneApoderado1.startsWith("+569")) {
       toast.error(
-        "El número de celular del apoderado principal debe tener el formato +569XXXXXXXX"
+        "El número de celular del apoderado principal debe tener el formato +569XXXXXXXX",
+        { duration: 3000, position: "bottom-center" }
       );
       return;
     }
@@ -427,7 +431,8 @@ const MatriculaEstudiante = () => {
         !phoneApoderado2.startsWith("+569")
       ) {
         toast.error(
-          "El número de celular del apoderado secundario debe tener el formato +569XXXXXXXX"
+          "El número de celular del apoderado secundario debe tener el formato +569XXXXXXXX",
+          { duration: 3000, position: "bottom-center" }
         );
         return;
       }
@@ -444,48 +449,67 @@ const MatriculaEstudiante = () => {
     // Validate phone format for emergency contact
     if (phoneContacto.length !== 12 || !phoneContacto.startsWith("+569")) {
       toast.error(
-        "El número de celular del contacto de emergencia debe tener el formato +569XXXXXXXX"
+        "El número de celular del contacto de emergencia debe tener el formato +569XXXXXXXX",
+        { duration: 3000, position: "bottom-center" }
       );
       return;
     }
 
     // Validate email format
     if (!validateEmail(email)) {
-      toast.error("El formato del email del estudiante no es válido");
+      toast.error("El formato del email del estudiante no es válido", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
     // Validate email confirmation
     if (email !== email2) {
-      toast.error("Los correos electrónicos del estudiante no coinciden");
+      toast.error("Los correos electrónicos del estudiante no coinciden", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
     if (!validateEmail(emailApoderado)) {
-      toast.error("El formato del email del apoderado no es válido");
+      toast.error("El formato del email del apoderado no es válido", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
     // Validate RUT only if the type is RUT
     if (selectedRutTypes.rut_tipo === "RUT" && !Fn.validaRut(rut)) {
-      toast.error("RUT del estudiante inválido");
+      toast.error("RUT del estudiante inválido", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
     if (selectedRutTypes.tipo_rut_apoderado1 === "RUT" && !Fn.validaRut(rut2)) {
-      toast.error("RUT del apoderado inválido");
+      toast.error("RUT del apoderado inválido", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
     // Validate password format
     if (!validatePassword(password)) {
-      toast.error(passwordError);
+      toast.error(passwordError, { duration: 3000, position: "bottom-center" });
       return;
     }
 
     // Validate password matching
     if (password !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
+      toast.error("Las contraseñas no coinciden", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
@@ -497,15 +521,24 @@ const MatriculaEstudiante = () => {
       });
 
       if (response.ok) {
-        toast.success("Registro exitoso");
+        toast.success("Registro exitoso, email de ocnfirmación enviado", {
+          duration: 5000,
+          position: "bottom-center",
+        });
         resetForm(formElement);
       } else {
         const errorData = await response.json();
-        toast.error(errorData.message || "Error en el registro");
+        toast.error(errorData.message || "Error en el registro", {
+          duration: 3000,
+          position: "bottom-center",
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("Error en el registro. Por favor intente nuevamente.");
+      toast.error("Error en el registro. Por favor intente nuevamente.", {
+        duration: 3000,
+        position: "bottom-center",
+      });
     }
   };
   return (

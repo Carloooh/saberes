@@ -166,17 +166,26 @@ const RegistroFuncionario = () => {
     const rut = formData.get("rut") as string;
 
     if (formData.get("clave") !== formData.get("clave2")) {
-      toast.error("Las contraseñas no coinciden");
+      toast.error("Las contraseñas no coinciden", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
     if (formData.get("email") !== formData.get("email2")) {
-      toast.error("Los emails no coinciden");
+      toast.error("Los emails no coinciden", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
     if (!Fn.validaRut(rut)) {
-      toast.error("RUT inválido");
+      toast.error("RUT inválido", {
+        duration: 3000,
+        position: "bottom-center",
+      });
       return;
     }
 
@@ -202,10 +211,16 @@ const RegistroFuncionario = () => {
     });
 
     if (response.ok) {
-      toast.success("Registro exitoso");
+      toast.success("Registro exitoso, email de confirmación enviado", {
+        duration: 5000,
+        position: "bottom-center",
+      });
       resetForm(formElement);
     } else {
-      toast.error("Error en el registro");
+      toast.error("Error en el registro", {
+        duration: 5000,
+        position: "bottom-center",
+      });
     }
   };
 
