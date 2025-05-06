@@ -406,7 +406,7 @@ const PortalDocentePage = ({
       {/* Sección de Resumen por Asignatura */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
-          Detalle por Asignatura
+          Asignaturas del Curso
         </h2>
         <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
           <div
@@ -414,41 +414,46 @@ const PortalDocentePage = ({
             onClick={() => setShowAsignaturas(!showAsignaturas)}
           >
             <h2 className="text-lg font-medium text-indigo-800">
-              Resumen por Asignatura
+              Detalle de rendimiento
             </h2>
-            <button className="text-indigo-600 hover:text-indigo-800">
-              {showAsignaturas ? (
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M5 15l7-7 7 7"
-                  ></path>
-                </svg>
-              ) : (
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
-              )}
-            </button>
+            <div className="flex items-center">
+              <span className="mr-2 text-sm text-indigo-600">
+                {showAsignaturas ? "Ocultar" : "Ver detalle"}
+              </span>
+              <button className="text-indigo-600 hover:text-indigo-800">
+                {showAsignaturas ? (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 15l7-7 7 7"
+                    ></path>
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    ></path>
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           {showAsignaturas && (
@@ -666,22 +671,19 @@ const PortalDocentePage = ({
                       estudiante.asignaturas &&
                       estudiante.asignaturas.length > 0 && (
                         <tr>
-                          <td colSpan={4} className="px-6 py-1 bg-gray-50">
-                            <div className="border-t border-gray-200 pt-1">
-                              <h4 className="text-sm font-medium text-gray-900 mb-2">
-                                Detalle por Asignatura
-                              </h4>
+                          <td colSpan={4} className="px-6 my-1 bg-gray-50">
+                            <div className="200 pt-1">
                               <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
+                                <table className="min-w-full divide-y divide-gray-200 border border-gray-300 mb-1">
                                   <thead className="bg-gray-100">
                                     <tr>
-                                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                                         Asignatura
                                       </th>
-                                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
                                         Promedio
                                       </th>
-                                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                      <th className="px-4 py-2 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
                                         Asistencia
                                       </th>
                                     </tr>
