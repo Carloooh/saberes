@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { Connection, Request, TYPES } from "tedious";
 import config from "@/app/api/dbConfig";
 
@@ -13,6 +13,7 @@ interface Estudiante {
 
 interface Asignatura {
   id_asignatura: string;
+  nombre_asignatura: string;
 }
 
 interface Nota {
@@ -28,6 +29,21 @@ interface EstudianteResumen {
   rut_usuario: string;
   nombres: string;
   apellidos: string;
+  promedio_general: number | null;
+  porcentaje_asistencia: number | null;
+  asignaturas?: AsignaturaEstudiante[];
+}
+
+interface AsignaturaEstudiante {
+  id_asignatura: string;
+  nombre_asignatura: string;
+  promedio: number | null;
+  porcentaje_asistencia: number | null;
+}
+
+interface AsignaturaResumen {
+  id_asignatura: string;
+  nombre_asignatura: string;
   promedio_general: number | null;
   porcentaje_asistencia: number | null;
 }
@@ -110,26 +126,105 @@ export async function GET(request: NextRequest) {
           { name: "cursoId", type: TYPES.NVarChar, value: cursoId },
         ])) as Estudiante[];
 
-        // For each student, get their grades and attendance for each subject
-        const estudiantesResumen = [];
+        // Get all subjects for this course
+        const queryAsignaturas = `
+          SELECT a.id_asignatura, a.nombre_asignatura
+          FROM Asignaturas as1
+          JOIN Asignatura a ON as1.id_asignatura = a.id_asignatura
+          WHERE as1.id_curso = @cursoId
+        `;
 
-        for (const estudiante of estudiantes) {
-          // Get all subjects for this course
-          const queryAsignaturas = `
-            SELECT id_asignatura
-            FROM Asignaturas
-            WHERE id_curso = @cursoId
+        const asignaturas = (await executeSQL(connection, queryAsignaturas, [
+          { name: "cursoId", type: TYPES.NVarChar, value: cursoId },
+        ])) as Asignatura[];
+
+        // Calculate subject averages
+        const asignaturasResumen: AsignaturaResumen[] = [];
+
+        for (const asignatura of asignaturas) {
+          // Get all grades for this subject
+          const queryNotas = `
+            SELECT c.nota
+            FROM Calificaciones c
+            JOIN Evaluaciones e ON c.id_evaluacion = e.id_evaluacion
+            JOIN CursosAsignaturasLink cal ON c.id_user = cal.id_user
+            WHERE e.id_asignatura = @asignaturaId AND e.id_curso = @cursoId AND cal.id_curso = @cursoId
           `;
 
-          const asignaturas = (await executeSQL(connection, queryAsignaturas, [
+          const notas = (await executeSQL(connection, queryNotas, [
+            {
+              name: "asignaturaId",
+              type: TYPES.NVarChar,
+              value: asignatura.id_asignatura,
+            },
             { name: "cursoId", type: TYPES.NVarChar, value: cursoId },
-          ])) as Asignatura[];
+          ])) as Nota[];
 
+          const notasValidas = notas.filter(
+            (nota: Nota) => nota.nota !== null && nota.nota > 0
+          );
+
+          let promedioAsignatura = null;
+          if (notasValidas.length > 0) {
+            promedioAsignatura =
+              notasValidas.reduce(
+                (sum: number, nota: Nota) => sum + nota.nota,
+                0
+              ) / notasValidas.length;
+          }
+
+          // Get attendance for this subject
+          const queryAsistencia = `
+            SELECT 
+              COUNT(CASE WHEN a.asistencia IN (1, 2) THEN 1 END) as presentes,
+              COUNT(*) as total
+            FROM DiasAsistencia d
+            LEFT JOIN Asistencia a ON d.id_dia = a.id_dia
+            JOIN CursosAsignaturasLink cal ON a.id_user = cal.id_user
+            WHERE d.id_curso = @cursoId AND d.id_asignatura = @asignaturaId AND cal.id_curso = @cursoId
+          `;
+
+          const asistenciaResults = await executeSQL(
+            connection,
+            queryAsistencia,
+            [
+              { name: "cursoId", type: TYPES.NVarChar, value: cursoId },
+              {
+                name: "asignaturaId",
+                type: TYPES.NVarChar,
+                value: asignatura.id_asignatura,
+              },
+            ]
+          );
+
+          let porcentajeAsistencia = null;
+          if (asistenciaResults.length > 0) {
+            const asistencia = asistenciaResults[0] as Asistencia;
+            if (asistencia && asistencia.total > 0) {
+              porcentajeAsistencia =
+                (asistencia.presentes / asistencia.total) * 100;
+            }
+          }
+
+          asignaturasResumen.push({
+            id_asignatura: asignatura.id_asignatura,
+            nombre_asignatura: asignatura.nombre_asignatura,
+            promedio_general: promedioAsignatura,
+            porcentaje_asistencia: porcentajeAsistencia,
+          });
+        }
+
+        // For each student, get their grades and attendance for each subject
+        const estudiantesResumen: EstudianteResumen[] = [];
+
+        for (const estudiante of asignaturas.length > 0 ? estudiantes : []) {
           // Calculate averages across all subjects
           let sumaPromedios = 0;
           let contadorPromedios = 0;
           let sumaAsistencias = 0;
           let contadorAsistencias = 0;
+
+          const asignaturasEstudiante: AsignaturaEstudiante[] = [];
 
           // Get grades and attendance for each subject
           for (const asignatura of asignaturas) {
@@ -159,13 +254,15 @@ export async function GET(request: NextRequest) {
               (nota: Nota) => nota.nota !== null && nota.nota > 0
             );
 
+            let promedioAsignatura = null;
             if (notasValidas.length > 0) {
-              const promedio =
+              promedioAsignatura =
                 notasValidas.reduce(
                   (sum: number, nota: Nota) => sum + nota.nota,
                   0
                 ) / notasValidas.length;
-              sumaPromedios += promedio;
+
+              sumaPromedios += promedioAsignatura;
               contadorPromedios++;
             }
 
@@ -197,16 +294,24 @@ export async function GET(request: NextRequest) {
               ]
             );
 
+            let porcentajeAsistencia = null;
             if (asistenciaResults.length > 0) {
               const asistencia = asistenciaResults[0] as Asistencia;
-
               if (asistencia && asistencia.total > 0) {
-                const porcentaje =
+                porcentajeAsistencia =
                   (asistencia.presentes / asistencia.total) * 100;
-                sumaAsistencias += porcentaje;
+
+                sumaAsistencias += porcentajeAsistencia;
                 contadorAsistencias++;
               }
             }
+
+            asignaturasEstudiante.push({
+              id_asignatura: asignatura.id_asignatura,
+              nombre_asignatura: asignatura.nombre_asignatura,
+              promedio: promedioAsignatura,
+              porcentaje_asistencia: porcentajeAsistencia,
+            });
           }
 
           const estudianteResumen: EstudianteResumen = {
@@ -219,6 +324,7 @@ export async function GET(request: NextRequest) {
               contadorAsistencias > 0
                 ? sumaAsistencias / contadorAsistencias
                 : null,
+            asignaturas: asignaturasEstudiante,
           };
 
           estudiantesResumen.push(estudianteResumen);
@@ -229,6 +335,7 @@ export async function GET(request: NextRequest) {
           NextResponse.json({
             success: true,
             estudiantes: estudiantesResumen,
+            asignaturas: asignaturasResumen,
           })
         );
       } catch (error) {
