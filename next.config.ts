@@ -14,7 +14,7 @@
 //   output: "standalone",
 //   experimental: {
 //     serverActions: {
-//       bodySizeLimit: "50mb",
+//       bodySizeLimit: "1024mb",
 //     },
 //   },
 //   eslint: {
@@ -29,7 +29,7 @@ const nextConfig = {
   output: "standalone",
   experimental: {
     serverActions: {
-      bodySizeLimit: "50mb",
+      bodySizeLimit: "1024mb",
     },
   },
   eslint: {
