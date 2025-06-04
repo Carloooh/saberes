@@ -1,32 +1,35 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Asegurar modo standalone
   output: "standalone",
+
   experimental: {
     serverActions: {
-      bodySizeLimit: "50mb",
+      bodySizeLimit: "1gb",
     },
+    // Habilitar esta opción si persisten los problemas
+    // outputFileTracingRoot: path.join(__dirname, '../../'),
   },
+
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Add headers configuration for cookie handling
+
   async headers() {
     return [
       {
         source: "/(.*)",
-        headers: [
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-        ],
+        headers: [{ key: "X-Content-Type-Options", value: "nosniff" }],
       },
     ];
   },
-  // Ensure cookies work properly behind proxies
+
   poweredByHeader: false,
-  // Add this to ensure proper hostname handling in Docker
-  // assetPrefix: process.env.NODE_ENV === 'production' ? 'https://saberes.elquisco.cl' : undefined,
+
+  // Añadir configuración crítica para Docker
+  images: {
+    unoptimized: true, // Desactivar optimización si hay problemas de memoria
+  },
 };
 
 module.exports = nextConfig;

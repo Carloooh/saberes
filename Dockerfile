@@ -1,12 +1,10 @@
 FROM node:18-alpine AS base
 
-# Install dependencies only when needed
+# Etapa de dependencias
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
@@ -15,54 +13,58 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-
-# Rebuild the source code only when needed
+# Etapa de construcción
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED=1
+# Configuración crítica para Server Actions
+ENV NEXT_SERVER_ACTIONS_BODY_SIZE_LIMIT=1gb
 
+# Forzar modo standalone en el build
+ENV NEXT_OUTPUT=standalone
+
+# Construcción con verificación de salida
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
   else echo "Lockfile not found." && exit 1; \
-  fi
+  fi; \
+  echo "Verificando estructura de build:"; \
+  ls -la /app/.next || echo "No se encontró .next"; \
+  ls -la /app/.next/standalone || echo "No se encontró standalone"
 
-# Production image, copy all the files and run next
+# Etapa de producción
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Copiar el server.js desde .next/standalone
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone/server.js ./
-
-USER nextjs
-
-EXPOSE 3000
-
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
-ENV HOSTNAME="0.0.0.0"
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-# CMD ["node", "server.js"]
-CMD ["./server.js"]
+# Copiar solo lo esencial
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+
+# Copiar output standalone (si existe)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Solución alternativa: si no se generó standalone, usar output normal
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+
+USER nextjs
+EXPOSE 3000
+
+CMD ["node", "server.js"]
+
+
+# sudo docker compose down
+# sudo DOCKER_BUILDKIT=1 docker compose build --no-cache --progress=plain
+# sudo docker compose up --force-recreate
