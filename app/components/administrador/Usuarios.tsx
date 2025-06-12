@@ -60,11 +60,15 @@ const Usuarios: React.FC = () => {
 
   useEffect(() => {
     filterUsers();
-    
+
     // Count pending and enrollment requests
-    const pendingUsers = users.filter(user => user.estado === "Pendiente").length;
-    const enrollmentUsers = users.filter(user => user.estado === "Matricula").length;
-    
+    const pendingUsers = users.filter(
+      (user) => user.estado === "Pendiente"
+    ).length;
+    const enrollmentUsers = users.filter(
+      (user) => user.estado === "Matricula"
+    ).length;
+
     setPendingCount(pendingUsers);
     setEnrollmentCount(enrollmentUsers);
   }, [searchTerm, statusFilter, typeFilter, users]);
@@ -79,7 +83,7 @@ const Usuarios: React.FC = () => {
 
         // Para cada docente, se obtiene su asignación de cursos
         data.data.forEach(async (user: User) => {
-          if (user.tipo_usuario === "Docente") {
+          if (user.tipo_usuario === "Docente" || user.tipo_usuario === "Administrador") {
             await fetchTeacherCourses(user.rut_usuario);
           }
         });
@@ -305,14 +309,34 @@ const Usuarios: React.FC = () => {
         {(pendingCount > 0 || enrollmentCount > 0) && (
           <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
             <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-yellow-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
               </svg>
               <span className="ml-2 text-sm font-medium text-yellow-800">
-                Tienes solicitudes pendientes: 
-                {pendingCount > 0 && <span className="font-bold"> {pendingCount} pendiente{pendingCount !== 1 ? 's' : ''}</span>}
-                {pendingCount > 0 && enrollmentCount > 0 && ' y '}
-                {enrollmentCount > 0 && <span className="font-bold"> {enrollmentCount} matrícula{enrollmentCount !== 1 ? 's' : ''}</span>}
+                Tienes solicitudes pendientes:
+                {pendingCount > 0 && (
+                  <span className="font-bold">
+                    {" "}
+                    {pendingCount} pendiente{pendingCount !== 1 ? "s" : ""}
+                  </span>
+                )}
+                {pendingCount > 0 && enrollmentCount > 0 && " y "}
+                {enrollmentCount > 0 && (
+                  <span className="font-bold">
+                    {" "}
+                    {enrollmentCount} matrícula
+                    {enrollmentCount !== 1 ? "s" : ""}
+                  </span>
+                )}
               </span>
             </div>
           </div>
@@ -408,7 +432,10 @@ const Usuarios: React.FC = () => {
                           }));
                           break;
                         case "courses":
-                          if (user.tipo_usuario === "Docente") {
+                          if (
+                            user.tipo_usuario === "Docente" ||
+                            user.tipo_usuario === "Administrador"
+                          ) {
                             setOpenMenus((prev) => ({
                               ...prev,
                               [user.rut_usuario]: "courses",
@@ -430,11 +457,12 @@ const Usuarios: React.FC = () => {
                     <option value="">Seleccionar acción...</option>
                     <option value="profile">Ver perfil</option>
                     <option value="status">Cambiar estado</option>
-                    {user.tipo_usuario === "Docente" && (
-                      <option value="courses">
-                        Gestionar cursos y asignaturas
-                      </option>
-                    )}
+                    {user.tipo_usuario === "Docente" ||
+                      (user.tipo_usuario === "Administrador" && (
+                        <option value="courses">
+                          Gestionar cursos y asignaturas
+                        </option>
+                      ))}
                     {user.tipo_usuario === "Estudiante" && (
                       <option value="courses">Cambiar curso</option>
                     )}
@@ -515,7 +543,8 @@ const Usuarios: React.FC = () => {
 
               {/* Panel de gestión de cursos y asignaturas para docentes (más compacto) */}
               {openMenus[user.rut_usuario] === "courses" &&
-                user.tipo_usuario === "Docente" && (
+                (user.tipo_usuario === "Docente" ||
+                  user.tipo_usuario === "Administrador") && (
                   <div className="mt-2 border-t pt-2">
                     <div className="space-y-2">
                       {cursosAsignaturas.map((curso) => (
