@@ -1,20 +1,9 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import { Metadata } from "next";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import "./globals.css";
 import ToasterClient from "@/app/components/ToasterClient";
 import JsonLd from "@/app/components/JsonLd";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://saberes.elquisco.cl"),
@@ -92,17 +81,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_forward"
-        />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/IconoSaberes.webp" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
-      >
+      <body className={`antialiased min-h-screen flex flex-col`}>
         <JsonLd data={organizationSchema} />
         <Header />
         <div className="flex-grow">{children}</div>
