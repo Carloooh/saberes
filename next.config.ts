@@ -5,7 +5,8 @@ const nextConfig = {
 
   experimental: {
     serverActions: {
-      bodySizeLimit: "1gb",
+      //bodySizeLimit: "1gb",
+      bodySizeLimit: "250mb",
     },
     // Habilitar esta opción si persisten los problemas
     // outputFileTracingRoot: path.join(__dirname, '../../'),
