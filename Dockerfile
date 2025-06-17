@@ -20,7 +20,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Configuración crítica para Server Actions
-ENV NEXT_SERVER_ACTIONS_BODY_SIZE_LIMIT=1gb
+ENV NEXT_SERVER_ACTIONS_BODY_SIZE_LIMIT=250mb
 
 # Forzar modo standalone en el build
 ENV NEXT_OUTPUT=standalone
