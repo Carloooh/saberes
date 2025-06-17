@@ -22,12 +22,12 @@ const GalleryItem = ({
 
   return (
     <div
-      className="cursor-pointer relative w-full h-40 rounded"
+      className="cursor-pointer relative w-full h-40 rounded overflow-hidden"
       onClick={onClick}
     >
       {/* Spinner de carga para este elemento */}
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded">
           <Pinwheel size="35" stroke="3.5" speed="0.9" color="#3b82f6" />
         </div>
       )}
@@ -98,16 +98,56 @@ export default function GaleriaPage() {
   }, []);
 
   if (loading) {
-    return <p className="text-center text-lg font-semibold">Cargando...</p>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center">
+          <Pinwheel size="45" stroke="4" speed="0.9" color="#3b82f6" />
+          <p className="mt-4 text-gray-600 font-medium">Cargando galería...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center text-red-500">{error}</p>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-800 mb-2">
+            Ocurrió un error
+          </h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            onClick={() => window.location.reload()}
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Galería</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Galería Multimedia
+      </h1>
 
       {/* Tabs de imágenes y videos */}
       <div className="flex justify-center gap-4 mb-6">
@@ -115,7 +155,7 @@ export default function GaleriaPage() {
           className={`px-6 py-2 rounded-full ${
             activeTab === "images"
               ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           } transition-colors`}
           onClick={() => setActiveTab("images")}
         >
@@ -125,7 +165,7 @@ export default function GaleriaPage() {
           className={`px-6 py-2 rounded-full ${
             activeTab === "videos"
               ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
           } transition-colors`}
           onClick={() => setActiveTab("videos")}
         >
@@ -136,26 +176,38 @@ export default function GaleriaPage() {
       {/* Contenido de imágenes */}
       {activeTab === "images" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-          {fotos.map((foto) => (
-            <GalleryItem
-              key={foto.id_archivo}
-              item={foto}
-              onClick={() => setModalItem(foto)}
-            />
-          ))}
+          {fotos.length === 0 ? (
+            <p className="col-span-full text-center text-gray-500 py-8">
+              No hay imágenes disponibles
+            </p>
+          ) : (
+            fotos.map((foto) => (
+              <GalleryItem
+                key={foto.id_archivo}
+                item={foto}
+                onClick={() => setModalItem(foto)}
+              />
+            ))
+          )}
         </div>
       )}
 
       {/* Contenido de videos */}
       {activeTab === "videos" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
-          {videos.map((video) => (
-            <GalleryItem
-              key={video.id_archivo}
-              item={video}
-              onClick={() => setModalItem(video)}
-            />
-          ))}
+          {videos.length === 0 ? (
+            <p className="col-span-full text-center text-gray-500 py-8">
+              No hay videos disponibles
+            </p>
+          ) : (
+            videos.map((video) => (
+              <GalleryItem
+                key={video.id_archivo}
+                item={video}
+                onClick={() => setModalItem(video)}
+              />
+            ))
+          )}
         </div>
       )}
 
