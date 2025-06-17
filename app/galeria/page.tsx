@@ -2,11 +2,63 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
+import { Pinwheel } from "ldrs/react";
+import "ldrs/react/Pinwheel.css";
 
 interface Archivo {
   id_archivo: string;
   extension: string;
 }
+
+// Componente para cada item de la galería con spinner
+const GalleryItem = ({
+  item,
+  onClick,
+}: {
+  item: Archivo;
+  onClick: () => void;
+}) => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  return (
+    <div
+      className="cursor-pointer relative w-full h-40 rounded"
+      onClick={onClick}
+    >
+      {/* Spinner de carga para este elemento */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded">
+          <Pinwheel size="35" stroke="3.5" speed="0.9" color="#3b82f6" />
+        </div>
+      )}
+
+      {/* Renderizado de imagen o video */}
+      {["png", "jpg", "jpeg"].includes(item.extension) ? (
+        <Image
+          src={`/api/galeria/download?id=${item.id_archivo}`}
+          alt={item.id_archivo}
+          width={400}
+          height={300}
+          className="w-full h-full object-cover rounded"
+          unoptimized
+          onLoadingComplete={() => setIsLoading(false)}
+          onError={() => setIsLoading(false)}
+        />
+      ) : (
+        <video
+          src={`/api/galeria/download?id=${item.id_archivo}`}
+          className="w-full h-full object-cover rounded"
+          autoPlay
+          loop
+          playsInline
+          muted
+          onCanPlay={() => setIsLoading(false)}
+          onError={() => setIsLoading(false)}
+        />
+      )}
+    </div>
+  );
+};
 
 export default function GaleriaPage() {
   const [fotos, setFotos] = useState<Archivo[]>([]);
@@ -85,20 +137,11 @@ export default function GaleriaPage() {
       {activeTab === "images" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
           {fotos.map((foto) => (
-            <div
+            <GalleryItem
               key={foto.id_archivo}
-              className="cursor-pointer"
+              item={foto}
               onClick={() => setModalItem(foto)}
-            >
-              <Image
-                src={`/api/galeria/download?id=${foto.id_archivo}`}
-                alt={foto.id_archivo}
-                width={400}
-                height={300}
-                className="w-full h-40 object-cover rounded"
-                unoptimized
-              />
-            </div>
+            />
           ))}
         </div>
       )}
@@ -107,19 +150,11 @@ export default function GaleriaPage() {
       {activeTab === "videos" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
           {videos.map((video) => (
-            <div
+            <GalleryItem
               key={video.id_archivo}
-              className="cursor-pointer"
+              item={video}
               onClick={() => setModalItem(video)}
-            >
-              <video
-                src={`/api/galeria/download?id=${video.id_archivo}`}
-                className="w-full h-40 object-cover rounded"
-                autoPlay
-                loop
-                playsInline
-              />
-            </div>
+            />
           ))}
         </div>
       )}
