@@ -19,13 +19,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Configuración crítica para Server Actions
-ENV NEXT_SERVER_ACTIONS_BODY_SIZE_LIMIT=1024mb
-
-# Forzar modo standalone en el build
+ENV NEXT_SERVER_ACTIONS_BODY_SIZE_LIMIT=250mb
 ENV NEXT_OUTPUT=standalone
 
-# Construcción con verificación de salida
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
@@ -34,9 +30,11 @@ RUN \
   fi; \
   echo "Verificando estructura de build:"; \
   ls -la /app/.next || echo "No se encontró .next"; \
-  ls -la /app/.next/standalone || echo "No se encontró standalone"
+  ls -la /app/.next/standalone || echo "No se encontró standalone"; \
+  # Asegurar que public se copie en standalone
+  if [ -d public ]; then cp -r public /app/.next/standalone/public; fi
 
-# Etapa de producción
+# Etapa de producción (runner)
 FROM base AS runner
 WORKDIR /app
 
@@ -48,16 +46,14 @@ ENV PORT=3000
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copiar solo lo esencial
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-
-# Copiar output standalone (si existe)
+# Copiar el output standalone
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+
+# Copiar la carpeta static
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Solución alternativa: si no se generó standalone, usar output normal
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+# Copiar la carpeta public (sin operador lógico)
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 EXPOSE 3000
