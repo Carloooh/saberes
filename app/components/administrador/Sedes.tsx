@@ -140,61 +140,65 @@ const Sedes: React.FC = () => {
   };
 
   // Add a file validation function
-  const validateFiles = (files: File[]): { valid: boolean; message: string } => {
+  const validateFiles = (
+    files: File[]
+  ): { valid: boolean; message: string } => {
     for (const file of files) {
       // Check file type
       const fileType = file.type;
-      if (!fileType.startsWith('image/') && !fileType.startsWith('video/')) {
-        return { 
-          valid: false, 
-          message: `El archivo ${file.name} no es una imagen o video válido.` 
+      if (!fileType.startsWith("image/") && !fileType.startsWith("video/")) {
+        return {
+          valid: false,
+          message: `El archivo ${file.name} no es una imagen o video válido.`,
         };
       }
-      
+
       // You can add more validations here if needed
     }
-    
-    return { valid: true, message: '' };
+
+    return { valid: true, message: "" };
   };
-  
+
   // Update the handleCreateSubmit function
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate files before uploading
     const fileValidation = validateFiles(createFormData.archivos);
     if (!fileValidation.valid) {
       toast.error(fileValidation.message);
       return;
     }
-    
+
     const formData = new FormData();
     formData.append("nombre", createFormData.nombre);
     formData.append("direccion", createFormData.direccion);
     formData.append("url", createFormData.url);
     formData.append("url_iframe", createFormData.url_iframe);
     formData.append("cursos", JSON.stringify(createFormData.cursos));
-    
+
     // Show loading toast for large uploads
     let loadingToast: string | undefined;
     if (createFormData.archivos.length > 0) {
-      loadingToast = toast.loading(`Subiendo ${createFormData.archivos.length} archivo(s)...`);
+      loadingToast = toast.loading(
+        `Subiendo ${createFormData.archivos.length} archivo(s)...`
+      );
     }
-    
+
     createFormData.archivos.forEach((file, index) => {
       formData.append(`archivo-${index}`, file);
     });
-  
+
     try {
       const response = await fetch("/api/sedes", {
         method: "POST",
         body: formData,
       });
-      
+
       if (loadingToast) {
         toast.dismiss(loadingToast);
       }
-      
+
       const result = await response.json();
 
       if (result.success) {
@@ -215,7 +219,7 @@ const Sedes: React.FC = () => {
       toast.error(`Error al crear la sede: ${error}`);
     }
   };
-  
+
   // Similarly update the handleEdit function
   const handleEdit = async (id: string) => {
     // Validate files before uploading
@@ -224,7 +228,7 @@ const Sedes: React.FC = () => {
       toast.error(fileValidation.message);
       return;
     }
-    
+
     const formData = new FormData();
     formData.append("id_sede", id);
     formData.append("nombre", editFormData.nombre);
@@ -232,34 +236,36 @@ const Sedes: React.FC = () => {
     formData.append("url", editFormData.url);
     formData.append("url_iframe", editFormData.url_iframe);
     formData.append("cursos", JSON.stringify(editFormData.cursos));
-  
+
     if (editFormData.archivosToDelete.length > 0) {
       formData.append(
         "archivosAEliminar",
         JSON.stringify(editFormData.archivosToDelete)
       );
     }
-  
+
     // Show loading toast for large uploads
     let loadingToast: string | undefined;
     if (editFormData.archivosToAdd.length > 0) {
-      loadingToast = toast.loading(`Subiendo ${editFormData.archivosToAdd.length} archivo(s)...`);
+      loadingToast = toast.loading(
+        `Subiendo ${editFormData.archivosToAdd.length} archivo(s)...`
+      );
     }
-  
+
     editFormData.archivosToAdd.forEach((file, index) => {
       formData.append(`archivo-${index}`, file);
     });
-  
+
     try {
       const response = await fetch("/api/sedes", {
         method: "PUT",
         body: formData,
       });
-      
+
       if (loadingToast) {
         toast.dismiss(loadingToast);
       }
-      
+
       const result = await response.json();
 
       if (result.success) {
@@ -656,61 +662,144 @@ const Sedes: React.FC = () => {
                         accept="image/*,video/*"
                       />
                     </div>
+                    {/* Archivos existentes */}
                     {sede.archivos && sede.archivos.length > 0 && (
-                      <div className="grid grid-cols-2 gap-2 mb-3">
-                        {sede.archivos.map((archivo) => (
-                          <div
-                            key={archivo.id_archivo}
-                            className="rounded-md overflow-hidden"
-                          >
-                            {archivo.extension && 
-                             ['mp4', 'webm', 'ogg', 'mov'].includes(archivo.extension.toLowerCase()) ? (
-                              <video
-                                src={`/api/sedes/download/${archivo.id_archivo}`}
-                                className="w-full h-24 object-cover"
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                              />
-                            ) : (
-                              <Image
-                                src={`/api/sedes/download/${archivo.id_archivo}`}
-                                alt={archivo.titulo}
-                                width={100}
-                                height={100}
-                                className="w-full h-24 object-cover"
-                                unoptimized
-                              />
-                            )}
-                          </div>
-                        ))}
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Archivos Existentes
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                          {sede.archivos.map((archivo) => {
+                            const isImage =
+                              archivo.extension &&
+                              ["jpg", "jpeg", "png", "gif", "webp"].includes(
+                                archivo.extension.toLowerCase()
+                              );
+                            const isVideo =
+                              archivo.extension &&
+                              ["mp4", "webm", "ogg", "mov"].includes(
+                                archivo.extension.toLowerCase()
+                              );
+
+                            return (
+                              <div
+                                key={archivo.id_archivo}
+                                className="relative group"
+                              >
+                                {isImage ? (
+                                  <div className="relative h-32 rounded-md overflow-hidden">
+                                    <Image
+                                      src={`/api/sedes/download/${archivo.id_archivo}`}
+                                      alt={archivo.titulo}
+                                      fill
+                                      className="object-cover"
+                                      style={{
+                                        opacity:
+                                          editFormData.archivosToDelete.includes(
+                                            archivo.id_archivo
+                                          )
+                                            ? 0.5
+                                            : 1,
+                                      }}
+                                      unoptimized
+                                    />
+                                  </div>
+                                ) : isVideo ? (
+                                  <div className="relative h-32 rounded-md overflow-hidden">
+                                    <video
+                                      src={`/api/sedes/download/${archivo.id_archivo}`}
+                                      className="w-full h-full object-cover"
+                                      autoPlay
+                                      muted
+                                      loop
+                                      playsInline
+                                      style={{
+                                        opacity:
+                                          editFormData.archivosToDelete.includes(
+                                            archivo.id_archivo
+                                          )
+                                            ? 0.5
+                                            : 1,
+                                      }}
+                                    />
+                                  </div>
+                                ) : (
+                                  <div
+                                    className="flex items-center justify-center h-32 bg-gray-100 rounded-md"
+                                    style={{
+                                      opacity:
+                                        editFormData.archivosToDelete.includes(
+                                          archivo.id_archivo
+                                        )
+                                          ? 0.5
+                                          : 1,
+                                    }}
+                                  >
+                                    <div className="text-center">
+                                      <div className="text-3xl mb-1">📄</div>
+                                      <span className="text-xs text-gray-600">
+                                        {archivo.extension?.toUpperCase() ||
+                                          "FILE"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    setEditFormData((prev) => ({
+                                      ...prev,
+                                      archivosToDelete:
+                                        prev.archivosToDelete.includes(
+                                          archivo.id_archivo
+                                        )
+                                          ? prev.archivosToDelete.filter(
+                                              (id) => id !== archivo.id_archivo
+                                            )
+                                          : [
+                                              ...prev.archivosToDelete,
+                                              archivo.id_archivo,
+                                            ],
+                                    }))
+                                  }
+                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                                  title={
+                                    editFormData.archivosToDelete.includes(
+                                      archivo.id_archivo
+                                    )
+                                      ? "Restaurar archivo"
+                                      : "Marcar para eliminar"
+                                  }
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
                   <div className="flex justify-end space-x-2 mt-4">
                     <button
-                      type="button"
-                      onClick={() => {
-                        setEditId(null);
-                        setEditFormData({
-                          nombre: "",
-                          direccion: "",
-                          url: "",
-                          url_iframe: "",
-                          cursos: [],
-                          archivosToAdd: [],
-                          archivosToDelete: [],
-                        });
-                      }}
-                      className="border border-gray-500 text-gray-500 bg-white px-3 py-1.5 rounded-md hover:bg-gray-500 hover:text-white transition-colors"
+                      onClick={() => setEditId(null)}
+                      className="border border-gray-500 text-gray-500 bg-white px-3 py-1.5 rounded-md hover:bg-gray-500 hover:text-white transition-colors text-sm"
                     >
                       Cancelar
                     </button>
                     <button
-                      type="button"
                       onClick={() => handleEdit(sede.id_sede)}
-                      className="border border-green-600 text-green-600 bg-white px-3 py-1.5 rounded-md hover:bg-green-600 hover:text-white transition-colors"
+                      className="border border-indigo-600 text-indigo-600 bg-white px-3 py-1.5 rounded-md hover:bg-indigo-600 hover:text-white transition-colors text-sm"
                     >
                       Guardar
                     </button>
@@ -719,113 +808,102 @@ const Sedes: React.FC = () => {
               ) : (
                 <>
                   <div className="p-4">
-                    <h3 className="text-lg font-semibold mb-2">
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
                       {sede.nombre}
                     </h3>
-                    <div className="flex items-start mb-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-500 mr-1 mt-0.5 flex-shrink-0"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
+                    <p className="text-sm text-gray-600 mb-2">
+                      {sede.direccion}
+                    </p>
+                    {sede.url && (
+                      <a
+                        href={sede.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 hover:text-indigo-800 text-sm"
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <p className="text-gray-600">{sede.direccion}</p>
-                    </div>
-                    <a
-                      href={sede.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 hover:text-indigo-800 hover:underline mb-3 inline-flex items-center"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 mr-1"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Ver en Google Maps
-                    </a>
-
-                    {sede.url_iframe && (
-                      <div className="mb-3 rounded-md overflow-hidden border border-gray-200">
-                        <iframe
-                          src={sede.url_iframe}
-                          className="w-full h-48"
-                          frameBorder="0"
-                          allowFullScreen
-                        ></iframe>
-                      </div>
+                        Ver en Google Maps
+                      </a>
                     )}
-
                     {sede.cursos && sede.cursos.length > 0 && (
-                      <div className="mb-3">
-                        <h4 className="text-sm font-medium text-gray-700 mb-1">
+                      <div className="mt-3">
+                        <p className="text-sm font-medium text-gray-700 mb-1">
                           Cursos:
-                        </h4>
+                        </p>
                         <div className="flex flex-wrap gap-1">
                           {sede.cursos.map((cursoId) => {
                             const curso = cursos.find(
                               (c) => c.id_curso === cursoId
                             );
-                            return curso ? (
+                            return (
                               <span
                                 key={cursoId}
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                                className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded"
                               >
-                                {curso.nombre_curso}
+                                {curso?.nombre_curso || cursoId}
                               </span>
-                            ) : null;
+                            );
                           })}
                         </div>
                       </div>
                     )}
-
                     {sede.archivos && sede.archivos.length > 0 && (
-                      <div className="grid grid-cols-2 gap-2 mb-3">
-                        {sede.archivos.map((archivo) => (
-                          <div
-                            key={archivo.id_archivo}
-                            className="rounded-md overflow-hidden"
-                          >
-                            {archivo.extension && 
-                             ['mp4', 'webm', 'ogg', 'mov'].includes(archivo.extension.toLowerCase()) ? (
-                              <video
-                                src={`/api/sedes/download/${archivo.id_archivo}`}
-                                className="w-full h-24 object-cover"
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                              />
-                            ) : (
-                              <Image
-                                src={`/api/sedes/download/${archivo.id_archivo}`}
-                                alt={archivo.titulo}
-                                width={100}
-                                height={100}
-                                className="w-full h-24 object-cover"
-                                unoptimized
-                              />
-                            )}
-                          </div>
-                        ))}
+                      <div className="mt-3">
+                        <p className="text-sm font-medium text-gray-700 mb-2">
+                          Archivos ({sede.archivos.length})
+                        </p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {sede.archivos.slice(0, 6).map((archivo) => {
+                            const isImage =
+                              archivo.extension &&
+                              ["jpg", "jpeg", "png", "gif", "webp"].includes(
+                                archivo.extension.toLowerCase()
+                              );
+                            const isVideo =
+                              archivo.extension &&
+                              ["mp4", "webm", "ogg", "mov"].includes(
+                                archivo.extension.toLowerCase()
+                              );
+
+                            return (
+                              <div
+                                key={archivo.id_archivo}
+                                className="relative h-16 rounded overflow-hidden"
+                              >
+                                {isImage ? (
+                                  <Image
+                                    src={`/api/sedes/download/${archivo.id_archivo}`}
+                                    alt={archivo.titulo}
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
+                                  />
+                                ) : isVideo ? (
+                                  <video
+                                    src={`/api/sedes/download/${archivo.id_archivo}`}
+                                    className="w-full h-full object-cover"
+                                    muted
+                                  />
+                                ) : (
+                                  <div className="flex items-center justify-center h-full bg-gray-100">
+                                    <span className="text-xs text-gray-600">
+                                      {archivo.extension?.toUpperCase() ||
+                                        "FILE"}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                          {sede.archivos.length > 6 && (
+                            <div className="flex items-center justify-center h-16 bg-gray-100 rounded text-xs text-gray-600">
+                              +{sede.archivos.length - 6} más
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
-
-                  <div className="border-t px-4 py-3 flex justify-end space-x-2">
+                  <div className="flex justify-end space-x-2 p-4 bg-gray-50">
                     <button
                       onClick={() => startEdit(sede)}
                       className="border border-yellow-500 text-yellow-500 bg-white px-3 py-1.5 rounded-md hover:bg-yellow-500 hover:text-white transition-colors text-sm flex items-center"

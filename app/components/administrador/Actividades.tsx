@@ -79,6 +79,7 @@ const Actividades: React.FC = () => {
       });
       const data = await response.json();
       if (data.success) {
+        toast.success("Actividad creada exitosamente");
         setCreateFormData({
           titulo: "",
           descripcion: "",
@@ -88,9 +89,12 @@ const Actividades: React.FC = () => {
         });
         setShowCreateForm(false);
         fetchActividades();
+      } else {
+        toast.error(data.message || "Error al crear la actividad");
       }
     } catch (error) {
       console.error("Error creating actividad:", error);
+      toast.error("Error al crear la actividad");
     }
   };
 
@@ -123,6 +127,7 @@ const Actividades: React.FC = () => {
       });
       const data = await response.json();
       if (data.success) {
+        toast.success("Actividad actualizada exitosamente");
         setEditingActividadId(null);
         setEditingFormData({
           titulo: "",
@@ -133,9 +138,12 @@ const Actividades: React.FC = () => {
           archivosToDelete: [],
         });
         fetchActividades();
+      } else {
+        toast.error(data.message || "Error al actualizar la actividad");
       }
     } catch (error) {
       console.error("Error updating actividad:", error);
+      toast.error("Error al actualizar la actividad");
     }
   };
 
@@ -147,10 +155,14 @@ const Actividades: React.FC = () => {
       });
       const data = await response.json();
       if (data.success) {
+        toast.success("Actividad eliminada exitosamente");
         fetchActividades();
+      } else {
+        toast.error(data.message || "Error al eliminar la actividad");
       }
     } catch (error) {
       console.error("Error deleting actividad:", error);
+      toast.error("Error al eliminar la actividad");
     }
   };
 
@@ -435,7 +447,7 @@ const Actividades: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Archivos Existentes
                     </label>
-                    {/* <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                       {actividad.archivos && actividad.archivos.length > 0 ? (
                         actividad.archivos.map((archivo) => (
                           <div
@@ -480,10 +492,23 @@ const Actividades: React.FC = () => {
                                 />
                               </div>
                             ) : (
-                              <div className="flex items-center justify-center h-32 bg-gray-100 rounded-md">
-                                <span className="text-sm text-gray-500">
-                                  {archivo.extension.toUpperCase()}
-                                </span>
+                              <div
+                                className="flex items-center justify-center h-32 bg-gray-100 rounded-md"
+                                style={{
+                                  opacity:
+                                    editingFormData.archivosToDelete.includes(
+                                      archivo.id_archivo
+                                    )
+                                      ? 0.5
+                                      : 1,
+                                }}
+                              >
+                                <div className="text-center">
+                                  <div className="text-3xl mb-1">📄</div>
+                                  <span className="text-xs text-gray-600">
+                                    {archivo.extension.toUpperCase()}
+                                  </span>
+                                </div>
                               </div>
                             )}
                             <button
@@ -504,6 +529,13 @@ const Actividades: React.FC = () => {
                                 }))
                               }
                               className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                              title={
+                                editingFormData.archivosToDelete.includes(
+                                  archivo.id_archivo
+                                )
+                                  ? "Restaurar archivo"
+                                  : "Marcar para eliminar"
+                              }
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -525,52 +557,7 @@ const Actividades: React.FC = () => {
                           No hay archivos
                         </p>
                       )}
-                    </div> */}
-                    {actividad.archivos && actividad.archivos.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        {actividad.archivos.map((archivo) => (
-                          <div key={archivo.id_archivo} className="group">
-                            {isImageFile(archivo.extension) ? (
-                              <div className="relative h-32 rounded-md overflow-hidden">
-                                <Image
-                                  src={`/api/actividades/download/${archivo.id_archivo}`}
-                                  alt={archivo.titulo}
-                                  fill
-                                  className="object-cover"
-                                  unoptimized
-                                />
-                              </div>
-                            ) : isVideoFile(archivo.extension) ? (
-                              <div className="relative h-32 rounded-md overflow-hidden">
-                                <video
-                                  src={`/api/actividades/download/${archivo.id_archivo}`}
-                                  className="w-full h-full object-cover"
-                                  autoPlay
-                                  muted
-                                  loop
-                                  playsInline
-                                  controls={false}
-                                />
-                              </div>
-                            ) : (
-                              <a
-                                href={`/api/actividades/download/${archivo.id_archivo}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center h-32 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                              >
-                                <div className="text-center">
-                                  <div className="text-3xl mb-1">📄</div>
-                                  <span className="text-xs text-gray-600">
-                                    {archivo.extension.toUpperCase()}
-                                  </span>
-                                </div>
-                              </a>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
