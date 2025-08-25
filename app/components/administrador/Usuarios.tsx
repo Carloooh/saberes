@@ -83,7 +83,10 @@ const Usuarios: React.FC = () => {
 
         // Para cada docente, se obtiene su asignación de cursos
         data.data.forEach(async (user: User) => {
-          if (user.tipo_usuario === "Docente" || user.tipo_usuario === "Administrador") {
+          if (
+            user.tipo_usuario === "Docente" ||
+            user.tipo_usuario === "Administrador"
+          ) {
             await fetchTeacherCourses(user.rut_usuario);
           }
         });
@@ -457,12 +460,12 @@ const Usuarios: React.FC = () => {
                     <option value="">Seleccionar acción...</option>
                     <option value="profile">Ver perfil</option>
                     <option value="status">Cambiar estado</option>
-                    {user.tipo_usuario === "Docente" ||
-                      (user.tipo_usuario === "Administrador" && (
-                        <option value="courses">
-                          Gestionar cursos y asignaturas
-                        </option>
-                      ))}
+                    {(user.tipo_usuario === "Docente" ||
+                      user.tipo_usuario === "Administrador") && (
+                      <option value="courses">
+                        Gestionar cursos y asignaturas
+                      </option>
+                    )}
                     {user.tipo_usuario === "Estudiante" && (
                       <option value="courses">Cambiar curso</option>
                     )}
