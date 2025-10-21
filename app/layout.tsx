@@ -89,6 +89,7 @@ export default function RootLayout({
         <JsonLd data={organizationSchema} />
         <Header />
         <div className="flex-grow">{children}</div>
+        <div className="h-1 w-full bg-gradient-to-r from-[#2196F3] to-[#E91E63]"></div>
         <Footer />
         <ToasterClient />
       </body>
