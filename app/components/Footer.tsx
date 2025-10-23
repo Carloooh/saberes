@@ -368,7 +368,7 @@ export default function Footer() {
               {/* Gestión Acceso */}
               <div className="space-y-2">
                 <p className="font-semibold text-gray-500 text-sm">
-                  Gestión de accesos
+                  Gestión de accesos y colaboración en red:
                 </p>
                 <div
                   className="flex items-center gap-2 group cursor-pointer"
